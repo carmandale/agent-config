@@ -67,13 +67,37 @@ This means you can have:
 - **Global AGENTS.md**: Core standards, never-do rules, preferred workflows
 - **Repo AGENTS.md**: Project architecture, specific conventions, tooling
 
+## Session Workflow
+
+The core workflow for tracked, traceable work sessions:
+
+```
+/focus <bead-id>           # Start: load context, mark in-progress
+    ↓
+  ... do work ...
+    ↓
+/checkpoint                # Optional: mid-session save
+    ↓
+  ... more work ...
+    ↓
+/handoff                   # End: summarize, commit, requires bead
+```
+
+### Key Rules
+
+- **`/handoff` requires a bead** - hard stop if no active bead (traceability)
+- **`/handoff` writes** `.handoff/YYYY-MM-DD-HHMM-{bead-id}.md` - tracked & committed
+- **`/checkpoint` writes** `.checkpoint/YYYY-MM-DD-HHMM.md` - tracked & committed
+- **`/focus` marks bead in-progress** and loads relevant context
+
 ## Key Commands
 
 ### Session Management
 | Command | Description |
 |---------|-------------|
-| `/handoff` | End-of-session summary, sync beads/git, generate continuation prompt |
-| `/checkpoint` | Mid-session context compression, preserve decisions |
+| `/focus <bead>` | **Start** session - load context, mark bead in-progress |
+| `/handoff` | **End** session - requires bead, writes `.handoff/`, commits |
+| `/checkpoint` | Mid-session save - writes `.checkpoint/`, commits |
 | `/standup` | Quick status update |
 | `/retro` | Session retrospective |
 
