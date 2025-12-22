@@ -168,6 +168,70 @@ Use beads for traceability. Every work session should be tracked.
 
 ---
 
+## Worktree Workflow
+
+Use git worktrees for isolated parallel development. Worktrees live **inside** the repo in `.worktrees/` (gitignored).
+
+### Structure
+
+```
+/dev/my-repo/                    # Main repo (clean, on main)
+/dev/my-repo/.worktrees/         # Gitignored worktree container
+/dev/my-repo/.worktrees/bd-abc/  # Worktree for bead bd-abc
+```
+
+### Setup (one-time per repo)
+
+```bash
+# Add to .gitignore
+echo ".worktrees/" >> .gitignore
+```
+
+### Create Worktree
+
+```bash
+# Ensure main is clean first
+git status  # Must be clean!
+
+# Create worktree with bead ID as branch name
+git worktree add .worktrees/<bead-id> -b <bead-id>
+
+# Enter worktree
+cd .worktrees/<bead-id>
+```
+
+### Work in Worktree
+
+```bash
+# Do your work, commit normally
+git add -A && git commit -m "feat: description"
+
+# Push branch
+git push -u origin <bead-id>
+```
+
+### Cleanup (after merge)
+
+```bash
+# From main repo
+cd /dev/my-repo
+git worktree remove .worktrees/<bead-id>
+git branch -d <bead-id>
+
+# Close bead
+bd close <bead-id> --reason "Merged"
+```
+
+### Rules
+
+- **NEVER** create worktrees as siblings outside the repo
+- **ALWAYS** use `.worktrees/` inside the repo
+- **ALWAYS** ensure `.worktrees/` is in `.gitignore`
+- **ALWAYS** verify main is clean before creating worktree
+- Use `/worktree-task <bead-id>` command for guided setup
+
+---
+
 ## When Uncertain
 
 Say so. Ask.
