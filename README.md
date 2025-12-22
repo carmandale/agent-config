@@ -8,7 +8,7 @@ Unified configuration for AI coding agents. One central location for slash comma
 |-------|----------|--------------|
 | **Pi** (pi-coding-agent) | `~/.pi/agent/commands/` | `~/.pi/agent/AGENTS.md` |
 | **Claude Code** | `~/.claude/commands/` | `~/.claude/CLAUDE.md` |
-| **Codex** (OpenAI) | `~/.codex/prompts/` | `~/.codex/instructions.md` |
+| **Codex** (OpenAI) | `~/.codex/prompts/` | `~/.codex/AGENTS.md` |
 | **OpenCode** | `~/.config/opencode/commands/` | Project-level only |
 
 ## Installation
@@ -49,7 +49,7 @@ The `install.sh` script creates symlinks from each agent's config location to th
 
 ~/.pi/agent/AGENTS.md    → ~/.agent-config/instructions/AGENTS.md
 ~/.claude/CLAUDE.md      → ~/.agent-config/instructions/AGENTS.md
-~/.codex/instructions.md → ~/.agent-config/instructions/AGENTS.md
+~/.codex/AGENTS.md       → ~/.agent-config/instructions/AGENTS.md
 ```
 
 ## Dual Instructions Support

@@ -104,7 +104,7 @@ echo ""
 #==============================================================================
 echo "─── Codex ───"
 create_symlink "$COMMANDS_DIR" "$HOME/.codex/prompts"
-create_symlink "$AGENTS_MD" "$HOME/.codex/instructions.md"
+create_symlink "$AGENTS_MD" "$HOME/.codex/AGENTS.md"
 echo ""
 
 #==============================================================================
