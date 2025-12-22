@@ -329,4 +329,225 @@ gj logs orchestrator "error"      # Should be empty
 
 ---
 
+## Beads Workflow (Issue Tracking)
+
+Use `bd` CLI for issue tracking. Issues stored in `.beads/` and tracked in git.
+
+### Essential Commands
+
+```bash
+bd ready              # Show issues ready to work (no blockers)
+bd list --status=open # All open issues
+bd show <id>          # Full issue details with dependencies
+bd create --title="..." --type=task --priority=2
+bd update <id> --status=in_progress
+bd close <id> --reason="Completed"
+bd close <id1> <id2>  # Close multiple issues at once
+bd sync               # Commit and push beads changes
+```
+
+### Workflow Pattern
+
+1. **Start**: `bd ready` to find actionable work
+2. **Claim**: `bd update <id> --status=in_progress`
+3. **Work**: Implement the task
+4. **Complete**: `bd close <id> --reason="Done"`
+5. **Sync**: `bd sync` at session end
+
+### Key Concepts
+
+- **Dependencies**: Issues can block other issues. `bd ready` shows only unblocked work.
+- **Priority**: P0=critical, P1=high, P2=medium, P3=low, P4=backlog
+- **Types**: task, bug, feature, epic, question, docs
+- **Blocking**: `bd dep add <issue> <depends-on>`
+
+### Session End Protocol
+
+```bash
+git status              # Check what changed
+git add <files>         # Stage code changes
+git commit -m "..."     # Commit code
+bd sync                 # Commit beads changes
+git push                # Push to remote
+```
+
+---
+
+## Git Push Workflow
+
+```bash
+# Stage and commit local changes first
+git add -A && git commit -m "your message"
+
+# Try to push - this will fail if remote has new commits
+git push
+
+# ONLY if push fails with "rejected" (remote ahead), then:
+git pull --rebase && git push
+
+# Sync beads after code is pushed
+bd sync
+
+# Verify clean state
+git status   # MUST show "up to date with origin"
+```
+
+**NEVER run `git pull --rebase` blindly** - only use it when push fails because remote is ahead.
+
+---
+
+## cass — Search Agent History
+
+Search across all AI agent conversation history before solving problems from scratch.
+
+**NEVER run bare `cass`** — it launches TUI. Always use `--robot` or `--json`.
+
+### Quick Commands
+
+```bash
+cass health                                    # Check index health
+cass search "pattern" --robot --limit 5        # Search all agents
+cass search "pattern" --robot --agent codex    # Filter by agent
+cass search "pattern" --robot --days 7         # Recent only
+cass view /path/to/session.jsonl -n 42 --json  # View specific result
+```
+
+### Agents Indexed
+
+| Agent | Location |
+|-------|----------|
+| Claude Code | `~/.claude/projects/` |
+| OpenCode | `.opencode/` in repos |
+| Cursor | `~/Library/Application Support/Cursor/User/` |
+| Codex | `~/.codex/sessions/` |
+| Pi-Agent | `~/.pi/agent/sessions/` |
+
+### Key Flags
+
+| Flag | Purpose |
+|------|---------|
+| `--robot` / `--json` | Machine-readable output (required!) |
+| `--fields minimal` | Reduce payload size |
+| `--limit N` | Cap result count |
+| `--agent NAME` | Filter to specific agent |
+| `--workspace PATH` | Filter to specific project |
+| `--days N` | Limit to recent N days |
+
+---
+
+## MCP Agent Mail (Multi-Agent Coordination)
+
+Coordination when multiple AI agents work the same repo. Prevents collision via file reservations and enables async messaging.
+
+### Session Start (Required)
+
+```
+agentmail_init(
+  project_path="/path/to/repo",
+  task_description="Working on feature X"
+)
+# Returns: { agent_name: "BlueLake", project_key: "..." }
+```
+
+### Key Workflows
+
+```bash
+# Reserve files before edit
+agentmail_reserve(patterns=["src/**"], ttl_seconds=3600, exclusive=true)
+
+# Send message to other agents
+agentmail_send(to="OtherAgent", subject="...", body="...", thread_id="bd-123")
+
+# Check inbox
+agentmail_inbox()
+
+# Release reservations when done
+agentmail_release()
+```
+
+### Integration with Beads
+
+- Use bead ID as `thread_id` (e.g., `thread_id="bd-123"`)
+- Include bead ID in reservation `reason` for traceability
+- Reserve files when starting bead task; release when closing
+
+### Quick Check
+
+```bash
+curl http://127.0.0.1:8765/health/liveness  # Health check
+open http://127.0.0.1:8765/mail             # Web UI
+```
+
+---
+
+## bv — Beads Viewer (AI Sidecar)
+
+Fast terminal UI for beads with precomputed dependency metrics. Use robot flags for deterministic, dependency-aware outputs.
+
+```bash
+bv --robot-help      # All AI-facing commands
+bv --robot-insights  # Graph metrics (PageRank, critical path, cycles)
+bv --robot-plan      # Execution plan with parallel tracks
+bv --robot-priority  # Priority recommendations with reasoning
+bv --robot-recipes   # List available recipes
+bv --robot-diff --diff-since <commit>  # Issue changes since commit
+```
+
+Use these instead of hand-rolling graph logic.
+
+---
+
+## ast-grep vs ripgrep
+
+**Use `ast-grep` when structure matters** — parses code, matches AST nodes, can safely rewrite.
+
+```bash
+# Find structured code (ignores comments/strings)
+ast-grep run -l TypeScript -p 'import $X from "$P"'
+
+# Codemod
+ast-grep run -l JavaScript -p 'var $A = $B' -r 'let $A = $B' -U
+```
+
+**Use `ripgrep` when text is enough** — fastest for literals/regex.
+
+```bash
+rg -n 'console\.log\(' -t js
+```
+
+**Combine for precision:**
+
+```bash
+rg -l -t ts 'useQuery\(' | xargs ast-grep run -l TypeScript -p 'useQuery($A)' -r 'useSuspenseQuery($A)' -U
+```
+
+**Rule of thumb:** Need correctness or rewrites → `ast-grep`. Need speed or hunting text → `rg`.
+
+---
+
+## UBS — Ultimate Bug Scanner
+
+Static analysis before commits. Exit 0 = safe, Exit >0 = fix needed.
+
+```bash
+ubs file.ts file2.py                    # Specific files (< 1s)
+ubs $(git diff --name-only --cached)    # Staged files
+ubs --only=js,python src/               # Language filter
+ubs .                                   # Whole project
+```
+
+**Output format:** `file:line:col – Issue` with 💡 fix suggestions.
+
+**Fix workflow:**
+1. Read finding → understand category + fix
+2. Navigate to `file:line:col`
+3. Verify real issue (not false positive)
+4. Fix root cause
+5. Re-run `ubs <file>` → exit 0
+6. Commit
+
+**Speed tip:** Scope to changed files. `ubs src/file.ts` (< 1s) vs `ubs .` (30s).
+
+---
+
 *Unified agent configuration: https://github.com/carmandale/agent-config*
