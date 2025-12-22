@@ -118,6 +118,48 @@ If tapping `StaticText` does nothing, look for the adjacent `Button` or `CheckBo
 
 Note: `ms` (Media Server) is macOS, not a simulator - no UI automation.
 
+## Extension / AVPStreamKit Logs
+
+Broadcast extensions run in separate processes with different subsystems. Use `--ext` to capture them:
+
+```bash
+# Run with extension logs
+gj run --ext gmp
+gj run --ext pfizer
+
+# Launch with extension logs (no build)
+gj launch --ext gmp
+```
+
+### What `--ext` Captures
+
+| Subsystem | Description |
+|-----------|-------------|
+| Main app bundle ID | Normal app logs |
+| `{bundle_id}.CameraStreamExtension` | Broadcast extension logs |
+| `com.avpstreamkit.*` | AVPStreamKit framework logs |
+
+### Extension Bundle IDs
+
+| App | Extension Bundle ID |
+|-----|---------------------|
+| GMP | `com.groovetech.media-player.CameraStreamExtension` |
+| Pfizer | `com.groovejones.PfizerOutdoCancer.CameraStreamExtension` |
+
+### Manual Extension Log Streaming
+
+If you need to stream extension logs separately:
+
+```bash
+# GMP extension logs (simulator)
+xcrun simctl spawn booted log stream --style compact --level debug \
+  --predicate "subsystem == 'com.avpstreamkit.vt' OR subsystem == 'com.groovetech.media-player.CameraStreamExtension'"
+
+# Pfizer extension logs (simulator)
+xcrun simctl spawn booted log stream --style compact --level debug \
+  --predicate "subsystem == 'com.avpstreamkit.vt' OR subsystem == 'com.groovejones.PfizerOutdoCancer.CameraStreamExtension'"
+```
+
 ## How It Works
 
 `gj ui tap-button` uses [AXe](https://github.com/cameroncooke/AXe) under the hood:
