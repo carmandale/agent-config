@@ -222,4 +222,47 @@ Making claims about completeness without reading actual requirements is a fundam
 
 ---
 
+## gj Tool (GrooveTech Build/Test)
+
+**Use `gj` for all build/run/test operations. Never use xcodebuild directly.**
+
+### Essential Commands
+
+```bash
+gj run <app>              # Build + run + stream logs
+gj run --device <app>     # Build + run on physical device
+gj logs <app> "pattern"   # Search logs (use as assertions)
+gj ui screenshot <app>    # Visual verification
+gj test P0                # E2E connection tests
+```
+
+### Apps: `orchestrator`, `pfizer`, `gmp`, `ms`, `all`
+
+### Testing Quick Pattern
+
+```bash
+# Quick validation (use this first)
+gj run orchestrator
+gj logs orchestrator "error"      # Should be empty
+gj ui screenshot orchestrator     # Visual check
+
+# Use logs as assertions
+gj logs orchestrator "connected"  # Should have output
+gj logs orchestrator "error"      # Should be empty
+```
+
+### When to Test What
+
+| Situation | Command |
+|-----------|---------|
+| Quick iteration | `gj logs <app> "pattern"` |
+| Visual check | `gj ui screenshot <app>` |
+| UI interaction | `gj ui tap-button <app> "Label"` |
+| Full validation | `gj test P0` |
+
+**Full docs:** `~/.agent-config/docs/gj-tool.md`
+**UI automation:** `~/.agent-config/docs/ui-automation.md`
+
+---
+
 *Unified agent configuration: https://github.com/carmandale/agent-config*
