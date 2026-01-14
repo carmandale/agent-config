@@ -1,7 +1,7 @@
 # AGENTS.md - Global Instructions
 
 > Universal standards for all AI coding agents
-> Last Updated: 2025-12-21
+> Last Updated: 2026-01-09
 
 ---
 
@@ -96,15 +96,13 @@ Does this align with what you want? Should I proceed?
 
 1. **Git Status Check** - MANDATORY before any edit:
    ```bash
-   git status --short
+   git status --short | grep -v -E '\.DS_Store|\.beads/|\.worktrees/'
    ```
-   - If working tree is dirty with unrelated changes → STOP, notify user
+   - If working tree has **meaningful AND uncommitted code changes that are RELEVANT to yout CURRENT assignment** → STOP, notify user
    - If on wrong branch → STOP, notify user
-   - Clean state required for safe work
+   - **Ignore artifacts** (see Ignorable Artifacts below) - these do NOT block work
 
 2. **Create Beads** - If task has 2+ steps, create tracking beads
-
-3. **Reserve Files** - If editing and Agent Mail is available
 
 **During Execution:**
 - One file at a time
@@ -117,14 +115,44 @@ Does this align with what you want? Should I proceed?
 ## Hard Limits (ENFORCED)
 
 ### Agent Spawning
-- Maximum 3 parallel agents without user approval
 - Maximum 5 beads/tasks per session without user approval
 - ALWAYS show plan before spawning agents
 
 ### Git Safety
-- NEVER edit files with uncommitted unrelated changes
-- NEVER push without explicit request
-- CHECK git status before any edit
+
+**Default behavior:**
+- If uncommitted code changes exist → STOP, report, and ASK before proceeding
+- Never push without explicit request
+- CHECK git status before any edit (filtering artifacts)
+
+**User override:** When user explicitly says "proceed anyway", "ignore that", "I know, continue", or similar:
+1. Acknowledge: "Acknowledged — proceeding despite uncommitted changes."
+2. Continue with the work
+3. Do NOT re-raise the same concern unless conditions change
+4. Do NOT require repeated confirmation or lecture about risks
+
+**The user is the final authority.** Safety checks exist to inform, not to block explicit instructions.
+
+### Ignorable Artifacts (DO NOT halt on these)
+
+These are **NOT** "dirty state" - proceed normally if only these appear:
+
+| Pattern | Reason |
+|---------|--------|
+| `.DS_Store` | macOS Finder metadata |
+| `.beads/` anything | Beads runtime: locks, sockets, WAL files, logs |
+| `.worktrees/` | Git worktree working directories |
+| `*.lock` (in tool dirs) | Tool lock files (npm, yarn, etc.) |
+| `*.log` (in tool dirs) | Runtime logs |
+| `*-shm`, `*-wal` | SQLite journal files |
+
+**The rule is:** If it's not source code you're about to edit, it's not blocking.
+
+**Quick filter command:**
+```bash
+git status --short | grep -v -E '\.DS_Store|\.beads/|\.worktrees/|-wal|-shm|\.lock$'
+```
+If this returns empty or only shows files you're working on → proceed.
 
 ### Scope Creep Prevention
 - NEVER refactor while fixing bugs
@@ -432,51 +460,6 @@ cass view /path/to/session.jsonl -n 42 --json  # View specific result
 | `--agent NAME` | Filter to specific agent |
 | `--workspace PATH` | Filter to specific project |
 | `--days N` | Limit to recent N days |
-
----
-
-## MCP Agent Mail (Multi-Agent Coordination)
-
-Coordination when multiple AI agents work the same repo. Prevents collision via file reservations and enables async messaging.
-
-### Session Start (Required)
-
-```
-agentmail_init(
-  project_path="/path/to/repo",
-  task_description="Working on feature X"
-)
-# Returns: { agent_name: "BlueLake", project_key: "..." }
-```
-
-### Key Workflows
-
-```bash
-# Reserve files before edit
-agentmail_reserve(patterns=["src/**"], ttl_seconds=3600, exclusive=true)
-
-# Send message to other agents
-agentmail_send(to="OtherAgent", subject="...", body="...", thread_id="bd-123")
-
-# Check inbox
-agentmail_inbox()
-
-# Release reservations when done
-agentmail_release()
-```
-
-### Integration with Beads
-
-- Use bead ID as `thread_id` (e.g., `thread_id="bd-123"`)
-- Include bead ID in reservation `reason` for traceability
-- Reserve files when starting bead task; release when closing
-
-### Quick Check
-
-```bash
-curl http://127.0.0.1:8765/health/liveness  # Health check
-open http://127.0.0.1:8765/mail             # Web UI
-```
 
 ---
 
