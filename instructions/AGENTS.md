@@ -99,13 +99,11 @@ Does this align with what you want? Should I proceed?
 
 **Pre-Flight Checklist (BLOCKING):**
 
-1. **Git Status Check** - MANDATORY before any edit:
-   ```bash
-   git status --short | grep -v -E '\.DS_Store|\.beads/|\.worktrees/'
-   ```
-   - If working tree has **meaningful AND uncommitted code changes that are RELEVANT to yout CURRENT assignment** → STOP, notify user
-   - If on wrong branch → STOP, notify user
-   - **Ignore artifacts** (see Ignorable Artifacts below) - these do NOT block work
+1. **Git Status Check** - Before editing a file:
+   - If **that file** was dirty before you started → STOP, ask before editing
+   - If **you** dirtied it this session → it's WIP, keep working
+   - Other dirty files? **Not your concern**
+   - Wrong branch? → STOP, notify user
 
 2. **Create Beads** - If task has 2+ steps, create tracking beads
 
@@ -125,39 +123,16 @@ Does this align with what you want? Should I proceed?
 
 ### Git Safety
 
-**Default behavior:**
-- If uncommitted code changes exist → STOP, report, and ASK before proceeding
-- Never push without explicit request
-- CHECK git status before any edit (filtering artifacts)
+**The rule:** Don't edit a file that was dirty before you started.
 
-**User override:** When user explicitly says "proceed anyway", "ignore that", "I know, continue", or similar:
-1. Acknowledge: "Acknowledged — proceeding despite uncommitted changes."
-2. Continue with the work
-3. Do NOT re-raise the same concern unless conditions change
-4. Do NOT require repeated confirmation or lecture about risks
+- If a file has uncommitted changes **you didn't make** → STOP, ask before editing
+- If **you** dirtied it this session → it's WIP, keep working
+- Other files in the repo dirty? **Not your concern**
 
-**The user is the final authority.** Safety checks exist to inform, not to block explicit instructions.
+**Always ignore (artifacts, not code):**
+`.beads/`, `.worktrees/`, `.DS_Store`, `*.lock`, `*-wal`, `*-shm`
 
-### Ignorable Artifacts (DO NOT halt on these)
-
-These are **NOT** "dirty state" - proceed normally if only these appear:
-
-| Pattern | Reason |
-|---------|--------|
-| `.DS_Store` | macOS Finder metadata |
-| `.beads/` anything | Beads runtime: locks, sockets, WAL files, logs |
-| `.worktrees/` | Git worktree working directories |
-| `*.lock` (in tool dirs) | Tool lock files (npm, yarn, etc.) |
-| `*.log` (in tool dirs) | Runtime logs |
-| `*-shm`, `*-wal` | SQLite journal files |
-
-**The rule is:** If it's not source code you're about to edit, it's not blocking.
-
-**Quick filter command:**
-```bash
-git status --short | grep -v -E '\.DS_Store|\.beads/|\.worktrees/|-wal|-shm|\.lock$'
-```
-If this returns empty or only shows files you're working on → proceed.
+**Never push without explicit request.**
 
 ### Scope Creep Prevention
 - NEVER refactor while fixing bugs
