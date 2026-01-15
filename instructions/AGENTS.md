@@ -1,7 +1,7 @@
 # AGENTS.md - Global Instructions
 
 > Universal standards for all AI coding agents
-> Last Updated: 2026-01-09
+> Last Updated: 2026-01-15
 
 ---
 
@@ -22,6 +22,11 @@
 - Don't add "safety padding" that obscures intent
 - Don't create wrapper layers that add no value
 - Trust the APIs to work as designed
+
+**No Legacy Tech Debt**
+- **DELETE over WRAP** — when v1/POC code is superseded, remove it
+- Don't add compatibility layers for code that was never meant to be permanent
+- If asked to "keep the old way working," challenge whether it's actually needed
 
 **Minimal, Working Changes**
 - Fix what's broken, nothing more
@@ -298,7 +303,7 @@ Making claims about completeness without reading actual requirements is a fundam
 | **Abstraction** | Adding layers "for the future" |
 | **Continuation** | Proceeding after "stop" |
 | **Assumptions** | Guessing instead of reading source documents |
-| **Legacy** | Adding old patterns (UIKit) to modern platforms (visionOS) |
+| **Legacy** | Wrapping v1/POC code instead of deleting it; adding "compatibility layers" for temporary code |
 
 ---
 
