@@ -100,7 +100,7 @@ Does this align with what you want? Should I proceed?
 **Pre-Flight Checklist (BLOCKING):**
 
 1. **Git Status Check** - Before editing a file:
-   - If **that file** was dirty before you started → STOP, ask before editing
+   - If **that file** was dirty before you started → STOP, ask before editing (except append-only `.learnings/*.md`)
    - If **you** dirtied it this session → it's WIP, keep working
    - Other dirty files? **Not your concern**
    - Wrong branch? → STOP, notify user
@@ -128,6 +128,7 @@ Does this align with what you want? Should I proceed?
 - If a file has uncommitted changes **you didn't make** → STOP, ask before editing
 - If **you** dirtied it this session → it's WIP, keep working
 - Other files in the repo dirty? **Not your concern**
+- Exception: `.learnings/*.md` is append-only; always append even if dirty
 
 **Always ignore (artifacts, not code):**
 `.beads/`, `.worktrees/`, `.DS_Store`, `*.lock`, `*-wal`, `*-shm`
