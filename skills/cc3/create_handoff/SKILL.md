@@ -2,7 +2,6 @@
 name: create_handoff
 description: Create unified artifact document for checkpoint, handoff, or finalize
 ---
-name: create_handoff
 
 # Create Unified Artifact
 
@@ -84,7 +83,6 @@ thoughts/shared/handoffs/<session>/YYYY-MM-DD_HH-MM_<title>_<mode>.yaml
 
 ```yaml
 ---
-name: create_handoff
 schema_version: "1.0.0"
 mode: handoff
 date: 2026-01-14T01:23:45.678Z
@@ -93,7 +91,6 @@ outcome: PARTIAL_PLUS
 primary_bead: Continuous-Claude-v3-ug8.6
 session_id: abc12345
 ---
-name: create_handoff
 
 goal: What this session accomplished
 now: What next session should do first
@@ -185,7 +182,6 @@ Resume in a new session with:
 ```
 
 ---
-name: create_handoff
 
 ## Additional Notes
 

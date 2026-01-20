@@ -2,7 +2,6 @@
 name: resume_handoff
 description: Resume work from handoff document with context analysis and validation
 ---
-name: resume_handoff
 
 # Resume work from a handoff document
 

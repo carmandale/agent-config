@@ -2,7 +2,6 @@
 name: repo-research-analyst
 description: Analyze repository structure, patterns, conventions, and documentation for understanding a new codebase
 ---
-name: repo-research-analyst
 
 > **Note:** The current year is 2025. Use this when searching for recent documentation and patterns.
 
@@ -99,13 +98,11 @@ Write your findings to the handoff directory.
 
 ```markdown
 ---
-name: repo-research-analyst
 date: [ISO timestamp]
 type: repo-research
 status: complete
 repository: [repo name or path]
 ---
-name: repo-research-analyst
 
 # Repository Research: [Repo Name]
 
@@ -185,7 +182,6 @@ name: repo-research-analyst
 ```
 
 ---
-name: repo-research-analyst
 
 ## Returning to Orchestrator
 
@@ -210,7 +206,6 @@ Ready for [planning/contribution/implementation].
 ```
 
 ---
-name: repo-research-analyst
 
 ## Important Guidelines
 
@@ -234,7 +229,6 @@ name: repo-research-analyst
 - Read files completely, don't sample
 
 ---
-name: repo-research-analyst
 
 ## Example Invocation
 

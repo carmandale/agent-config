@@ -2,7 +2,6 @@
 name: synthesize-ledgers
 description: Synthesize multiple session event files into a unified current.md ledger
 ---
-name: synthesize-ledgers
 
 # Synthesize Ledgers
 
@@ -56,14 +55,12 @@ When multiple agents work in parallel (worktrees, branches), each writes session
 Each event file has YAML frontmatter:
 ```yaml
 ---
-name: synthesize-ledgers
 ts: 2026-01-11T10:00:00Z
 agent: abc12345
 branch: feat/feature-a
 type: session_end
 reason: clear
 ---
-name: synthesize-ledgers
 
 now: Current focus description
 

@@ -2,7 +2,6 @@
 name: plan-agent
 description: Planning agent that creates implementation plans and handoffs from conversation context
 ---
-name: plan-agent
 
 > **Note:** The current year is 2025. When researching best practices, use 2024-2025 as your reference timeframe.
 
@@ -203,13 +202,11 @@ Create a handoff document summarizing the plan.
 
 ```markdown
 ---
-name: plan-agent
 date: [ISO timestamp]
 type: plan
 status: complete
 plan_file: thoughts/shared/plans/PLAN-<description>.md
 ---
-name: plan-agent
 
 # Plan Handoff: [Feature Name]
 
@@ -276,7 +273,6 @@ Before returning to the orchestrator, run a quick pre-mortem on your plan:
 The orchestrator may run `/premortem deep` on your plan before implementation.
 
 ---
-name: plan-agent
 
 ## Returning to Orchestrator
 
@@ -297,7 +293,6 @@ Ready for user review.
 ```
 
 ---
-name: plan-agent
 
 ## Important Guidelines
 
@@ -322,7 +317,6 @@ name: plan-agent
 - The research-validation step will catch issues before implementation
 
 ---
-name: plan-agent
 
 ## Example Invocation
 
@@ -360,7 +354,6 @@ Task(
 ```
 
 ---
-name: plan-agent
 
 ## Plan Quality Checklist
 

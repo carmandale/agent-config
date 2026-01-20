@@ -2,7 +2,6 @@
 name: finalize
 description: Create finalize document for session closure and memorial
 ---
-name: finalize
 
 # Finalize Session
 
@@ -137,13 +136,11 @@ Artifact location: thoughts/shared/handoffs/<session>/[filename]
 ```
 
 ---
-name: finalize
 
 ## Example Finalize Structure
 
 ```yaml
 ---
-name: finalize
 schema_version: "1.0.0"
 mode: finalize
 date: 2026-01-14T01:23:45.678Z
@@ -152,7 +149,6 @@ session_id: abc12345
 outcome: SUCCEEDED
 primary_bead: Continuous-Claude-v3-ug8.7
 ---
-name: finalize
 
 goal: Implement unified artifact system with finalize support
 now: System complete and tested
@@ -205,7 +201,6 @@ test: npm test --prefix .claude/hooks
 ```
 
 ---
-name: finalize
 
 ## Notes
 

@@ -2,7 +2,6 @@
 name: validate-agent
 description: Validation agent that validates plan tech choices against current best practices
 ---
-name: validate-agent
 
 > **Note:** The current year is 2025. When validating tech choices, check against 2024-2025 best practices.
 
@@ -84,13 +83,11 @@ Write your validation to the handoff directory.
 
 ```markdown
 ---
-name: validate-agent
 date: [ISO timestamp]
 type: validation
 status: [VALIDATED | NEEDS REVIEW]
 plan_file: [path to plan]
 ---
-name: validate-agent
 
 # Plan Validation: [Plan Name]
 
@@ -152,7 +149,6 @@ All tech choices are current best practices. Plan is ready for implementation.
 ```
 
 ---
-name: validate-agent
 
 ## Returning to Orchestrator
 
@@ -178,7 +174,6 @@ Recommend discussing with user before implementation.
 ```
 
 ---
-name: validate-agent
 
 ## Important Guidelines
 
@@ -208,7 +203,6 @@ name: validate-agent
 - Critical architectural concerns
 
 ---
-name: validate-agent
 
 ## Example Invocation
 
@@ -242,7 +236,6 @@ Task(
 ```
 
 ---
-name: validate-agent
 
 ## Standard Library Note
 

@@ -4,7 +4,6 @@ description: Deep interview process to transform vague ideas into detailed specs
 user_invocable: true
 model: opus
 ---
-name: discovery-interview
 
 # Discovery Interview
 

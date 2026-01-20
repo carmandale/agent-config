@@ -2,7 +2,6 @@
 name: checkpoint
 description: Create checkpoint snapshot of current session state
 ---
-name: checkpoint
 
 # Checkpoint Session
 
@@ -124,7 +123,6 @@ Minimal checkpoint (just the essentials):
 
 ```yaml
 ---
-name: checkpoint
 schema_version: "1.0.0"
 mode: checkpoint
 date: 2026-01-14T01:23:45.678Z
@@ -132,7 +130,6 @@ session: auth-bug-investigation
 session_id: abc12345
 outcome: PARTIAL_PLUS
 ---
-name: checkpoint
 
 goal: Investigating auth bug in login flow
 now: Tracing request through middleware chain
@@ -159,7 +156,6 @@ Full checkpoint (with details):
 
 ```yaml
 ---
-name: checkpoint
 schema_version: "1.0.0"
 mode: checkpoint
 date: 2026-01-14T01:23:45.678Z
@@ -168,7 +164,6 @@ session_id: abc12345
 primary_bead: beads-123
 outcome: PARTIAL_PLUS
 ---
-name: checkpoint
 
 goal: Fix authentication bug in login flow
 now: Testing middleware ordering hypothesis
