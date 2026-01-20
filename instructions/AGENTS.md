@@ -130,8 +130,41 @@ Does this align with what you want? Should I proceed?
 - Other files in the repo dirty? **Not your concern**
 - Exception: `.learnings/*.md` is append-only; always append even if dirty
 
-**Always ignore (artifacts, not code):**
-`.beads/`, `.worktrees/`, `.DS_Store`, `*.lock`, `*-wal`, `*-shm`
+**Paths that don't block your work** (dirty is OK, don't wait for user):
+`.worktrees/`, `.DS_Store`, `*.lock`, `*-wal`, `*-shm`
+
+### .beads/ Directory (SPECIAL HANDLING REQUIRED)
+
+The `.beads/` directory contains the beads issue database. It requires specific handling:
+
+**✅ CORRECT: Use `bd sync` to manage .beads/ files**
+```bash
+bd sync          # Exports issues, commits, pulls, pushes
+git status       # Should be clean after sync
+```
+
+**❌ NEVER DO THESE:**
+- `git restore .beads/` — DESTROYS sync state, loses issue changes
+- `git checkout .beads/` — Same problem
+- Manually committing `.beads/` files — Let `bd sync` handle it
+
+**If `.beads/` is dirty after `bd sync`:**
+1. Run `bd sync` again (sometimes needs two passes)
+2. If still dirty, check which files:
+   - `issues.jsonl` dirty → run `bd sync` again
+   - Runtime files (`last-touched`, `sync-state.json`, `*.db`) → These should be gitignored. If tracked, run: `git rm --cached .beads/<file>`
+3. If issues persist, ask the user — don't guess
+
+**Decision tree for dirty .beads/ files:**
+```
+.beads/ dirty?
+    ├── Run `bd sync`
+    │       └── Still dirty?
+    │               ├── issues.jsonl → `bd sync` again
+    │               ├── Runtime files (last-touched, *.db) → `git rm --cached`
+    │               └── Unknown → ASK USER
+    └── Clean → proceed
+```
 
 **Never push without explicit request.**
 

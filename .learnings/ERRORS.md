@@ -63,3 +63,32 @@ Verify the path before running; use an absolute path or validate with `ls`.
 - Related Files: N/A
 
 ---
+## [ERR-20260120-001] create_agent_loop_issue
+
+**Logged**: 2026-01-20T10:35:32Z
+**Priority**: high
+**Status**: pending
+**Area**: config
+
+### Summary
+agent-loop issue creation failed when the GitHub label "agent-loop" did not exist
+
+### Error
+```
+[error] Command failed: gh issue create --title "Fix finalize/handoff/checkpoint context + GH close flow" --body <...> --label agent-loop
+could not add label: 'agent-loop' not found
+```
+
+### Context
+- Command/operation: create_agent_loop_issue.py (bd create + gh issue create)
+- Repo: ~/.agent-config
+- Result: bead was created, GH issue failed due to missing label
+
+### Suggested Fix
+Create the "agent-loop" label in the target repo or update the script to create the label if missing.
+
+### Metadata
+- Reproducible: yes
+- Related Files: /Users/dalecarman/.codex/skills/public/agent-loop-issue/scripts/create_agent_loop_issue.py
+
+---
