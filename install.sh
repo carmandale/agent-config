@@ -134,3 +134,26 @@ echo ""
 echo "Edit global instructions:"
 echo "  $AGENTS_MD"
 echo ""
+
+#==============================================================================
+# Skills (Unified across all agents)
+#==============================================================================
+SKILLS_DIR="$SCRIPT_DIR/skills"
+
+if [[ -d "$SKILLS_DIR" ]]; then
+    echo "─── Skills (Unified) ───"
+    
+    # Claude Code
+    create_symlink "$SKILLS_DIR" "$HOME/.claude/skills"
+    
+    # Codex
+    create_symlink "$SKILLS_DIR" "$HOME/.codex/skills"
+    
+    # Pi Agent (both locations for compatibility)
+    create_symlink "$SKILLS_DIR" "$HOME/.config/agent-skills"
+    create_symlink "$SKILLS_DIR" "$HOME/.pi/agent/skills"
+    
+    echo ""
+    log_info "Skills unified: $(find "$SKILLS_DIR" -mindepth 2 -maxdepth 2 -type d | wc -l | tr -d ' ') skills across $(ls -1 "$SKILLS_DIR" | wc -l | tr -d ' ') categories"
+    echo ""
+fi
