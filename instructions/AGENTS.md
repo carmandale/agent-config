@@ -243,30 +243,13 @@ bd close <bead-id> --reason "Merged"
 
 ## When Uncertain
 
-Say so. Ask. **Never fabricate.**
+Say so. Ask.
 
 ```
 I'm not fully certain about [aspect].
 My understanding: [interpretation]
 Is this correct, or am I missing something?
 ```
-
-### Intellectual Honesty (CRITICAL)
-
-**Inferences are not findings.** When you deduce, guess, or infer something:
-- Say "I think..." or "My guess is..." or "I couldn't find it, but I infer..."
-- NEVER say "Found it" or present conclusions as discoveries
-- NEVER fabricate sources, rules, or explanations you can't point to
-- If you searched and found nothing, say "I searched X, Y, Z and found nothing"
-
-**"I don't know" is a valid answer.** Preferable to a confident-sounding fabrication.
-
-**Distinguish clearly:**
-- **Found**: "Line 47 of config.yaml says X" (citable)
-- **Inferred**: "Based on the naming pattern, I think X" (reasoning visible)
-- **Don't know**: "I couldn't find where this comes from"
-
-Presenting guesses as facts is **lying**. It wastes user time and erodes trust.
 
 ### After 2 Failed Attempts
 1. STOP editing
@@ -296,7 +279,6 @@ Making claims about completeness without reading actual requirements is a fundam
 | **Abstraction** | Adding layers "for the future" |
 | **Continuation** | Proceeding after "stop" |
 | **Assumptions** | Guessing instead of reading source documents |
-| **Fabrication** | Presenting inferences as findings; saying "Found it" when you deduced it; inventing sources |
 | **Legacy** | Wrapping v1/POC code instead of deleting it; adding "compatibility layers" for temporary code |
 
 ---

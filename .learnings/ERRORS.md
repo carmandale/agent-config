@@ -7,34 +7,6 @@ Operational failures and error logs captured during development.
 
 ---
 
-## [ERR-20260116-002] cc-artifact
-
-**Logged**: 2026-01-16T23:56:05Z
-**Priority**: high
-**Status**: pending
-**Area**: infra
-
-### Summary
-Finalize artifact generation failed due to missing cc-artifact script
-
-### Error
-```
-zsh:1: no such file or directory: /Users/dalecarman/.claude/scripts/cc-artifact
-```
-
-### Context
-- Command/operation: `~/.claude/scripts/cc-artifact --mode finalize --bead .agent-config-e10`
-- Environment: local CLI run
-
-### Suggested Fix
-Verify script path or install the artifact generator at the expected location.
-
-### Metadata
-- Reproducible: yes
-- Related Files: N/A
-
----
-
 ## [ERR-20260116-001] oracle_run
 
 **Logged**: 2026-01-16T22:46:35Z
