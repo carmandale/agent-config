@@ -1,7 +1,6 @@
 ---
 name: search-tools
 description: Search Tool Hierarchy
-user-invocable: false
 ---
 
 # Search Tool Hierarchy

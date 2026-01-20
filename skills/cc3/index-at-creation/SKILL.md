@@ -1,7 +1,6 @@
 ---
 name: index-at-creation
 description: Index at Creation Time
-user-invocable: false
 ---
 
 # Index at Creation Time

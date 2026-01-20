@@ -1,7 +1,6 @@
 ---
 name: explicit-identity
 description: Explicit Identity Across Boundaries
-user-invocable: false
 ---
 
 # Explicit Identity Across Boundaries

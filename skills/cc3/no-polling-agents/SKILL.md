@@ -1,7 +1,6 @@
 ---
 name: no-polling-agents
 description: No Polling for Background Agents
-user-invocable: false
 ---
 
 # No Polling for Background Agents

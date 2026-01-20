@@ -99,7 +99,6 @@ Write your findings to the handoff directory.
 ```markdown
 ---
 date: [ISO timestamp]
-type: repo-research
 status: complete
 repository: [repo name or path]
 ---

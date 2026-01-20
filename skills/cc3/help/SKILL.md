@@ -1,9 +1,7 @@
 ---
 name: help
 description: Interactive workspace discovery - learn what tools, workflows, agents, and hooks are available
-triggers: ["help", "what can you do", "show capabilities", "how do I"]
 allowed-tools: [AskUserQuestion, Bash, Read, Glob, Grep]
-priority: high
 ---
 
 # /help - Workspace Discovery
@@ -238,9 +236,7 @@ Skills use YAML frontmatter for metadata and tool restrictions:
 ---
 name: my-skill
 description: What it does
-triggers: ["keyword1", "keyword2"]
 allowed-tools: [Bash, Read, Edit]
-priority: high
 skills: [other-skill]  # Auto-load dependencies
 ---
 ```
@@ -252,7 +248,6 @@ Agents declare their capabilities:
 ---
 name: my-agent
 description: Specialist for X
-model: sonnet|haiku|opus
 tools: [Read, Grep, Glob, Bash]
 ---
 ```

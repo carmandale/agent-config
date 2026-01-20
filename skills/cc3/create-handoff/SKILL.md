@@ -1,5 +1,5 @@
 ---
-name: create_handoff
+name: create-handoff
 description: Create unified artifact document for checkpoint, handoff, or finalize
 ---
 

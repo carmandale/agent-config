@@ -1,9 +1,7 @@
 ---
-name: math
+name: math-unified
 description: Unified math capabilities - computation, solving, and explanation. I route to the right tool.
-triggers: ["calculate", "compute", "solve", "integrate", "derivative", "eigenvalue", "matrix", "simplify", "factor", "limit", "series", "differential equation", "unit convert", "explain", "what is", "how does"]
 allowed-tools: [Bash, Read, Write]
-priority: high
 ---
 
 # /math - Unified Math Capabilities

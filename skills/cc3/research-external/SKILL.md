@@ -1,7 +1,6 @@
 ---
 name: research-external
 description: External research workflow for docs, web, APIs - NOT codebase exploration
-model: sonnet
 allowed-tools: [Bash, Read, Write, Task]
 ---
 
@@ -265,7 +264,6 @@ Write to: `thoughts/shared/research/YYYY-MM-DD-{topic-slug}.md`
 ```markdown
 ---
 date: {ISO timestamp}
-type: external-research
 topic: "{topic}"
 focus: {focus}
 sources: [nia, perplexity, firecrawl]
@@ -314,7 +312,6 @@ Write to: `thoughts/shared/handoffs/{session}/research-{topic-slug}.yaml`
 
 ```yaml
 ---
-type: research-handoff
 ts: {ISO timestamp}
 topic: "{topic}"
 focus: {focus}

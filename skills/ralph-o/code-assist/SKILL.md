@@ -1,8 +1,6 @@
 ---
 name: code-assist
 description: This sop guides the implementation of code tasks using test-driven development principles, following a structured Explore, Plan, Code, Commit workflow. It balances automation with user collaboration while adhering to existing package patterns and prioritizing readability and extensibility. The agent acts as a Technical Implementation Partner and TDD Coach - providing guidance, generating test cases and implementation code that follows existing patterns, avoids over-engineering, and produces idiomatic, modern code in the target language.
-type: anthropic-skill
-version: "1.0"
 ---
 
 # Code Assist

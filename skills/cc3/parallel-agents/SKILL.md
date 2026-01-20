@@ -1,7 +1,6 @@
 ---
 name: parallel-agents
 description: Parallel Agent Orchestration
-user-invocable: false
 ---
 
 # Parallel Agent Orchestration

@@ -1,7 +1,6 @@
 ---
 name: shapely-compute
 description: Computational geometry with Shapely - create geometries, boolean operations, measurements, predicates
-triggers: ["geometry", "polygon", "intersection", "area", "contains", "distance between points", "buffer", "convex hull", "centroid", "WKT"]
 ---
 
 # Computational Geometry with Shapely

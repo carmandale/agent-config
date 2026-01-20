@@ -1,7 +1,6 @@
 ---
 name: tdd
 description: Test-driven development workflow with philosophy guide - plan → write tests → implement → validate
-keywords: [tdd, test-driven, test-first, red-green-refactor]
 ---
 
 # /tdd - Test-Driven Development Workflow

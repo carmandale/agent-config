@@ -2,7 +2,6 @@
 name: explore
 description: Meta-skill for internal codebase exploration at varying depths (quick/deep/architecture)
 allowed-tools: [Bash, Task, Read, Glob, Grep, Write]
-keywords: [explore, codebase, architecture, understand, analyze, layers, call graph, brownfield]
 ---
 
 # Explore - Internal Codebase Exploration
@@ -288,7 +287,6 @@ Creates: `thoughts/shared/research/YYYY-MM-DD-explore-{focus}.md`
 ```markdown
 ---
 date: {ISO timestamp}
-type: exploration
 depth: {quick|deep|architecture}
 focus: {focus area or "full"}
 commit: {git hash}
@@ -321,7 +319,6 @@ Creates: `thoughts/shared/handoffs/{session}/explore-{focus}.yaml`
 
 ```yaml
 ---
-type: exploration
 ts: {ISO timestamp}
 depth: {quick|deep|architecture}
 focus: {focus area}

@@ -1,8 +1,6 @@
 ---
 name: math-help
 description: Guide to the math cognitive stack - what tools exist and when to use each
-triggers: ["help", "guide", "how do I", "what math", "math help", "math tools", "which tool", "math tutorial"]
-user-invocable: false
 ---
 
 # Math Cognitive Stack Guide

@@ -203,7 +203,6 @@ Create a handoff document summarizing the plan.
 ```markdown
 ---
 date: [ISO timestamp]
-type: plan
 status: complete
 plan_file: thoughts/shared/plans/PLAN-<description>.md
 ---

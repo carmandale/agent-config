@@ -1,8 +1,6 @@
 ---
 name: eval
 description: EvalKit is a conversational evaluation framework for AI agents that guides you through creating robust evaluations using the Strands Evals SDK. Through natural conversation, you can plan evaluations, generate test data, execute evaluations, and analyze results.
-type: anthropic-skill
-version: "1.0"
 ---
 
 # EvalKit

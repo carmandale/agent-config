@@ -1,7 +1,6 @@
 ---
 name: research-agent
 description: Research agent for external documentation, best practices, and library APIs via MCP tools
-user-invocable: false
 ---
 
 > **Note:** The current year is 2025. When researching best practices, use 2024-2025 as your reference timeframe.
@@ -67,7 +66,6 @@ Write your findings to the handoff directory.
 ```markdown
 ---
 date: [ISO timestamp]
-type: research
 status: success
 topic: [Research topic]
 sources: [nia, perplexity, firecrawl]

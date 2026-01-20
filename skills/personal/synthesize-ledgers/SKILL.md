@@ -58,7 +58,6 @@ Each event file has YAML frontmatter:
 ts: 2026-01-11T10:00:00Z
 agent: abc12345
 branch: feat/feature-a
-type: session_end
 reason: clear
 ---
 

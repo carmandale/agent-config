@@ -1,7 +1,6 @@
 ---
 name: graceful-degradation
 description: Graceful Degradation with Helpful Messages
-user-invocable: false
 ---
 
 # Graceful Degradation with Helpful Messages

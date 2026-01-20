@@ -1,7 +1,6 @@
 ---
 name: agentic-workflow
 description: Agentic Workflow Pattern
-user-invocable: false
 ---
 
 # Agentic Workflow Pattern

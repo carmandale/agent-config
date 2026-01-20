@@ -1,7 +1,6 @@
 ---
 name: parallel-agent-contracts
 description: Parallel Agent Type Contracts
-user-invocable: false
 ---
 
 # Parallel Agent Type Contracts

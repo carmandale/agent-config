@@ -1,7 +1,6 @@
 ---
 name: no-task-output
 description: Never Use TaskOutput
-user-invocable: false
 ---
 
 # Never Use TaskOutput

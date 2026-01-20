@@ -1,8 +1,6 @@
 ---
 name: code-task-generator
 description: This sop generates structured code task files from rough descriptions, ideas, or PDD implementation plans. It automatically detects the input type and creates properly formatted code task files following Amazon's code task format specification. For PDD plans, it processes implementation steps one at a time to allow for learning and adaptation between steps.
-type: anthropic-skill
-version: "1.0"
 ---
 
 # Code Task Generator

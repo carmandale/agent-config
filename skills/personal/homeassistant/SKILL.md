@@ -1,7 +1,6 @@
 ---
 name: homeassistant
 description: Control Home Assistant - smart plugs, lights, scenes, automations.
-homepage: https://www.home-assistant.io/
 metadata: {"clawdis":{"emoji":"🏠","requires":{"bins":["curl"],"env":["HA_TOKEN"]},"primaryEnv":"HA_TOKEN"}}
 ---
 

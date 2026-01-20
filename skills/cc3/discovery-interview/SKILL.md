@@ -1,8 +1,6 @@
 ---
 name: discovery-interview
 description: Deep interview process to transform vague ideas into detailed specs. Works for technical and non-technical users.
-user_invocable: true
-model: opus
 ---
 
 # Discovery Interview

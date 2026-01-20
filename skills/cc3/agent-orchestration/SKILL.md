@@ -1,7 +1,6 @@
 ---
 name: agent-orchestration
 description: Agent Orchestration Rules
-user-invocable: false
 ---
 
 # Agent Orchestration Rules

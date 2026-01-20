@@ -1,5 +1,5 @@
 ---
-name: system_overview
+name: system-overview
 description: Generate comprehensive system architecture overview
 ---
 

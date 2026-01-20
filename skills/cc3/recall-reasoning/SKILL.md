@@ -1,7 +1,6 @@
 ---
 name: recall-reasoning
 description: Search past reasoning for relevant decisions and approaches
-user-invocable: false
 ---
 
 # Recall Past Work

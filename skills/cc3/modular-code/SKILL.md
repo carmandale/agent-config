@@ -1,7 +1,6 @@
 ---
 name: modular-code
 description: Modular Code Organization
-user-invocable: false
 ---
 
 # Modular Code Organization

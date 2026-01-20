@@ -84,7 +84,6 @@ Write your validation to the handoff directory.
 ```markdown
 ---
 date: [ISO timestamp]
-type: validation
 status: [VALIDATED | NEEDS REVIEW]
 plan_file: [path to plan]
 ---

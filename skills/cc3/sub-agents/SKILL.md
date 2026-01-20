@@ -2,7 +2,6 @@
 name: sub-agents
 description: Create and configure Claude Code sub-agents with custom prompts, tools, and models
 allowed-tools: [Read, Write, Bash]
-user-invocable: false
 ---
 
 # Sub-Agents Reference
@@ -33,7 +32,6 @@ cat > .claude/agents/reviewer.md << 'EOF'
 name: reviewer
 description: Code review specialist. Use proactively after code changes.
 tools: Read, Grep, Glob, Bash
-model: sonnet
 ---
 
 You are a senior code reviewer focusing on quality and security.
@@ -65,7 +63,6 @@ claude --agents '{
 name: agent-name
 description: When/why to use this agent
 tools: Read, Edit, Bash      # Optional, inherits all if omitted
-model: sonnet                 # sonnet, opus, haiku, inherit
 ---
 
 System prompt content here...
@@ -117,7 +114,6 @@ tools: Read, Write, Edit, Bash, Glob
 name: code-reviewer
 description: Reviews code for quality and security. Use after code changes.
 tools: Read, Grep, Glob, Bash
-model: sonnet
 ---
 
 Review code for:
@@ -135,7 +131,6 @@ Output findings by priority: Critical > Warning > Suggestion
 name: debugger
 description: Debug errors and test failures.
 tools: Read, Edit, Bash, Grep, Glob
-model: inherit
 ---
 
 Debugging process:

@@ -1,8 +1,6 @@
 ---
 name: research
 description: Document codebase as-is with thoughts directory for historical context
-model: opus
-user-invocable: false
 ---
 
 # Research Codebase

@@ -1,8 +1,6 @@
 ---
 name: pdd
 description: This sop guides you through the process of transforming a rough idea into a detailed design document with an implementation plan and todo list. It follows the Prompt-Driven Development methodology to systematically refine your idea, conduct necessary research, create a comprehensive design, and develop an actionable implementation plan. The process is designed to be iterative, allowing movement between requirements clarification and research as needed.
-type: anthropic-skill
-version: "1.0"
 ---
 
 # Prompt-Driven Development

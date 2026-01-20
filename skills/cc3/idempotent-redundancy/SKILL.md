@@ -1,7 +1,6 @@
 ---
 name: idempotent-redundancy
 description: Idempotent Redundancy
-user-invocable: false
 ---
 
 # Idempotent Redundancy

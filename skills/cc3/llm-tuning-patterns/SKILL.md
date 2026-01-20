@@ -1,7 +1,6 @@
 ---
 name: llm-tuning-patterns
 description: LLM Tuning Patterns
-user-invocable: false
 ---
 
 # LLM Tuning Patterns

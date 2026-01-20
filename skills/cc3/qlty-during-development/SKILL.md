@@ -1,7 +1,6 @@
 ---
 name: qlty-during-development
 description: QLTY During Development
-user-invocable: false
 ---
 
 # QLTY During Development

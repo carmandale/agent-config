@@ -1,7 +1,6 @@
 ---
 name: environment-triage
 description: Environment Triage
-user-invocable: false
 ---
 
 # Environment Triage

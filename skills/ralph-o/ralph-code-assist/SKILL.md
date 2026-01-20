@@ -1,8 +1,6 @@
 ---
 name: ralph-code-assist
 description: Runs Ralph orchestrator with the code-assist configuration to implement code tasks autonomously. Spawns Ralph as a subprocess that handles the full TDD workflow (Explore, Plan, Code, Commit) for the given code task file.
-type: anthropic-skill
-version: "1.0"
 ---
 
 # Ralph Code Assist

@@ -1,7 +1,6 @@
 ---
 name: observe-before-editing
 description: Observe Before Editing
-user-invocable: false
 ---
 
 # Observe Before Editing

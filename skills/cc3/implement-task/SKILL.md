@@ -1,7 +1,6 @@
 ---
-name: implement_task
+name: implement-task
 description: Implementation agent that executes a single task and creates handoff on completion
-user-invocable: false
 ---
 
 # Implementation Task Agent

@@ -1,8 +1,6 @@
 ---
-name: implement_plan_micro
+name: implement-plan-micro
 description: Implement technical plans from thoughts/shared/plans with verification
-version: 3.0
-user-invocable: false
 ---
 
 # Formal Specification
