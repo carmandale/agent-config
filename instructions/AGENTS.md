@@ -130,41 +130,8 @@ Does this align with what you want? Should I proceed?
 - Other files in the repo dirty? **Not your concern**
 - Exception: `.learnings/*.md` is append-only; always append even if dirty
 
-**Paths that don't block your work** (dirty is OK, don't wait for user):
-`.worktrees/`, `.DS_Store`, `*.lock`, `*-wal`, `*-shm`
-
-### .beads/ Directory (SPECIAL HANDLING REQUIRED)
-
-The `.beads/` directory contains the beads issue database. It requires specific handling:
-
-**✅ CORRECT: Use `bd sync` to manage .beads/ files**
-```bash
-bd sync          # Exports issues, commits, pulls, pushes
-git status       # Should be clean after sync
-```
-
-**❌ NEVER DO THESE:**
-- `git restore .beads/` — DESTROYS sync state, loses issue changes
-- `git checkout .beads/` — Same problem
-- Manually committing `.beads/` files — Let `bd sync` handle it
-
-**If `.beads/` is dirty after `bd sync`:**
-1. Run `bd sync` again (sometimes needs two passes)
-2. If still dirty, check which files:
-   - `issues.jsonl` dirty → run `bd sync` again
-   - Runtime files (`last-touched`, `sync-state.json`, `*.db`) → These should be gitignored. If tracked, run: `git rm --cached .beads/<file>`
-3. If issues persist, ask the user — don't guess
-
-**Decision tree for dirty .beads/ files:**
-```
-.beads/ dirty?
-    ├── Run `bd sync`
-    │       └── Still dirty?
-    │               ├── issues.jsonl → `bd sync` again
-    │               ├── Runtime files (last-touched, *.db) → `git rm --cached`
-    │               └── Unknown → ASK USER
-    └── Clean → proceed
-```
+**Always ignore (artifacts, not code):**
+`.beads/`, `.worktrees/`, `.DS_Store`, `*.lock`, `*-wal`, `*-shm`
 
 **Never push without explicit request.**
 
@@ -276,30 +243,13 @@ bd close <bead-id> --reason "Merged"
 
 ## When Uncertain
 
-Say so. Ask. **Never fabricate.**
+Say so. Ask.
 
 ```
 I'm not fully certain about [aspect].
 My understanding: [interpretation]
 Is this correct, or am I missing something?
 ```
-
-### Intellectual Honesty (CRITICAL)
-
-**Inferences are not findings.** When you deduce, guess, or infer something:
-- Say "I think..." or "My guess is..." or "I couldn't find it, but I infer..."
-- NEVER say "Found it" or present conclusions as discoveries
-- NEVER fabricate sources, rules, or explanations you can't point to
-- If you searched and found nothing, say "I searched X, Y, Z and found nothing"
-
-**"I don't know" is a valid answer.** Preferable to a confident-sounding fabrication.
-
-**Distinguish clearly:**
-- **Found**: "Line 47 of config.yaml says X" (citable)
-- **Inferred**: "Based on the naming pattern, I think X" (reasoning visible)
-- **Don't know**: "I couldn't find where this comes from"
-
-Presenting guesses as facts is **lying**. It wastes user time and erodes trust.
 
 ### After 2 Failed Attempts
 1. STOP editing
@@ -329,86 +279,7 @@ Making claims about completeness without reading actual requirements is a fundam
 | **Abstraction** | Adding layers "for the future" |
 | **Continuation** | Proceeding after "stop" |
 | **Assumptions** | Guessing instead of reading source documents |
-| **Fabrication** | Presenting inferences as findings; saying "Found it" when you deduced it; inventing sources |
 | **Legacy** | Wrapping v1/POC code instead of deleting it; adding "compatibility layers" for temporary code |
-
----
-
-## Task Delegation (interactive_shell)
-
-**When to delegate to a subagent:**
-- Long-running tasks (refactoring, multi-file changes, test fixes)
-- Tasks where user should see progress in real-time
-- GitHub issues, feature implementation, code review
-- Any task where user says "delegate", "have a subagent", "hands-free"
-
-**How:**
-```typescript
-interactive_shell({
-  command: 'pi "Clear prompt with full context"',
-  mode: "hands-free",
-  reason: "Brief description"
-})
-```
-
-**Workflow:**
-1. Spawn subagent with detailed prompt (include issue context, file hints)
-2. User watches overlay in real-time
-3. Query status periodically, send follow-up input if needed
-4. User can take over by typing in overlay, or Ctrl+Q to background
-5. Kill session when done, review changes together
-
-**User steers via:** typing in overlay (direct) or telling me what to send (I relay)
-
----
-
-## Oracle (GPT-5 Pro Second Opinion)
-
-**Trigger:** User says "consult the oracle", "ask the oracle", "what does the oracle think", "oracle this"
-
-**It's this simple:**
-```bash
-oracle --prompt "Clear question with context" --file "relevant/file.swift" --slug "short-name"
-```
-
-**Required elements:**
-1. `--prompt` — Full context: project, stack, problem, what you tried, specific question
-2. `--file` — Relevant files (quote paths with spaces, verify they exist first)
-3. `--slug` — Short memorable name for recovery
-
-**Before running:**
-```bash
-# 1. Check no oracle is running
-oracle status --hours 1
-
-# 2. Verify files exist
-ls -la "path/to/file.swift"
-
-# 3. Check token count
-oracle --dry-run summary -p "test" --file "path/to/file.swift"
-```
-
-**Run DETACHED** (can take 45 min to 1+ hour, must not be cancelled):
-```bash
-nohup bash -lc 'oracle -p "## Context
-Project: [name], Stack: [Swift/visionOS]
-
-## Problem
-[Error or issue]
-
-## Question
-[Specific question]" \
-  --file "relevant/file.swift" \
-  --slug "descriptive-name"' > /tmp/oracle-<slug>.log 2>&1 &
-
-echo "Oracle running in background. Check: oracle status --hours 1"
-```
-
-**Check status:** `oracle status --hours 1`
-**Get result:** `oracle session <slug>`
-**View log:** `cat /tmp/oracle-<slug>.log`
-
-**CRITICAL:** Use `nohup bash -lc '...'` (not just `nohup oracle`) so it works in both Pi and Codex.
 
 ---
 
@@ -418,8 +289,6 @@ echo "Oracle running in background. Check: oracle status --hours 1"
 |------|---------|
 | `gj` | Build, run, test GrooveTech apps (never raw xcodebuild) |
 | `bd` | Beads issue tracking |
-| `interactive_shell` | Delegate tasks to subagent with user supervision |
-| `oracle` | GPT-5 Pro second opinion (run detached with nohup ... &) |
 | `/focus` | Start work session on a bead |
 | `/handoff` | End work session with summary |
 | `/checkpoint` | Mid-session context save |
