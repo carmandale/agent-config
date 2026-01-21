@@ -1,6 +1,6 @@
 ---
 name: oracle
-description: Consult Oracle (GPT-5 Pro) for complex debugging, architecture questions, or code review. Use when stuck on a problem, need a second opinion, or want deep analysis of code. Invoked when user says "ask the oracle" or similar.
+description: GPT-5 Pro second opinion. Use when user says "consult the oracle", "ask the oracle", "oracle this". Run DETACHED with nohup bash -lc 'oracle ...' & (45min-1hr+ runtime). Check with oracle status, get result with oracle session <slug>.
 ---
 
 # Oracle Skill
@@ -11,20 +11,23 @@ Consult GPT-5.2 Pro via browser automation for complex problems. Oracle bundles 
 
 ## 🚨 CRITICAL: READ THIS FIRST 🚨
 
-### 1. Oracle takes 15-20 MINUTES (not seconds)
+### 1. Oracle takes 45+ MINUTES
 
-Real measured durations from production:
-- `apr-ralph-reliabilit-round-9`: **16m38s**
-- `apr-ralph-reliabilit-round-8`: **15m37s**
-- `apr-ralph-reliabilit-round-7`: **15m46s**
+Typical: 45 min. Complex questions: 1+ hour.
 
-**You MUST set `timeout: 1800` (30 minutes) on the bash tool call.**
+### 2. RUN DETACHED — never block
 
-### 2. Oracle BLOCKS - it does NOT run in background
+**DO NOT** run oracle in foreground or with timeout. It WILL get cancelled.
 
-The command will not return until oracle completes. This 15+ minute wait is normal.
+**ALWAYS** run with `nohup bash -lc`:
 
-### 3. Pre-flight checklist (DO ALL OF THESE)
+```bash
+nohup bash -lc 'oracle -p "prompt" --file "file.swift" --slug "my-query"' > /tmp/oracle-my-query.log 2>&1 &
+```
+
+**NOTE:** Using `nohup bash -lc '...'` instead of just `nohup oracle` ensures it works in both Pi and Codex environments.
+
+### 3. Pre-flight checklist
 
 ```bash
 # 1. Check no other oracle is running
@@ -33,22 +36,37 @@ oracle status --hours 1
 # 2. Verify your files exist and check token count
 oracle --dry-run summary -p "test" --file "your/file.swift"
 
-# 3. THEN run with timeout: 1800
-oracle -p "your prompt" --file "your/file.swift" --slug "descriptive-name"
+# 3. Run DETACHED (use nohup bash -lc for Pi + Codex compatibility)
+nohup bash -lc 'oracle -p "your prompt" --file "your/file.swift" --slug "descriptive-name"' > /tmp/oracle-descriptive-name.log 2>&1 &
+
+# 4. Confirm it started
+echo "Oracle started. Check: oracle status --hours 1"
+```
+
+### 4. Check status and get results
+
+```bash
+oracle status --hours 1        # See if running/completed
+oracle session <slug>          # Get the response
+cat /tmp/oracle-<slug>.log     # View raw log
 ```
 
 ---
 
 ## Common Failure Modes (Why Agents Fail)
 
-### ❌ Failure 1: Timeout too short
+### ❌ Failure 1: Running in foreground (gets cancelled)
 
-| Timeout | Result |
-|---------|--------|
-| Default/none | ❌ Fails immediately |
-| 600 (10 min) | ❌ Too short - real queries take 15+ min |
-| 900 (15 min) | ⚠️ Borderline - may timeout |
-| **1800 (30 min)** | ✅ **USE THIS** |
+```bash
+# WRONG - will get cancelled if agent session ends
+oracle -p "prompt" --file file.swift
+
+# WRONG - plain nohup fails in Codex due to nice() permissions
+nohup oracle -p "prompt" --file file.swift --slug "name" > /tmp/oracle-name.log 2>&1 &
+
+# CORRECT - nohup bash -lc works in both Pi and Codex
+nohup bash -lc 'oracle -p "prompt" --file file.swift --slug "name"' > /tmp/oracle-name.log 2>&1 &
+```
 
 ### ❌ Failure 2: File paths with spaces
 

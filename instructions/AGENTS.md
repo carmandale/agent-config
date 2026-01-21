@@ -334,12 +334,92 @@ Making claims about completeness without reading actual requirements is a fundam
 
 ---
 
+## Task Delegation (interactive_shell)
+
+**When to delegate to a subagent:**
+- Long-running tasks (refactoring, multi-file changes, test fixes)
+- Tasks where user should see progress in real-time
+- GitHub issues, feature implementation, code review
+- Any task where user says "delegate", "have a subagent", "hands-free"
+
+**How:**
+```typescript
+interactive_shell({
+  command: 'pi "Clear prompt with full context"',
+  mode: "hands-free",
+  reason: "Brief description"
+})
+```
+
+**Workflow:**
+1. Spawn subagent with detailed prompt (include issue context, file hints)
+2. User watches overlay in real-time
+3. Query status periodically, send follow-up input if needed
+4. User can take over by typing in overlay, or Ctrl+Q to background
+5. Kill session when done, review changes together
+
+**User steers via:** typing in overlay (direct) or telling me what to send (I relay)
+
+---
+
+## Oracle (GPT-5 Pro Second Opinion)
+
+**Trigger:** User says "consult the oracle", "ask the oracle", "what does the oracle think", "oracle this"
+
+**It's this simple:**
+```bash
+oracle --prompt "Clear question with context" --file "relevant/file.swift" --slug "short-name"
+```
+
+**Required elements:**
+1. `--prompt` — Full context: project, stack, problem, what you tried, specific question
+2. `--file` — Relevant files (quote paths with spaces, verify they exist first)
+3. `--slug` — Short memorable name for recovery
+
+**Before running:**
+```bash
+# 1. Check no oracle is running
+oracle status --hours 1
+
+# 2. Verify files exist
+ls -la "path/to/file.swift"
+
+# 3. Check token count
+oracle --dry-run summary -p "test" --file "path/to/file.swift"
+```
+
+**Run DETACHED** (can take 45 min to 1+ hour, must not be cancelled):
+```bash
+nohup bash -lc 'oracle -p "## Context
+Project: [name], Stack: [Swift/visionOS]
+
+## Problem
+[Error or issue]
+
+## Question
+[Specific question]" \
+  --file "relevant/file.swift" \
+  --slug "descriptive-name"' > /tmp/oracle-<slug>.log 2>&1 &
+
+echo "Oracle running in background. Check: oracle status --hours 1"
+```
+
+**Check status:** `oracle status --hours 1`
+**Get result:** `oracle session <slug>`
+**View log:** `cat /tmp/oracle-<slug>.log`
+
+**CRITICAL:** Use `nohup bash -lc '...'` (not just `nohup oracle`) so it works in both Pi and Codex.
+
+---
+
 ## Tools
 
 | Tool | Purpose |
 |------|---------|
 | `gj` | Build, run, test GrooveTech apps (never raw xcodebuild) |
 | `bd` | Beads issue tracking |
+| `interactive_shell` | Delegate tasks to subagent with user supervision |
+| `oracle` | GPT-5 Pro second opinion (run detached with nohup ... &) |
 | `/focus` | Start work session on a bead |
 | `/handoff` | End work session with summary |
 | `/checkpoint` | Mid-session context save |

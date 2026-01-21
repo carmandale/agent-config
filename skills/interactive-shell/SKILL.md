@@ -1,0 +1,1 @@
+/Users/dalecarman/.pi/agent/extensions/interactive-shell/SKILL.md
