@@ -1,7 +1,7 @@
 ---
 description: Build with RepoPrompt MCP tools context builder → chat → implement
 repoprompt_managed: true
-repoprompt_commands_version: 3
+repoprompt_commands_version: 4
 repoprompt_variant: mcp
 ---
 
@@ -62,6 +62,8 @@ Call `context_builder` with your informed prompt. Use `response_type: "plan"` to
 - Smart file selection (automatically curated within token budget)
 - Architectural plan grounded in actual code
 - `chat_id` for follow-up conversation
+
+
 
 **Trust `context_builder`** – it explores deeply and selects intelligently. You shouldn't need to add many files afterward.
 

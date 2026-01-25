@@ -1,7 +1,7 @@
 ---
 description: Deep codebase investigation and architecture research with RepoPrompt MCP tools
 repoprompt_managed: true
-repoprompt_commands_version: 3
+repoprompt_commands_version: 4
 repoprompt_variant: mcp
 ---
 

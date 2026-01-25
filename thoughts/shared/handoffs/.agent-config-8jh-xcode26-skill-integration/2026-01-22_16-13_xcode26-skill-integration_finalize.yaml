@@ -1,0 +1,38 @@
+---
+schema_version: "1.0.0"
+mode: finalize
+date: 2026-01-22T16:13:04.924Z
+session: ".agent-config-8jh-xcode26-skill-integration"
+outcome: "SUCCEEDED"
+primary_bead: ".agent-config-8jh"
+---
+
+goal: "Integrate Xcode26-Agent-Skills repo into unified agent-config so the xcode-26 skill is available to all agents (Pi, Claude Code, Codex)"
+now: "Symlinks created, skill verified working in both Pi and Codex agents"
+
+done_this_session:
+  - "Investigated Xcode26-Agent-Skills repo structure and installation options"
+  - "Discovered skill is Apple's hidden Xcode AI documentation (from IDEIntelligenceChat.framework) with corrections"
+  - "Created symlink: ~/.agent-config/skills/swift/xcode-26 → repo's xcode-26/ folder"
+  - "Created top-level alias: ~/.agent-config/skills/xcode-26 → swift/xcode-26"
+  - "Verified skill availability in Pi agent - successfully read and listed all 20 topics"
+  - "Verified skill availability in Codex agent - successfully read and listed all 17 topics"
+
+decisions:
+  - "Used symlink approach (Option A) instead of openskills or copying"
+  - "Placed skill in swift/ category alongside existing Swift-related skills"
+  - "Used curated version with corrections rather than raw Xcode files"
+
+findings:
+  - "Apple bundles AI documentation in Xcode at: /Applications/Xcode.app/Contents/PlugIns/IDEIntelligenceChat.framework/Versions/A/Resources/AdditionalDocumentation/"
+  - "Skill pack has 5 corrected files adding iOS 26 version references and fixing Foundation Models temperature"
+  - "20 reference files covering: Liquid Glass (4 platforms), Foundation Models, Swift Concurrency, StoreKit, App Intents, AlarmKit, Visual Intelligence, MapKit, Swift Charts 3D, SwiftData, and more"
+
+files:
+  - "~/.agent-config/skills/swift/xcode-26 (symlink)"
+  - "~/.agent-config/skills/xcode-26 (alias symlink)"
+
+git:
+  branch: "main"
+  commit: "fd6a47262a024981a5c79845fefbcccb9daecd41"
+  remote: "https://github.com/carmandale/agent-config.git"

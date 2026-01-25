@@ -1,7 +1,7 @@
 ---
 description: Build with rp-cli context builder → chat → implement
 repoprompt_managed: true
-repoprompt_commands_version: 3
+repoprompt_commands_version: 4
 repoprompt_variant: cli
 ---
 
@@ -30,7 +30,7 @@ rp-cli -e '<command>'
 | `manage_selection` | `rp-cli -e 'select add path/'` |
 | `context_builder` | `rp-cli -e 'builder "instructions" --response-type plan'` |
 | `chat_send` | `rp-cli -e 'chat "message" --mode plan'` |
-| `apply_edits` | `rp-cli -e 'edit path/file.swift "old" "new"'` |
+| `apply_edits` | `rp-cli -e 'call apply_edits {"path":"...","search":"...","replace":"..."}'` |
 | `file_actions` | `rp-cli -e 'file create path/new.swift'` |
 
 Chain commands with `&&`:
@@ -89,7 +89,9 @@ rp-cli -e 'builder "<reformulated prompt with codebase context>" --response-type
 - Smart file selection (automatically curated within token budget)
 - Architectural plan grounded in actual code
 - Chat session for follow-up conversation
+- `tab_id` for targeting the same tab in subsequent CLI invocations
 
+**Tab routing:** Each `rp-cli` invocation is a fresh connection. To continue working in the same tab across separate invocations, pass `-t <tab_id>` (the tab ID returned by builder).
 **Trust `builder`** – it explores deeply and selects intelligently. You shouldn't need to add many files afterward.
 
 ---
@@ -104,8 +106,10 @@ Use the chat to:
 - Validate your understanding before implementing
 
 ```bash
-rp-cli -e 'chat "How does X connect to Y in these files? Any edge cases I should watch for?" --mode plan'
+rp-cli -t '<tab_id>' -e 'chat "How does X connect to Y in these files? Any edge cases I should watch for?" --mode plan'
 ```
+
+> **Note:** Pass `-t <tab_id>` to target the same tab across separate CLI invocations.
 
 **The chat excels at:**
 - Revealing architectural patterns across files
@@ -130,8 +134,11 @@ Implement the plan directly. **Do not use `chat` with `mode:"edit"`** – you im
 
 **Primary tools:**
 ```bash
-# Modify existing files (search/replace)
-rp-cli -e 'edit Root/File.swift "old" "new"'
+# Modify existing files (search/replace) - JSON format required
+rp-cli -e 'call apply_edits {"path":"Root/File.swift","search":"old","replace":"new"}'
+
+# Multiline edits
+rp-cli -e 'call apply_edits {"path":"Root/File.swift","search":"old\ntext","replace":"new\ntext"}'
 
 # Create new files
 rp-cli -e 'file create Root/NewFile.swift "content..."'
@@ -142,7 +149,7 @@ rp-cli -e 'read Root/File.swift --start-line 50 --limit 30'
 
 **Ask the chat when stuck:**
 ```bash
-rp-cli -e 'chat "I'\''m implementing X but unsure about Y. What pattern should I follow?" --mode chat'
+rp-cli -t '<tab_id>' -e 'chat "I'\''m implementing X but unsure about Y. What pattern should I follow?" --mode chat'
 ```
 
 ---

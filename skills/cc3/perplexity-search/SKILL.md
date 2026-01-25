@@ -10,102 +10,125 @@ Web search with AI-powered answers, deep research, and chain-of-thought reasonin
 
 ## When to Use
 
-- Direct web search for ranked results (no AI synthesis)
-- AI-synthesized research with citations
+- Direct web search for AI-synthesized answers
+- Research with citations from multiple sources
 - Chain-of-thought reasoning for complex decisions
 - Deep comprehensive research on topics
 
+## Prerequisites
+
+```bash
+# Check if pplx CLI is available
+which pplx || echo "Install: see Setup below"
+
+# API key required
+export PERPLEXITY_API_KEY=your-key
+# Or add to ~/.env, ~/.claude/.env, or ~/.config/perplexity/.env
+```
+
+## Setup (one-time)
+
+The `pplx` CLI should be at `~/.local/bin/pplx`. If missing:
+1. Ensure `httpx` is installed: `pip install httpx`
+2. Create the CLI from skill docs or ask for it to be set up
+
 ## Models (2025)
 
-| Model | Purpose |
-|-------|---------|
-| `sonar` | Lightweight search with grounding |
-| `sonar-pro` | Advanced search for complex queries |
-| `sonar-reasoning-pro` | Chain of thought reasoning |
-| `sonar-deep-research` | Expert-level exhaustive research |
+| Model | Mode | Purpose |
+|-------|------|---------|
+| `sonar` | `--ask`, `--search` | Lightweight search with grounding |
+| `sonar-pro` | `--research` | Advanced search for complex queries |
+| `sonar-reasoning-pro` | `--reason` | Chain of thought reasoning |
+| `sonar-deep-research` | `--deep` | Expert-level exhaustive research |
 
 ## Usage
 
 ### Quick question (AI answer)
 ```bash
-uv run python scripts/perplexity_search.py \
-    --ask "What is the latest version of Python?"
+pplx --ask "What is the latest version of Python?"
 ```
 
-### Direct web search (ranked results, no AI)
+### Web search with AI synthesis
 ```bash
-uv run python scripts/perplexity_search.py \
-    --search "SQLite graph database patterns" \
-    --max-results 5 \
-    --recency week
+pplx --search "SQLite graph database patterns" --recency week
 ```
 
 ### AI-synthesized research
 ```bash
-uv run python scripts/perplexity_search.py \
-    --research "compare FastAPI vs Django for microservices"
+pplx --research "compare FastAPI vs Django for microservices"
 ```
 
 ### Chain-of-thought reasoning
 ```bash
-uv run python scripts/perplexity_search.py \
-    --reason "should I use Neo4j or SQLite for small graph under 10k nodes?"
+pplx --reason "should I use Neo4j or SQLite for small graph under 10k nodes?"
 ```
 
 ### Deep comprehensive research
 ```bash
-uv run python scripts/perplexity_search.py \
-    --deep "state of AI agent observability 2025"
+pplx --deep "state of AI agent observability 2025"
 ```
 
 ## Parameters
 
-| Parameter | Description |
-|-----------|-------------|
-| `--ask` | Quick question with AI answer (sonar) |
-| `--search` | Direct web search - ranked results without AI synthesis |
-| `--research` | AI-synthesized research (sonar-pro) |
-| `--reason` | Chain-of-thought reasoning (sonar-reasoning-pro) |
-| `--deep` | Deep comprehensive research (sonar-deep-research) |
+| Flag | Description |
+|------|-------------|
+| `--ask QUERY` | Quick question with AI answer (sonar) |
+| `--search QUERY` | Web search with AI synthesis (sonar) |
+| `--research QUERY` | AI-synthesized research (sonar-pro) |
+| `--reason QUERY` | Chain-of-thought reasoning (sonar-reasoning-pro) |
+| `--deep QUERY` | Deep comprehensive research (sonar-deep-research) |
 
-### Search-specific options
-| Parameter | Description |
-|-----------|-------------|
-| `--max-results N` | Number of results (1-20, default: 10) |
-| `--recency` | Filter: `day`, `week`, `month`, `year` |
-| `--domains` | Limit to specific domains |
+### Search Options
+| Flag | Description |
+|------|-------------|
+| `--recency {day,week,month,year}` | Filter by recency |
+| `--domains DOMAIN [...]` | Limit to specific domains |
+| `--max-tokens N` | Max response tokens (default: 4096) |
+
+### Output Options
+| Flag | Description |
+|------|-------------|
+| `--json` | Output raw JSON response |
+| `--no-citations` | Hide source citations |
 
 ## Mode Selection Guide
 
 | Need | Use | Why |
 |------|-----|-----|
 | Quick fact | `--ask` | Fast, lightweight |
-| Find sources | `--search` | Raw results, no AI overhead |
-| Synthesized answer | `--research` | AI combines multiple sources |
+| Find info with sources | `--search` | AI synthesizes with citations |
+| Comprehensive answer | `--research` | AI combines multiple sources deeply |
 | Complex decision | `--reason` | Chain-of-thought analysis |
-| Comprehensive report | `--deep` | Exhaustive multi-source research |
+| Expert-level report | `--deep` | Exhaustive multi-source research |
 
 ## Examples
 
 ```bash
-# Find recent sources on a topic
-uv run python scripts/perplexity_search.py \
-    --search "OpenTelemetry AI agent tracing" \
-    --recency month --max-results 5
+# Recent info on a topic
+pplx --search "OpenTelemetry AI agent tracing" --recency month
 
-# Get AI synthesis
-uv run python scripts/perplexity_search.py \
-    --research "best practices for AI agent logging 2025"
+# Limit to specific domains
+pplx --search "Swift concurrency best practices" --domains apple.com swift.org
+
+# Get AI synthesis for comparison
+pplx --research "best practices for AI agent logging 2025"
 
 # Make a decision
-uv run python scripts/perplexity_search.py \
-    --reason "microservices vs monolith for startup MVP"
+pplx --reason "microservices vs monolith for startup MVP"
 
-# Deep dive
-uv run python scripts/perplexity_search.py \
-    --deep "comprehensive guide to building feedback loops for autonomous agents"
+# Deep dive (takes longer)
+pplx --deep "comprehensive guide to building feedback loops for autonomous agents"
+
+# Get raw JSON for parsing
+pplx --ask "current Python version" --json | jq '.choices[0].message.content'
 ```
 
 ## API Key Required
 
-Requires `PERPLEXITY_API_KEY` in environment or `~/.claude/.env`.
+Requires `PERPLEXITY_API_KEY`. The CLI checks:
+1. `PERPLEXITY_API_KEY` environment variable
+2. `~/.env`
+3. `~/.claude/.env`
+4. `~/.config/perplexity/.env`
+
+Get your API key at: https://www.perplexity.ai/settings/api

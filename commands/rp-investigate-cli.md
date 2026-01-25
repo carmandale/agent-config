@@ -1,7 +1,7 @@
 ---
 description: Deep codebase investigation and architecture research with rp-cli commands
 repoprompt_managed: true
-repoprompt_commands_version: 3
+repoprompt_commands_version: 4
 repoprompt_variant: cli
 ---
 
@@ -30,7 +30,7 @@ rp-cli -e '<command>'
 | `manage_selection` | `rp-cli -e 'select add path/'` |
 | `context_builder` | `rp-cli -e 'builder "instructions" --response-type plan'` |
 | `chat_send` | `rp-cli -e 'chat "message" --mode plan'` |
-| `apply_edits` | `rp-cli -e 'edit path/file.swift "old" "new"'` |
+| `apply_edits` | `rp-cli -e 'call apply_edits {"path":"...","search":"...","replace":"..."}'` |
 | `file_actions` | `rp-cli -e 'file create path/new.swift'` |
 
 Chain commands with `&&`:
@@ -80,8 +80,10 @@ Areas to explore:
 After `builder` returns, continue with targeted questions:
 
 ```bash
-rp-cli -e 'chat "<specific follow-up based on findings>" --mode plan'
+rp-cli -t '<tab_id>' -e 'chat "<specific follow-up based on findings>" --mode plan'
 ```
+
+> Pass `-t <tab_id>` to target the same tab across separate CLI invocations.
 
 ### Phase 4: Evidence Gathering
 
