@@ -9,6 +9,7 @@ Unified configuration for AI coding agents. One central location for slash comma
 | **Pi** (pi-coding-agent) | `~/.pi/agent/commands/` | `~/.pi/agent/AGENTS.md` |
 | **Claude Code** | `~/.claude/commands/` | `~/.claude/CLAUDE.md` |
 | **Codex** (OpenAI) | `~/.codex/prompts/` | `~/.codex/AGENTS.md` |
+| **Droid** (Factory) | `~/.factory/commands/` | `~/.factory/droids/` |
 | **OpenCode** | `~/.config/opencode/commands/` | Project-level only |
 
 ## Installation
@@ -45,11 +46,13 @@ The `install.sh` script creates symlinks from each agent's config location to th
 ~/.pi/agent/commands     → ~/.agent-config/commands
 ~/.claude/commands       → ~/.agent-config/commands
 ~/.codex/prompts         → ~/.agent-config/commands
+~/.factory/commands      → ~/.agent-config/commands
 ~/.config/opencode/commands → ~/.agent-config/commands
 
 ~/.pi/agent/AGENTS.md    → ~/.agent-config/instructions/AGENTS.md
 ~/.claude/CLAUDE.md      → ~/.agent-config/instructions/AGENTS.md
 ~/.codex/AGENTS.md       → ~/.agent-config/instructions/AGENTS.md
+~/.factory/droids/       → ~/.agent-config/skills (custom droids)
 ```
 
 ## Dual Instructions Support
@@ -194,7 +197,60 @@ cd ~/.agent-config
 - **Pi**: Restart the agent session
 - **Claude Code**: Instructions load per-session
 - **Codex**: Restart codex
+- **Droid**: Custom droids load from `~/.factory/droids/`
 
 ## License
 
 MIT
+
+## Skills (Unified)
+
+Skills are now unified across all agents, organized into categories:
+
+```
+~/.agent-config/skills/
+├── cc3/            # Continuous-Claude-v3 framework skills (106)
+├── tools/          # CLI/tool integrations (28): cass, bv, gj-tool, oracle, etc.
+├── swift/          # SwiftUI/iOS development (4)
+└── personal/       # User additions (20): checkpoint, finalize, etc.
+```
+
+### Symlinks
+
+All agents point to the same unified location:
+
+```
+~/.claude/skills        → ~/.agent-config/skills
+~/.codex/skills         → ~/.agent-config/skills
+~/.factory/droids       → ~/.agent-config/skills (custom droids)
+~/.config/agent-skills  → ~/.agent-config/skills
+~/.pi/agent/skills      → ~/.agent-config/skills
+```
+
+### Adding Skills
+
+Add new skills to the appropriate category:
+
+```bash
+# For tool integrations
+mkdir ~/.agent-config/skills/tools/my-tool
+# Create SKILL.md with description and instructions
+
+# For personal skills
+mkdir ~/.agent-config/skills/personal/my-skill
+```
+
+### Skill Format
+
+Each skill needs a `SKILL.md` file:
+
+```markdown
+---
+name: my-skill
+description: Brief description of what the skill does
+---
+
+# Skill Name
+
+Detailed instructions for the skill...
+```
