@@ -166,6 +166,12 @@ git status       # Should be clean after sync
     └── Clean → proceed
 ```
 
+**Rotated daemon logs:** The beads daemon creates timestamped log files like `daemon-2026-01-25T18-59-44.822.log.gz`. These should be gitignored. Add this to `.beads/.gitignore`:
+```gitignore
+# Rotated daemon logs
+daemon-*.log.gz
+```
+
 **Never push without explicit request.**
 
 ### Scope Creep Prevention
