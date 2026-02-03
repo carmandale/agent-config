@@ -274,6 +274,13 @@ else
     echo -e "${BLUE}═══════════════════════════════════════════════════════${NC}"
     echo ""
 
+    # For macOS: remove quarantine attributes from downloaded files
+    # (PNG, ICNS, etc. from internet can have quarantine that blocks App Store upload)
+    if [[ "$PLATFORM" == "macos" ]]; then
+        echo -e "${YELLOW}🧹 Removing quarantine attributes (macOS)...${NC}"
+        xattr -r -d com.apple.quarantine . 2>/dev/null || true
+    fi
+
     # Clean previous
     [[ -d "$ARCHIVE_PATH" ]] && rm -rf "$ARCHIVE_PATH"
 
