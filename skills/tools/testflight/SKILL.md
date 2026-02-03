@@ -323,19 +323,58 @@ This creates: `~/Desktop/App_Name_Delivery_v1.0_Build42/`
 | Media Server | `com.groovetech.media-server` | macOS | GrooveTechMediaServer.xcworkspace | GrooveTech Media Server |
 | Orchestrator | `com.groovejones.orchestrator` | iOS | orchestrator.xcodeproj | orchestrator |
 
-### Querying TestFlight Builds
+### ⚠️ CRITICAL: Build Number Workflow
 
-Check current build numbers on App Store Connect:
+**ALWAYS check ASC build numbers BEFORE incrementing local builds!**
+
+Local project files can get out of sync with App Store Connect. Using stale local build numbers will cause duplicate build failures or confusion.
+
+#### Step 1: Query Current ASC Build Numbers
 
 ```bash
-source ~/.config/testflight/credentials.env
-export TESTFLIGHT_API_KEY_ID TESTFLIGHT_ISSUER_ID
-
-# Use node to query API (requires JWT signing)
-# App IDs: GMP=6757438008, MS=6757471795, Orchestrator=6754814714, Pfizer=6737364780
+# Query all 4 apps at once
+node ~/.pi/agent/skills/testflight/query-builds.js
 ```
 
-See session history for full API query example.
+Output shows latest builds on App Store Connect:
+```
+=== Pfizer (6737364780) ===
+  Build 80 - 2026-02-03 - VALID
+=== GMP (6757438008) ===
+  Build 97 - 2026-02-03 - VALID
+...
+```
+
+#### Step 2: Increment to ASC_LATEST + 1
+
+For each app, set `CURRENT_PROJECT_VERSION` to **ASC latest + 1**:
+
+```bash
+# Example: If ASC shows build 97, set local to 98
+sed -i '' "s/CURRENT_PROJECT_VERSION = [0-9]*;/CURRENT_PROJECT_VERSION = 98;/g" "path/to/project.pbxproj"
+```
+
+#### Step 3: Commit Build Number Changes
+
+```bash
+git add -A && git commit -m "chore: Bump build numbers for TestFlight"
+git push
+```
+
+#### Step 4: Run Upload
+
+```bash
+~/.pi/agent/skills/testflight/upload.sh <project> <scheme> --appstore [platform]
+```
+
+### App IDs Reference
+
+| App | App Store Connect ID |
+|-----|---------------------|
+| Pfizer | 6737364780 |
+| GMP | 6757438008 |
+| Orchestrator | 6754814714 |
+| Media Server | 6757471795 |
 
 ## Session History (for agents)
 
