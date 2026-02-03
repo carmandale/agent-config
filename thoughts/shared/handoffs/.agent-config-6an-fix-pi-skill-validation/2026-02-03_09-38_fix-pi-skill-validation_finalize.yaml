@@ -1,0 +1,38 @@
+---
+schema_version: "1.0.0"
+mode: finalize
+date: 2026-02-03T09:38:56.491Z
+session: ".agent-config-6an-fix-pi-skill-validation"
+outcome: "SUCCEEDED"
+primary_bead: ".agent-config-6an"
+---
+
+goal: "Fix pi skill validation errors reported for compound-docs, create-agent-skills, and last30days skills"
+now: "All skill validation errors resolved. Fixed invalid frontmatter fields in 3 skills: removed preconditions from compound-docs, fixed name mismatch in create-agent-skills, removed invalid fields from last30days"
+
+done_this_session:
+  - "Fixed compound-docs: Removed invalid 'preconditions:' frontmatter field"
+  - "Fixed create-agent-skills: Changed name from 'creating-agent-skills' to 'create-agent-skills' to match directory"
+  - "Fixed last30days: Removed invalid fields (argument-hint, context, agent, disable-model-invocation)"
+  - "Moved last30days argument hint into description field"
+  - "Fixed last30days allowed-tools format from comma-separated to YAML list"
+  - "Created and closed bead .agent-config-6an to track the work"
+
+decisions:
+  - "Skills symlink to actual sources in Dropbox - edits to symlinks modify the source files"
+  - "Valid pi skill frontmatter fields: name, description, allowed-tools, model only"
+
+findings:
+  - "compound-docs, create-agent-skills symlink through ~/.pi/agent/skills/compound/ to Dropbox compound-engineering-plugin"
+  - "last30days symlinks through ~/.pi/agent/skills/tools/ to Dropbox last30days-skill"
+  - "Pi skill validator is stricter than Claude Code skill spec - rejects unknown frontmatter fields"
+
+files:
+  - "~/.pi/agent/skills/compound-docs/SKILL.md (via symlink)"
+  - "~/.pi/agent/skills/create-agent-skills/SKILL.md (via symlink)"
+  - "~/.pi/agent/skills/last30days/SKILL.md (via symlink)"
+
+git:
+  branch: "main"
+  commit: "5a3cbed50e13cde3754ee6bc3a6c8430196bf042"
+  remote: "https://github.com/carmandale/agent-config.git"
