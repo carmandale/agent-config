@@ -1,11 +1,48 @@
 # AGENTS.md - Global Instructions
 
 > Universal standards for all AI coding agents
-> Last Updated: 2026-01-15
+> Last Updated: 2026-02-04
 
 ---
 
-## The North Star: Working Code Over Perfect Code
+## 1) Identity + Style (Optional)
+
+- Owner/contact: Dale Carman
+- Voice/format preferences: always honest. Never lazy. always follow through.
+- Startup behavior (e.g., greeting/motivating line): positive
+
+---
+
+## 2) Agent Protocol (Optional)
+
+- Workspace layout rules: [fill if needed]
+- Repo cloning rules: [fill if needed]
+- Docs-first expectations: [fill if needed]
+- Safety rules (deletes, staging upstream files, runners): [fill if needed]
+- Conventions (commits, file size, PR workflow): [fill if needed]
+
+---
+
+## 3) Core Principles
+
+### Hard Rule: Xcode Builds (gj only)
+
+- Never run `xcodebuild` directly.
+- All build/test/run actions for GrooveTech apps MUST use `gj`.
+- If a build is needed and `gj` fails, STOP and ask for guidance.
+- If a user asks for build/test, translate to `gj` equivalents only.
+- Orchestrator requires scanning to be enabled: run `gj ui tap-button orchestrator "Scan Devices"`.
+
+**If you catch yourself typing `xcodebuild`:**
+1. STOP typing
+2. Delete the command
+3. Translate to `gj` equivalent:
+   - `xcodebuild build` → `gj build <app>`
+   - `xcodebuild test` → `gj test <suite>` (see gj-tool skill for test syntax)
+   - `xcodebuild -destination` → `gj run --device <app>`
+4. If no `gj` equivalent exists, ASK before proceeding
+
+### The North Star: Working Code Over Perfect Code
 
 **The best code is no code. The second best code is working code.**
 
@@ -37,9 +74,7 @@
 
 ---
 
-## THINK. ALIGN. ACT. Protocol
-
-This is your operating system. Violations cause harm.
+## 4) THINK → ALIGN → ACT
 
 ### PHASE 1: THINK (MANDATORY before any action)
 
@@ -113,13 +148,15 @@ Does this align with what you want? Should I proceed?
 - Mark todos complete as you go
 - If something unexpected happens → STOP and report
 
+### Stop Signals
+When user says any of: "stop", "wait", "hold on", "cancel", "no"
+→ IMMEDIATELY halt all work
+→ Report current state
+→ Wait for further instruction
+
 ---
 
-## Hard Limits (ENFORCED)
-
-### Agent Spawning
-- Maximum 5 beads/tasks per session without user approval
-- ALWAYS show plan before spawning agents
+## 5) Git & Worktrees
 
 ### Git Safety
 
@@ -132,6 +169,87 @@ Does this align with what you want? Should I proceed?
 
 **Paths that don't block your work** (dirty is OK, don't wait for user):
 `.worktrees/`, `.DS_Store`, `*.lock`, `*-wal`, `*-shm`
+
+### Worktree Workflow
+
+Use git worktrees for isolated parallel development. Worktrees live **inside** the repo in `.worktrees/` (gitignored).
+
+**Structure**
+```
+/dev/my-repo/                    # Main repo (clean, on main)
+/dev/my-repo/.worktrees/         # Gitignored worktree container
+/dev/my-repo/.worktrees/bd-abc/  # Worktree for bead bd-abc
+```
+
+**Setup (one-time per repo)**
+```bash
+# Add to .gitignore
+echo ".worktrees/" >> .gitignore
+```
+
+**Create Worktree**
+```bash
+# Ensure main is clean first
+git status  # Must be clean!
+
+# Create worktree with bead ID as branch name
+git worktree add .worktrees/<bead-id> -b <bead-id>
+
+# Enter worktree
+cd .worktrees/<bead-id>
+```
+
+**Work in Worktree**
+```bash
+# Do your work, commit normally
+git add -A && git commit -m "feat: description"
+
+# Push branch
+git push -u origin <bead-id>
+```
+
+**Cleanup (after merge)**
+```bash
+# From main repo
+cd /dev/my-repo
+git worktree remove .worktrees/<bead-id>
+git branch -d <bead-id>
+
+# Close bead
+bd close <bead-id> --reason "Merged"
+```
+
+**Rules**
+- **NEVER** create worktrees as siblings outside the repo
+- **ALWAYS** use `.worktrees/` inside the repo
+- **ALWAYS** ensure `.worktrees/` is in `.gitignore`
+- **ALWAYS** verify main is clean before creating worktree
+- Use `/worktree-task <bead-id>` command for guided setup
+
+### Git Push Workflow
+
+```bash
+# Stage and commit local changes first
+git add -A && git commit -m "your message"
+
+# Try to push - this will fail if remote has new commits
+git push
+
+# ONLY if push fails with "rejected" (remote ahead), then:
+git pull --rebase && git push
+
+# Sync beads after code is pushed
+bd sync
+
+# Verify clean state
+git status   # MUST show "up to date with origin"
+```
+
+**NEVER run `git pull --rebase` blindly** - only use it when push fails because remote is ahead.
+
+---
+
+## 6) Beads Workflow
 
 ### .beads/ Directory (SPECIAL HANDLING REQUIRED)
 
@@ -166,35 +284,30 @@ git status       # Should be clean after sync
     └── Clean → proceed
 ```
 
-**Rotated daemon logs:** The beads daemon creates timestamped log files like `daemon-2026-01-25T18-59-44.822.log.gz`. These should be gitignored. Add this to `.beads/.gitignore`:
-```gitignore
-# Rotated daemon logs
-daemon-*.log.gz
-```
-
 **Never push without explicit request.**
 
-### Scope Creep Prevention
-- NEVER refactor while fixing bugs
-- NEVER "improve" code that wasn't requested
-- NEVER add abstraction "for the future"
-- If tempted to do more than asked → STOP and ask
+### Database Locking
 
-### Domain Humility
-- Complex domains require extra caution
-- Assume the user knows more than you about their domain
-- If something seems wrong, ASK before "fixing"
-- Don't apply generic patterns to specialized code
+If `bd sync` shows `sqlite3: database is locked`:
 
-### Stop Signals
-When user says any of: "stop", "wait", "hold on", "cancel", "no"
-→ IMMEDIATELY halt all work
-→ Report current state
-→ Wait for further instruction
+1. **Check for other bd processes:**
+   ```bash
+   pgrep -f "bd " && echo "Other bd process running"
+   ```
 
----
+2. **Wait and retry:**
+   ```bash
+   sleep 2 && bd sync
+   ```
 
-## Session Workflow
+3. **If persistent:**
+   - Close other terminals running bd commands
+   - Kill stale bd processes: `pkill -f "bd "`
+   - Retry: `bd sync`
+
+4. **Never ignore locking errors** - the export may have failed silently
+
+### Session Workflow
 
 Use beads for traceability. Every work session should be tracked.
 
@@ -214,133 +327,135 @@ Use beads for traceability. Every work session should be tracked.
 - **`/handoff` writes** `.handoff/YYYY-MM-DD-HHMM-{bead-id}.md`
 - **`/checkpoint` writes** `.checkpoint/YYYY-MM-DD-HHMM.md`
 
----
+### Beads CLI
 
-## Worktree Workflow
+Use `bd` CLI for issue tracking. Issues stored in `.beads/` and tracked in git.
 
-Use git worktrees for isolated parallel development. Worktrees live **inside** the repo in `.worktrees/` (gitignored).
-
-### Structure
-
-```
-/dev/my-repo/                    # Main repo (clean, on main)
-/dev/my-repo/.worktrees/         # Gitignored worktree container
-/dev/my-repo/.worktrees/bd-abc/  # Worktree for bead bd-abc
-```
-
-### Setup (one-time per repo)
-
+**Essential Commands**
 ```bash
-# Add to .gitignore
-echo ".worktrees/" >> .gitignore
+bd ready              # Show issues ready to work (no blockers)
+bd list --status=open # All open issues
+bd show <id>          # Full issue details with dependencies
+bd create --title="..." --type=task --priority=2
+bd update <id> --status=in_progress
+bd close <id> --reason="Completed"
+bd close <id1> <id2>  # Close multiple issues at once
+bd sync               # Commit and push beads changes
 ```
 
-### Create Worktree
+**Workflow Pattern**
+1. **Start**: `bd ready` to find actionable work
+2. **Claim**: `bd update <id> --status=in_progress`
+3. **Work**: Implement the task
+4. **Complete**: `bd close <id> --reason="Done"`
+5. **Sync**: `bd sync` at session end
 
+**Key Concepts**
+- **Dependencies**: Issues can block other issues. `bd ready` shows only unblocked work.
+- **Priority**: P0=critical, P1=high, P2=medium, P3=low, P4=backlog
+- **Types**: task, bug, feature, epic, question, docs
+- **Blocking**: `bd dep add <issue> <depends-on>`
+
+---
+
+## 7) Task Procedures
+
+### gj Tool (GrooveTech Build/Test)
+
+**Use `gj` for all build/run/test operations. Never use xcodebuild directly.**
+
+**Essential Commands**
 ```bash
-# Ensure main is clean first
-git status  # Must be clean!
-
-# Create worktree with bead ID as branch name
-git worktree add .worktrees/<bead-id> -b <bead-id>
-
-# Enter worktree
-cd .worktrees/<bead-id>
+gj build <app>            # Build only (required to verify changes)
+gj run <app>              # Build + run + stream logs
+gj run --device <app>     # Build + run on physical device
+gj logs <app> "pattern"   # Search logs (use as assertions)
+gj ui screenshot <app>    # Visual verification
+gj test P0                # E2E connection tests
 ```
 
-### Work in Worktree
+**Apps**: `orchestrator`, `pfizer`, `gmp`, `ms`, `all`
 
+**Testing Quick Pattern**
 ```bash
-# Do your work, commit normally
-git add -A && git commit -m "feat: description"
+# Quick validation (use this first)
+gj run orchestrator
+gj logs orchestrator "error"      # Should be empty
+gj ui screenshot orchestrator     # Visual check
 
-# Push branch
-git push -u origin <bead-id>
+# Use logs as assertions
+gj logs orchestrator "connected"  # Should have output
+gj logs orchestrator "error"      # Should be empty
 ```
 
-### Cleanup (after merge)
+**When to Test What**
+| Situation | Command |
+|-----------|---------|
+| Quick iteration | `gj logs <app> "pattern"` |
+| Visual check | `gj ui screenshot <app>` |
+| UI interaction | `gj ui tap-button <app> "Label"` |
+| Full validation | `gj test P0` |
 
-```bash
-# From main repo
-cd /dev/my-repo
-git worktree remove .worktrees/<bead-id>
-git branch -d <bead-id>
+**gj test Patterns**
+| What you want | Command |
+|---------------|---------|
+| Run P0 E2E tests | `gj test P0` |
+| Run specific test class | `gj test orchestrator StateCleanupInvariantTests` |
+| Run tests matching pattern | `gj test orchestrator "Cleanup"` |
+| Run all tests for app | `gj test orchestrator` |
+| Run tests in specific file | Check `gj test --help` for file syntax |
 
-# Close bead
-bd close <bead-id> --reason "Merged"
-```
+**When in doubt:** `gj test --help` - never construct xcodebuild test commands manually.
 
-### Rules
-
-- **NEVER** create worktrees as siblings outside the repo
-- **ALWAYS** use `.worktrees/` inside the repo
-- **ALWAYS** ensure `.worktrees/` is in `.gitignore`
-- **ALWAYS** verify main is clean before creating worktree
-- Use `/worktree-task <bead-id>` command for guided setup
+**Full docs:** `~/.agent-config/docs/gj-tool.md`
+**UI automation:** `~/.agent-config/docs/ui-automation.md`
 
 ---
 
-## When Uncertain
+## 8) Tools Catalog
 
-Say so. Ask. **Never fabricate.**
+### Tools
 
-```
-I'm not fully certain about [aspect].
-My understanding: [interpretation]
-Is this correct, or am I missing something?
-```
+| Tool | Purpose |
+|------|---------|
+| `gj` | Build, run, test GrooveTech apps (never raw xcodebuild) |
+| `bd` | Beads issue tracking |
+| `interactive_shell` | Delegate tasks to subagent with user supervision |
+| `oracle` | GPT-5 Pro second opinion (run detached with nohup ... &) |
+| `/focus` | Start work session on a bead |
+| `/handoff` | End work session with summary |
+| `/checkpoint` | Mid-session context save |
 
-### Intellectual Honesty (CRITICAL)
+### Tool Types: Blocking vs Interactive
 
-**Inferences are not findings.** When you deduce, guess, or infer something:
-- Say "I think..." or "My guess is..." or "I couldn't find it, but I infer..."
-- NEVER say "Found it" or present conclusions as discoveries
-- NEVER fabricate sources, rules, or explanations you can't point to
-- If you searched and found nothing, say "I searched X, Y, Z and found nothing"
+**Regular CLI (blocks, waits for completion):**
+- `rp-cli`, `bd`, `gj build`, `cass --robot`, `ast-grep`, `rg`
+- Run normally with bash. NO timeout needed.
+- If slow, it's doing work - wait for it.
 
-**"I don't know" is a valid answer.** Preferable to a confident-sounding fabrication.
+**TUI/Interactive (takes over terminal):**
+- `pi`, `claude`, `codex`, `gemini`, bare `cass` (without --robot)
+- Use `interactive_shell` with timeout ONLY for capturing --help or quick output
+- For actual work, use hands-free mode and query status
 
-**Distinguish clearly:**
-- **Found**: "Line 47 of config.yaml says X" (citable)
-- **Inferred**: "Based on the naming pattern, I think X" (reasoning visible)
-- **Don't know**: "I couldn't find where this comes from"
+**Background/Detached (long-running):**
+- `oracle`, `nohup` processes
+- Run detached. Check status periodically.
 
-Presenting guesses as facts is **lying**. It wastes user time and erodes trust.
+**The rule:** If it's a regular CLI tool that communicates via stdout/socket, let it finish. Don't add timeouts and call it "failed."
 
-### After 2 Failed Attempts
-1. STOP editing
-2. Report what was tried
-3. Ask user for guidance
+### CLI Tools: Timeout Rules
 
----
+| Tool | Needs Timeout? | Why |
+|------|----------------|-----|
+| `rp-cli` | ❌ NO | Regular CLI over socket. `builder` command does AI analysis - can take 60-90s legitimately |
+| `gj build/run/test` | ❌ NO | Build times vary. Let it finish |
+| `interactive_shell` (TUI) | ✅ YES | Only for capturing help/output from TUI apps that don't exit cleanly |
+| `oracle` | ❌ NO | Runs detached, 45min+ is normal |
 
-## Critical Work Standard
+**NEVER** add arbitrary timeouts to bash commands and declare "failure" when they expire.
 
-When asked to check status against requirements, specifications, or documents:
-- You MUST find, read, and verify against the actual source document
-- NEVER rely on memory, assumptions, or prior knowledge
-- If you cannot locate the document, explicitly state this and ask for the path
-- Always say "Let me find and read [document name]" before making status assessments
-
-Making claims about completeness without reading actual requirements is a fundamental failure.
-
----
-
-## Anti-Patterns (NEVER DO)
-
-| Category | Anti-Pattern |
-|----------|--------------|
-| **Autonomy** | Acting without alignment on significant work |
-| **Scope** | Refactoring while fixing bugs |
-| **Abstraction** | Adding layers "for the future" |
-| **Continuation** | Proceeding after "stop" |
-| **Assumptions** | Guessing instead of reading source documents |
-| **Fabrication** | Presenting inferences as findings; saying "Found it" when you deduced it; inventing sources |
-| **Legacy** | Wrapping v1/POC code instead of deleting it; adding "compatibility layers" for temporary code |
-
----
-
-## Task Delegation (interactive_shell)
+### Task Delegation (interactive_shell)
 
 **When to delegate to a subagent:**
 - Long-running tasks (refactoring, multi-file changes, test fixes)
@@ -366,9 +481,7 @@ interactive_shell({
 
 **User steers via:** typing in overlay (direct) or telling me what to send (I relay)
 
----
-
-## Oracle (GPT-5 Pro Second Opinion)
+### Oracle (GPT-5 Pro Second Opinion)
 
 **Trigger:** User says "consult the oracle", "ask the oracle", "what does the oracle think", "oracle this"
 
@@ -416,140 +529,13 @@ echo "Oracle running in background. Check: oracle status --hours 1"
 
 **CRITICAL:** Use `nohup bash -lc '...'` (not just `nohup oracle`) so it works in both Pi and Codex.
 
----
-
-## Tools
-
-| Tool | Purpose |
-|------|---------|
-| `gj` | Build, run, test GrooveTech apps (never raw xcodebuild) |
-| `bd` | Beads issue tracking |
-| `interactive_shell` | Delegate tasks to subagent with user supervision |
-| `oracle` | GPT-5 Pro second opinion (run detached with nohup ... &) |
-| `/focus` | Start work session on a bead |
-| `/handoff` | End work session with summary |
-| `/checkpoint` | Mid-session context save |
-
----
-
-## gj Tool (GrooveTech Build/Test)
-
-**Use `gj` for all build/run/test operations. Never use xcodebuild directly.**
-
-### Essential Commands
-
-```bash
-gj run <app>              # Build + run + stream logs
-gj run --device <app>     # Build + run on physical device
-gj logs <app> "pattern"   # Search logs (use as assertions)
-gj ui screenshot <app>    # Visual verification
-gj test P0                # E2E connection tests
-```
-
-### Apps: `orchestrator`, `pfizer`, `gmp`, `ms`, `all`
-
-### Testing Quick Pattern
-
-```bash
-# Quick validation (use this first)
-gj run orchestrator
-gj logs orchestrator "error"      # Should be empty
-gj ui screenshot orchestrator     # Visual check
-
-# Use logs as assertions
-gj logs orchestrator "connected"  # Should have output
-gj logs orchestrator "error"      # Should be empty
-```
-
-### When to Test What
-
-| Situation | Command |
-|-----------|---------|
-| Quick iteration | `gj logs <app> "pattern"` |
-| Visual check | `gj ui screenshot <app>` |
-| UI interaction | `gj ui tap-button <app> "Label"` |
-| Full validation | `gj test P0` |
-
-**Full docs:** `~/.agent-config/docs/gj-tool.md`
-**UI automation:** `~/.agent-config/docs/ui-automation.md`
-
----
-
-## Beads Workflow (Issue Tracking)
-
-Use `bd` CLI for issue tracking. Issues stored in `.beads/` and tracked in git.
-
-### Essential Commands
-
-```bash
-bd ready              # Show issues ready to work (no blockers)
-bd list --status=open # All open issues
-bd show <id>          # Full issue details with dependencies
-bd create --title="..." --type=task --priority=2
-bd update <id> --status=in_progress
-bd close <id> --reason="Completed"
-bd close <id1> <id2>  # Close multiple issues at once
-bd sync               # Commit and push beads changes
-```
-
-### Workflow Pattern
-
-1. **Start**: `bd ready` to find actionable work
-2. **Claim**: `bd update <id> --status=in_progress`
-3. **Work**: Implement the task
-4. **Complete**: `bd close <id> --reason="Done"`
-5. **Sync**: `bd sync` at session end
-
-### Key Concepts
-
-- **Dependencies**: Issues can block other issues. `bd ready` shows only unblocked work.
-- **Priority**: P0=critical, P1=high, P2=medium, P3=low, P4=backlog
-- **Types**: task, bug, feature, epic, question, docs
-- **Blocking**: `bd dep add <issue> <depends-on>`
-
-### Session End Protocol
-
-```bash
-git status              # Check what changed
-git add <files>         # Stage code changes
-git commit -m "..."     # Commit code
-bd sync                 # Commit beads changes
-git push                # Push to remote
-```
-
----
-
-## Git Push Workflow
-
-```bash
-# Stage and commit local changes first
-git add -A && git commit -m "your message"
-
-# Try to push - this will fail if remote has new commits
-git push
-
-# ONLY if push fails with "rejected" (remote ahead), then:
-git pull --rebase && git push
-
-# Sync beads after code is pushed
-bd sync
-
-# Verify clean state
-git status   # MUST show "up to date with origin"
-```
-
-**NEVER run `git pull --rebase` blindly** - only use it when push fails because remote is ahead.
-
----
-
-## cass — Search Agent History
+### cass — Search Agent History
 
 Search across all AI agent conversation history before solving problems from scratch.
 
 **NEVER run bare `cass`** — it launches TUI. Always use `--robot` or `--json`.
 
-### Quick Commands
-
+**Quick Commands**
 ```bash
 cass health                                    # Check index health
 cass search "pattern" --robot --limit 5        # Search all agents
@@ -558,8 +544,7 @@ cass search "pattern" --robot --days 7         # Recent only
 cass view /path/to/session.jsonl -n 42 --json  # View specific result
 ```
 
-### Agents Indexed
-
+**Agents Indexed**
 | Agent | Location |
 |-------|----------|
 | Claude Code | `~/.claude/projects/` |
@@ -568,8 +553,7 @@ cass view /path/to/session.jsonl -n 42 --json  # View specific result
 | Codex | `~/.codex/sessions/` |
 | Pi-Agent | `~/.pi/agent/sessions/` |
 
-### Key Flags
-
+**Key Flags**
 | Flag | Purpose |
 |------|---------|
 | `--robot` / `--json` | Machine-readable output (required!) |
@@ -579,9 +563,7 @@ cass view /path/to/session.jsonl -n 42 --json  # View specific result
 | `--workspace PATH` | Filter to specific project |
 | `--days N` | Limit to recent N days |
 
----
-
-## bv — Beads Viewer (AI Sidecar)
+### bv — Beads Viewer (AI Sidecar)
 
 Fast terminal UI for beads with precomputed dependency metrics. Use robot flags for deterministic, dependency-aware outputs.
 
@@ -596,9 +578,7 @@ bv --robot-diff --diff-since <commit>  # Issue changes since commit
 
 Use these instead of hand-rolling graph logic.
 
----
-
-## ast-grep vs ripgrep
+### ast-grep vs ripgrep
 
 **Use `ast-grep` when structure matters** — parses code, matches AST nodes, can safely rewrite.
 
@@ -624,9 +604,7 @@ rg -l -t ts 'useQuery\(' | xargs ast-grep run -l TypeScript -p 'useQuery($A)' -r
 
 **Rule of thumb:** Need correctness or rewrites → `ast-grep`. Need speed or hunting text → `rg`.
 
----
-
-## UBS — Ultimate Bug Scanner
+### UBS — Ultimate Bug Scanner
 
 Static analysis before commits. Exit 0 = safe, Exit >0 = fix needed.
 
@@ -648,6 +626,130 @@ ubs .                                   # Whole project
 6. Commit
 
 **Speed tip:** Scope to changed files. `ubs src/file.ts` (< 1s) vs `ubs .` (30s).
+
+---
+
+## 9) Language / Stack Notes (Optional)
+
+- Language-specific rules: [fill if needed]
+
+---
+
+## 10) System / Platform Constraints (Optional)
+
+- OS permissions or signing constraints: [fill if needed]
+- Environment/key reminders: [fill if needed]
+
+---
+
+## 11) Critical Thinking & Escalation
+
+### Confirm Before Acting on Ambiguous References
+
+When user says "this", "that", "the tool", "the skill" without naming it:
+1. Look at their recent message for explicit names
+2. If still unclear, ask: "To confirm - you're asking about [X], correct?"
+3. NEVER guess and load a skill based on inference
+
+Common confusion patterns:
+- User says "this skill" → could mean the skill they're writing OR the skill they want you to use
+- User says "investigate this" → confirm WHAT before loading investigation skills
+
+### When Uncertain
+
+Say so. Ask. **Never fabricate.**
+
+```
+I'm not fully certain about [aspect].
+My understanding: [interpretation]
+Is this correct, or am I missing something?
+```
+
+### Intellectual Honesty (CRITICAL)
+
+**Inferences are not findings.** When you deduce, guess, or infer something:
+- Say "I think..." or "My guess is..." or "I couldn't find it, but I infer..."
+- NEVER say "Found it" or present conclusions as discoveries
+- NEVER fabricate sources, rules, or explanations you can't point to
+- If you searched and found nothing, say "I searched X, Y, Z and found nothing"
+
+**"I don't know" is a valid answer.** Preferable to a confident-sounding fabrication.
+
+**Distinguish clearly:**
+- **Found**: "Line 47 of config.yaml says X" (citable)
+- **Inferred**: "Based on the naming pattern, I think X" (reasoning visible)
+- **Don't know**: "I couldn't find where this comes from"
+
+Presenting guesses as facts is **lying**. It wastes user time and erodes trust.
+
+### After 2 Failed Attempts
+1. STOP editing
+2. Report what was tried
+3. Ask user for guidance
+
+### Critical Work Standard
+
+When asked to check status against requirements, specifications, or documents:
+- You MUST find, read, and verify against the actual source document
+- NEVER rely on memory, assumptions, or prior knowledge
+- If you cannot locate the document, explicitly state this and ask for the path
+- Always say "Let me find and read [document name]" before making status assessments
+
+Making claims about completeness without reading actual requirements is a fundamental failure.
+
+### Domain Humility
+- Complex domains require extra caution
+- Assume the user knows more than you about their domain
+- If something seems wrong, ASK before "fixing"
+- Don't apply generic patterns to specialized code
+
+### Scope Creep Prevention
+- NEVER refactor while fixing bugs
+- NEVER "improve" code that wasn't requested
+- NEVER add abstraction "for the future"
+- If tempted to do more than asked → STOP and ask
+
+### Anti-Patterns (NEVER DO)
+
+| Category | Anti-Pattern |
+|----------|--------------|
+| **Autonomy** | Acting without alignment on significant work |
+| **Scope** | Refactoring while fixing bugs |
+| **Abstraction** | Adding layers "for the future" |
+| **Continuation** | Proceeding after "stop" |
+| **Assumptions** | Guessing instead of reading source documents |
+| **Fabrication** | Presenting inferences as findings; saying "Found it" when you deduced it; inventing sources |
+| **Legacy** | Wrapping v1/POC code instead of deleting it; adding "compatibility layers" for temporary code |
+| **Timeout Bail** | Adding arbitrary timeouts to CLI tools (especially `rp-cli`), then declaring "failure" when they expire, skipping prescribed workflows to fall back to manual approaches |
+
+### Workflow Compliance
+
+When a prescribed workflow (skill, protocol, or investigation process) has a step that "fails":
+
+1. **Distinguish real failure from impatience:**
+   - Timeout you added? That's not a failure. Remove timeout, retry.
+   - Actual error message? That's a real failure.
+
+2. **Before bailing on the workflow:**
+   - Ask: "Am I skipping this because it's actually broken, or because I'm impatient?"
+   - Ask user: "The [tool] is taking longer than expected. Should I wait or try a different approach?"
+
+3. **NEVER silently replace prescribed workflow with your own approach:**
+   - If skill says "use rp-cli builder" and you skip to "just read files manually"
+   - That's workflow non-compliance - you're defeating the purpose of the skill
+
+**Pattern to avoid:** Timeout → "didn't work" → fall back to manual → skip entire workflow
+**Correct pattern:** Let tool finish → get results → use results as intended
+
+---
+
+## 12) Frontend Aesthetics (Optional)
+
+- Avoid AI-slop UI; be opinionated and distinctive.
+- Typography: use real fonts; avoid default stacks.
+- Color: commit to a palette; avoid purple-on-white clichés.
+- Motion: prefer 1–2 high-impact moments over micro-motion spam.
+- Background: add depth via gradients/patterns.
 
 ---
 
