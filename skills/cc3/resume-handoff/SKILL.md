@@ -1,267 +1,299 @@
 ---
 name: resume-handoff
-description: Resume work from handoff document with context analysis and validation
+description: Resume work from a handoff, checkpoint, or finalize artifact
 ---
 
-# Resume work from a handoff document
+# Resume from Handoff Artifact
 
-You are tasked with resuming work from a handoff document through an interactive process. These handoffs contain critical context, learnings, and next steps from previous work sessions that need to be understood and continued.
+Resume work from a previous session's artifact (handoff, checkpoint, or finalize). These artifacts are YAML files in `thoughts/shared/handoffs/` created by `/handoff`, `/checkpoint`, or `/finalize` commands.
 
-## Initial Response
+## Artifact Format Reference
 
-When this command is invoked:
-
-1. **If the path to a handoff document was provided**:
-   - If a handoff document path was provided as a parameter, skip the default message
-   - Immediately read the handoff document FULLY
-   - Immediately read any research or plan documents that it links to under `thoughts/shared/plans` or `thoughts/shared/research`. do NOT use a sub-agent to read these critical files.
-   - Begin the analysis process by ingesting relevant context from the handoff document, reading additional files it mentions
-   - Then propose a course of action to the user and confirm, or ask for clarification on direction.
-
-2. **If a ticket number (like ENG-XXXX) was provided**:
-   - locate the most recent handoff document for the ticket. Tickets will be located in `thoughts/shared/handoffs/ENG-XXXX` where `ENG-XXXX` is the ticket number. e.g. for `ENG-2124` the handoffs would be in `thoughts/shared/handoffs/ENG-2124/`. **List this directory's contents.**
-   - There may be zero, one or multiple files in the directory.
-   - **If there are zero files in the directory, or the directory does not exist**: tell the user: "I'm sorry, I can't seem to find that handoff document. Can you please provide me with a path to it?"
-   - **If there is only one file in the directory**: proceed with that handoff
-   - **If there are multiple files in the directory**: using the date and time specified in the file name (it will be in the format `YYYY-MM-DD_HH-MM-SS` in 24-hour time format), proceed with the _most recent_ handoff document.
-   - Immediately read the handoff document FULLY
-   - Immediately read any research or plan documents that it links to under `thoughts/shared/plans` or `thoughts/shared/research`; do NOT use a sub-agent to read these critical files.
-   - Begin the analysis process by ingesting relevant context from the handoff document, reading additional files it mentions
-   - Then propose a course of action to the user and confirm, or ask for clarification on direction.
-
-3. **If no parameters provided**, respond with:
-```
-I'll help you resume work from a handoff document. Let me find the available handoffs.
-
-Which handoff would you like to resume from?
-
-Tip: You can invoke this command directly with a handoff path: `/resume_handoff `thoughts/shared/handoffs/ENG-XXXX/YYYY-MM-DD_HH-MM-SS_ENG-XXXX_description.md`
-
-or using a ticket number to resume from the most recent handoff for that ticket: `/resume_handoff ENG-XXXX`
+Artifacts are YAML files with frontmatter:
+```yaml
+---
+schema_version: "1.0.0"
+mode: handoff | checkpoint | finalize
+date: 2026-01-14T01:23:45.678Z
+session: session-folder-name
+outcome: SUCCEEDED | PARTIAL_PLUS | PARTIAL_MINUS | FAILED
+primary_bead: bead-id  # required for handoff/finalize
+---
+goal: What the session accomplished
+now: Current focus / what to do next
+next:
+  - Step 1
+  - Step 2
+done_this_session:
+  - task: Description
+    files: [path1, path2]
+continuation_prompt: |
+  Instructions for resuming
 ```
 
-Then wait for the user's input.
+## Invocation
 
-## Process Steps
+### 1. Path provided: `/resume-handoff <path-to-artifact.yaml>`
 
-### Step 1: Read and Analyze Handoff
+Read the artifact immediately. Skip discovery.
 
-1. **Read handoff document completely**:
-   - Use the Read tool WITHOUT limit/offset parameters
-   - Extract all sections:
-     - Task(s) and their statuses
-     - Recent changes
-     - Learnings
-     - Artifacts
-     - Action items and next steps
-     - Other notes
+### 2. Bead ID provided: `/resume-handoff <bead-id>`
 
-2. **Spawn focused research tasks**:
-   Based on the handoff content, spawn parallel research tasks to verify current state:
+Find artifacts related to that bead. First search filenames and directory names:
 
-   ```
-   Task 1 - Gather artifact context:
-   Read all artifacts mentioned in the handoff.
-   1. Read feature documents listed in "Artifacts"
-   2. Read implementation plans referenced
-   3. Read any research documents mentioned
-   4. Extract key requirements and decisions
-   Use tools: Read
-   Return: Summary of artifact contents and key decisions
-   ```
+```bash
+find "thoughts/shared/handoffs" -name "*.yaml" 2>/dev/null | grep -i "<bead-id>" | sort -r | head -20
+```
 
-3. **Wait for ALL sub-tasks to complete** before proceeding
+If no match by filename/directory, search inside YAML frontmatter:
+```bash
+grep -rl "primary_bead.*<bead-id>" "thoughts/shared/handoffs/" 2>/dev/null
+```
 
-4. **Read critical files identified**:
-   - Read files from "Learnings" section completely
-   - Read files from "Recent changes" to understand modifications
-   - Read any new related files discovered during research
+Use the most recent match (by date prefix in filename, e.g. `2026-01-21`).
 
-### Step 2: Synthesize and Present Analysis
+### 3. No parameters: `/resume-handoff`
 
-1. **Present comprehensive analysis**:
-   ```
-   I've analyzed the handoff from [date] by [researcher]. Here's the current situation:
+**Discover and list available artifacts.** Do NOT just ask the user for a path.
 
-   **Original Tasks:**
-   - [Task 1]: [Status from handoff] → [Current verification]
-   - [Task 2]: [Status from handoff] → [Current verification]
+Run this discovery script:
 
-   **Key Learnings Validated:**
-   - [Learning with file:line reference] - [Still valid/Changed]
-   - [Pattern discovered] - [Still applicable/Modified]
+```bash
+python3 - <<'PYEOF'
+import os, re, pathlib
 
-   **Recent Changes Status:**
-   - [Change 1] - [Verified present/Missing/Modified]
-   - [Change 2] - [Verified present/Missing/Modified]
+project = os.environ.get("CLAUDE_PROJECT_DIR") or os.environ.get("CODEX_PROJECT_DIR") or os.getcwd()
+root = pathlib.Path(project) / "thoughts" / "shared" / "handoffs"
+if not root.exists():
+    print("NO_HANDOFFS_DIR")
+    raise SystemExit
 
-   **Artifacts Reviewed:**
-   - [Document 1]: [Key takeaway]
-   - [Document 2]: [Key takeaway]
+artifacts = []
+for yaml_file in root.rglob("*.yaml"):
+    # Skip events/ subdirectory
+    if "events" in yaml_file.parts:
+        continue
+    try:
+        text = yaml_file.read_text()
+        # Parse frontmatter
+        match = re.search(r"^---\n(.*?)\n---", text, re.DOTALL)
+        if not match:
+            continue
+        front = {}
+        for line in match.group(1).splitlines():
+            if ":" in line and not line.startswith("  "):
+                key, _, val = line.partition(":")
+                front[key.strip()] = val.strip().strip('"')
 
-   **Recommended Next Actions:**
-   Based on the handoff's action items and current state:
-   1. [Most logical next step based on handoff]
-   2. [Second priority action]
-   3. [Additional tasks discovered]
+        # Mode fallback: frontmatter → status field → filename → unknown
+        mode = front.get("mode") or front.get("status", "")
+        if not mode:
+            fname = yaml_file.stem.lower()
+            for m in ("handoff", "checkpoint", "finalize"):
+                if m in fname:
+                    mode = m
+                    break
+            else:
+                mode = "unknown"
 
-   **Potential Issues Identified:**
-   - [Any conflicts or regressions found]
-   - [Missing dependencies or broken code]
+        date = front.get("date", "")
+        bead = front.get("primary_bead", "")
+        outcome = front.get("outcome", "")
 
-   Shall I proceed with [recommended action 1], or would you like to adjust the approach?
-   ```
+        # Parse body for goal
+        body = text[match.end():]
+        goal_match = re.search(r"^goal:\s*[\"']?(.+?)[\"']?\s*$", body, re.MULTILINE)
+        goal = goal_match.group(1).strip() if goal_match else ""
 
-2. **Get confirmation** before proceeding
+        artifacts.append({
+            "path": str(yaml_file),
+            "mode": mode,
+            "date": date[:16],  # trim to YYYY-MM-DDTHH:MM
+            "bead": bead,
+            "outcome": outcome,
+            "goal": goal[:80],
+        })
+    except Exception:
+        continue
 
-### Step 3: Create Action Plan
+if not artifacts:
+    print("NO_ARTIFACTS_FOUND")
+    raise SystemExit
 
-1. **Use TodoWrite to create task list**:
-   - Convert action items from handoff into todos
-   - Add any new tasks discovered during analysis
-   - Prioritize based on dependencies and handoff guidance
+# Sort by date field (descending), falling back to filename for date-less artifacts
+artifacts.sort(key=lambda a: a["date"] or "0000", reverse=True)
 
-2. **Present the plan**:
-   ```
-   I've created a task list based on the handoff and current analysis:
+# Show most recent 10
+for i, a in enumerate(artifacts[:10]):
+    bead_str = f" [{a['bead']}]" if a['bead'] else ""
+    print(f"{i+1}. [{a['mode']}] {a['date']}{bead_str} {a['outcome']}")
+    print(f"   {a['goal']}")
+    print(f"   {a['path']}")
+    print()
+PYEOF
+```
 
-   [Show todo list]
+Present the results and ask which one to resume from (even if only one — let the user confirm).
 
-   Ready to begin with the first task: [task description]?
-   ```
+**Tip for user:** "You can also invoke directly: `/resume-handoff thoughts/shared/handoffs/<session>/<filename>.yaml`"
 
-### Step 4: Route to Specialist Agent
+**Note:** Discovery only finds `.yaml` artifacts. Older `.md` format artifacts are not listed but can be opened by direct path.
 
-**CRITICAL: Do NOT implement directly. Always spawn via Task tool.**
+## Process
 
-1. **Analyze task type and select specialist agent**:
+### Step 1: Read and Parse the Artifact
 
-   **Leads (can spawn workers):**
-   | Agent | Domain | Use For |
-   |-------|--------|---------|
-   | `kraken` | implement | Large features, new systems, major components |
-   | `architect` | plan | Feature design, system architecture, implementation planning |
-   | `phoenix` | plan | Refactoring plans, migrations, codebase restructuring |
-   | `herald` | deploy | Releases, deployments, publishing |
-   | `maestro` | orchestrate | Complex multi-agent workflows |
+1. **Read the YAML artifact completely** using the Read tool (no limit/offset)
+2. **Extract key fields from frontmatter:**
+   - `mode` — handoff, checkpoint, or finalize
+   - `primary_bead` — the bead this work is tied to
+   - `outcome` — how the previous session ended
+   - `date` — when it was created
+3. **Extract key fields from body:**
+   - `goal` — what the session was working on
+   - `now` — what the next session should focus on
+   - `next` — ordered list of next steps
+   - `done_this_session` — what was completed (with file references)
+   - `blockers` — anything blocking progress
+   - `questions` — unresolved questions
+   - `decisions` — decisions made and rationale
+   - `worked` / `failed` — what worked and what didn't
+   - `continuation_prompt` — specific instructions for resuming
+   - `files_to_review` — files worth examining with notes
+   - `git` — branch, commit, remote info
 
-   **Workers (focused specialists):**
-   | Agent | Domain | Use For |
-   |-------|--------|---------|
-   | `spark` | implement | Quick fixes, patches, minor tweaks |
-   | `scribe` | document | Documentation, guides, explanations |
-   | `sleuth` | debug | Bug investigation, tracing, root cause analysis |
-   | `aegis` | debug | Security audits, vulnerability scanning |
-   | `profiler` | debug | Performance optimization, bottleneck analysis |
-   | `arbiter` | validate | Unit tests |
-   | `atlas` | validate | E2E/integration tests |
-   | `oracle` | research | External docs, best practices, how-to |
-   | `scout` | research | Codebase exploration, finding existing code |
-   | `pathfinder` | research | Repository structure analysis |
-   | `plan-reviewer` | review | Feature plan review, design validation |
-   | `plan-reviewer` | review | Migration review, refactoring validation |
-   | `chronicler` | session | Session analysis, history summaries |
+### Step 2: Load Bead Context (if primary_bead exists)
 
-2. **Spawn the specialist via Task tool**:
-   ```
-   Use Task tool with:
-   - subagent_type: [selected agent from above]
-   - prompt: [task description + relevant handoff context + learnings]
-   ```
+```bash
+bd show <primary_bead>
+```
 
-3. **Include handoff context in the prompt**:
-   - Key learnings from the handoff
-   - File references with line numbers
-   - Patterns to follow
-   - Pitfalls to avoid
+Check bead status. If the bead is closed, note that — the user may want to reopen it or create a new bead.
 
-4. **Wait for agent completion**, then proceed to next task
+If the bead is open but not in_progress:
+```bash
+bd update <primary_bead> --status=in_progress
+```
 
-## Guidelines
+### Step 3: Verify Current State
 
-1. **Be Thorough in Analysis**:
-   - Read the entire handoff document first
-   - Verify ALL mentioned changes still exist
-   - Check for any regressions or conflicts
-   - Read all referenced artifacts
+1. **Check git state:**
+   - Is the branch from the artifact still checked out?
+   - Has the commit moved forward since the artifact was created?
+   - Are there uncommitted changes?
 
-2. **Be Interactive**:
-   - Present findings before starting work
-   - Get buy-in on the approach
-   - Allow for course corrections
-   - Adapt based on current state vs handoff state
+2. **Check referenced files:**
+   - Do files mentioned in `done_this_session` and `files_to_review` still exist?
+   - Have they been modified since the artifact date?
 
-3. **Leverage Handoff Wisdom**:
-   - Pay special attention to "Learnings" section
-   - Apply documented patterns and approaches
-   - Avoid repeating mistakes mentioned
-   - Build on discovered solutions
+3. **Check for related specs** (if the goal references a feature):
+   - Look in `specs/` for related spec/plan/tasks files
 
-4. **Track Continuity**:
-   - Use TodoWrite to maintain task continuity
-   - Reference the handoff document in commits
-   - Document any deviations from original plan
-   - Consider creating a new handoff when done
+4. **Read critical files** mentioned in:
+   - `files_to_review` (with their notes)
+   - `continuation_prompt` references
+   - `done_this_session` file lists (skim for context)
 
-5. **Validate Before Acting**:
-   - Never assume handoff state matches current state
-   - Verify all file references still exist
-   - Check for breaking changes since handoff
-   - Confirm patterns are still valid
+Do NOT use sub-agents for reading these files — read them directly to maintain context.
 
-## Common Scenarios
+### Step 4: Present Analysis
 
-### Scenario 1: Clean Continuation
-- All changes from handoff are present
-- No conflicts or regressions
-- Clear next steps in action items
-- Proceed with recommended actions
-
-### Scenario 2: Diverged Codebase
-- Some changes missing or modified
-- New related code added since handoff
-- Need to reconcile differences
-- Adapt plan based on current state
-
-### Scenario 3: Incomplete Handoff Work
-- Tasks marked as "in_progress" in handoff
-- Need to complete unfinished work first
-- May need to re-understand partial implementations
-- Focus on completing before new work
-
-### Scenario 4: Stale Handoff
-- Significant time has passed
-- Major refactoring has occurred
-- Original approach may no longer apply
-- Need to re-evaluate strategy
-
-## Example Interaction Flow
+Present a clear summary to the user:
 
 ```
-User: /resume_handoff specification/feature/handoffs/handoff-0.md
-Assistant: Let me read and analyze that handoff document...
+## Resuming from [mode] artifact
 
-[Reads handoff completely]
-[Spawns research tasks]
-[Waits for completion]
-[Reads identified files]
+**Date:** [date]
+**Bead:** [primary_bead] — [bead status]
+**Previous outcome:** [outcome]
+**Goal:** [goal]
 
-I've analyzed the handoff from [date]. Here's the current situation...
+### What was done
+- [done_this_session items]
 
-[Presents analysis]
+### What to do next
+[now field, plus next items]
 
-Shall I proceed with implementing the webhook validation fix, or would you like to adjust the approach?
+### Current state
+- Branch: [current branch vs artifact branch]
+- Files: [verified / changed / missing]
+- Bead: [status]
 
-User: Yes, proceed with the webhook validation
-Assistant: This is a bugfix task, so I'll route to the `spark` agent.
+### Blockers / Questions (if any)
+- [blockers]
+- [questions]
 
-[Uses Task tool with subagent_type="spark" and prompt containing:
- - The webhook validation fix task
- - Key learnings from handoff
- - Relevant file:line references
- - Patterns to follow]
+### Decisions from previous session
+- [decisions with rationale]
 
-[Waits for spark agent to complete]
+### What worked / What didn't
+- Worked: [worked items]
+- Failed: [failed items — avoid repeating these]
 
-The spark agent has completed the webhook validation fix. Moving to the next task...
+**Recommended first action:** [most logical next step]
+
+Shall I proceed?
+```
+
+### Step 5: Get Confirmation and Work
+
+Wait for user confirmation, then begin working on the `next` steps.
+
+If the artifact has a `continuation_prompt`, follow those specific instructions as the starting point.
+
+## Edge Cases
+
+### Finalize artifact (completed work)
+If the artifact mode is `finalize`, the work was marked as done. Tell the user:
+"This is a finalize artifact — the previous session marked this work as complete with outcome [outcome]. Are you looking to continue related work, or review what was done?"
+
+### Stale artifact (old date)
+If the artifact is more than 7 days old, warn:
+"This artifact is from [date] ([N days ago]). The codebase may have changed significantly. I'll verify the current state carefully before proceeding."
+
+### Missing bead
+If `primary_bead` is set but `bd show` fails, warn and offer concrete recovery:
+"The bead [id] referenced in this artifact was not found. It may have been closed or deleted. Options:
+1. Create a new bead: `bd create --title="[goal from artifact]" --type=task`
+2. Continue without a bead (just follow the next steps)
+3. Search for a similar bead: `bd list --status=open`"
+
+### No artifacts found
+If discovery finds nothing:
+"No handoff artifacts found in `thoughts/shared/handoffs/`. This could mean no previous sessions created handoffs, or the directory doesn't exist yet. Would you like to start fresh?"
+
+## Example Interactions
+
+### Discovery mode (no args)
+```
+User: /resume-handoff
+Assistant: [runs discovery script]
+
+I found 3 recent artifacts:
+
+1. [handoff] 2026-01-21T19:08 [Continuous-Claude-v3-sx8] PARTIAL_PLUS
+   Fix continuity lifecycle
+   thoughts/shared/handoffs/Continuous-Claude-v3-sx8-continuity/2026-01-21_19-08_continuity_handoff.yaml
+
+2. [checkpoint] 2026-01-17T17:01 [Continuous-Claude-v3-7x6] PARTIAL_PLUS
+   Restore CC3 setup
+   thoughts/shared/handoffs/Continuous-Claude-v3-7x6-restore-cc3-setup/2026-01-17_17-01_restore-cc3-setup_checkpoint.yaml
+
+3. [finalize] 2026-01-14T21:35 [Continuous-Claude-v3-xsp] SUCCEEDED
+   CC artifact non-interactive flow
+   thoughts/shared/handoffs/Continuous-Claude-v3-xsp-cc-artifact-non-interactive-flow/2026-01-14_21-35_cc-artifact-non-interactive-flow_finalize.yaml
+
+Which one would you like to resume from?
+```
+
+### Direct path
+```
+User: /resume-handoff thoughts/shared/handoffs/memory-hooks-investigation/2026-01-21_19-08_memory-hooks-investigation_checkpoint.yaml
+Assistant: [reads the YAML artifact, loads bead context, verifies git state, presents analysis]
+```
+
+### Bead ID
+```
+User: /resume-handoff Continuous-Claude-v3-7x6
+Assistant: [searches for artifacts containing that bead ID, finds the most recent one, proceeds]
 ```

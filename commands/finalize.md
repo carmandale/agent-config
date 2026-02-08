@@ -203,7 +203,6 @@ If the inferred bead is not in_progress, ask to mark it in_progress and continue
 python3 - <<'PY'
 import os
 import pathlib
-import shlex
 import subprocess
 
 bead = "<BEAD_ID>"  # required
@@ -248,13 +247,9 @@ if mode != "finalize":
 if primary != bead:
     raise SystemExit(f"primary_bead mismatch: {primary} != {bead}")
 print(f"Verified artifact: {path}")
-
-editor = os.environ.get("EDITOR") or "vi"
-editor_cmd = shlex.split(editor)
-subprocess.run(editor_cmd + [str(path)])
 PY
 ```
-Fill in `goal`, `now`, and `outcome` using SESSION_SUMMARY. Capture `final_solutions`, `final_decisions`, and `artifacts_produced` based on actual session work.
+Now use the Read tool to read the artifact file, then use the Edit tool to fill in `goal`, `now`, and `outcome` using SESSION_SUMMARY. Capture `final_solutions`, `final_decisions`, and `artifacts_produced` based on actual session work.
 
 IMPORTANT: Only edit the file path returned by `cc-artifact`. Do not open or modify any existing finalize artifact.
 If the returned path does not include the BEAD_ID and `_finalize.yaml`, stop and re-run `cc-artifact` with the correct bead/title.
@@ -269,8 +264,8 @@ State your inferred outcome from SESSION_SUMMARY, then let the user confirm or c
 bd close <BEAD_ID> --reason "Completed"
 ```
 
-### 5) Close linked GitHub issue (REQUIRED)
-Resolve the cross-referenced issue from the bead and close it.
+### 5) Close linked GitHub issue (if present)
+Check if the bead has a linked GitHub issue; if so, close it. If not, continue without stopping.
 
 ```bash
 bd show <BEAD_ID> --json
@@ -281,11 +276,7 @@ If the bead has `external-ref: gh-<num>`, close it:
 gh issue close <num> -c "Completed - see finalize artifact"
 ```
 
-If there is no `external-ref`, ask the user for the GH issue number, set it, then close:
-```bash
-bd update <BEAD_ID> --external-ref gh-<num>
-gh issue close <num> -c "Completed - see finalize artifact"
-```
+If there is no `external-ref`, **skip this step** and proceed to commit/push. Do NOT ask the user for a GH issue number.
 
 ### 6) Commit / push only if user requests
 ```bash

@@ -187,7 +187,6 @@ If multiple plausible beads or none, ask **once** whether to include a bead or p
 python3 - <<'PY'
 import os
 import pathlib
-import shlex
 import subprocess
 
 bead = ""  # optional; set to BEAD_ID if known
@@ -235,13 +234,9 @@ if bead:
     if primary and primary != bead:
         raise SystemExit(f"primary_bead mismatch: {primary} != {bead}")
 print(f"Verified artifact: {path}")
-
-editor = os.environ.get("EDITOR") or "vi"
-editor_cmd = shlex.split(editor)
-subprocess.run(editor_cmd + [str(path)])
 PY
 ```
-Fill in `goal`, `now`, and `outcome` using SESSION_SUMMARY. Add optional fields (`done_this_session`, `next`, `worked`, `failed`, etc.) as needed.
+Now use the Read tool to read the artifact file, then use the Edit tool to fill in `goal`, `now`, and `outcome` using SESSION_SUMMARY. Add optional fields (`done_this_session`, `next`, `worked`, `failed`, etc.) as needed.
 
 IMPORTANT: Only edit the file path returned by `cc-artifact`. Do not open or modify any existing checkpoint artifact.
 If the returned path does not end with `_checkpoint.yaml`, stop and re-run `cc-artifact`.
@@ -269,4 +264,4 @@ Report:
 - Primary bead (if any)
 - Outcome
 - Commit SHA
-- Resume command: `/resume_handoff <artifact-path>`
+- Resume command: `/resume-handoff <artifact-path>`
