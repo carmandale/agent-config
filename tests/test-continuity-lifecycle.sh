@@ -511,8 +511,8 @@ section "10. Symlink integrity"
 assert "resume-handoff skill symlinked to ~/.claude/skills/" \
   "[[ -L '$HOME/.claude/skills/cc3/resume-handoff/SKILL.md' || -f '$HOME/.claude/skills/cc3/resume-handoff/SKILL.md' ]]"
 
-assert "create-handoff skill symlinked to ~/.claude/skills/" \
-  "[[ -L '$HOME/.claude/skills/cc3/create-handoff/SKILL.md' || -f '$HOME/.claude/skills/cc3/create-handoff/SKILL.md' ]]"
+assert "create-handoff skill fully removed (not just deprecated)" \
+  "[[ ! -e '$HOME/.claude/skills/cc3/create-handoff/SKILL.md' ]]"
 
 assert "handoff command symlinked to ~/.claude/commands/" \
   "[[ -L '$HOME/.claude/commands/handoff.md' || -f '$HOME/.claude/commands/handoff.md' ]]"
@@ -551,11 +551,9 @@ assert "checkpoint.md has no EDITOR references" \
 assert "finalize.md has no EDITOR references" \
   "[[ '$EDITOR_FINALIZE' == '0' ]]"
 
-# Verify create-handoff is deprecated
-DEPRECATED=$(grep -c "DEPRECATED" "$HOME/.agent-config/skills/cc3/create-handoff/SKILL.md" 2>/dev/null || true)
-
-assert "create-handoff SKILL.md contains DEPRECATED notice" \
-  "[[ '$DEPRECATED' -gt 0 ]]"
+# Verify create-handoff is fully deleted (not just deprecated)
+assert "create-handoff source directory fully removed" \
+  "[[ ! -d '$HOME/.agent-config/skills/cc3/create-handoff' ]]"
 
 # ============================================================
 # Report
