@@ -46,8 +46,10 @@ Ledger:   thoughts/ledgers/CONTINUITY_CLAUDE-{session}.md
 Handoffs: thoughts/shared/handoffs/{session}/*.yaml
 
 Commands:
-  /resume_handoff <path>  - Continue from handoff
-  /create_handoff         - Create snapshot for transfer
+  /resume-handoff <path>  - Continue from handoff
+  /checkpoint             - Mid-session snapshot
+  /handoff                - Session transfer package
+  /finalize               - Final closure artifact
 
 TLDR CODE INTELLIGENCE
 ----------------------

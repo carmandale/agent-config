@@ -83,7 +83,7 @@ O(respect_user_preference)
 
 # Orchestration obligations
 O(read_previous_handoff) <- exists_handoff(task_{n-1})
-O(create_handoff) <- agent_completes
+O(handoff) <- agent_completes
 O(update_ledger) <- task_complete
 F(batch_tasks)                                # One agent per task
 F(proceed_on_mismatch) <- not user_guidance

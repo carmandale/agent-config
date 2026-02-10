@@ -527,15 +527,11 @@ assert "finalize command symlinked to ~/.claude/commands/" \
 section "11. Content consistency"
 # ============================================================
 
-# Verify no underscore typos remain
-UNDERSCORE_HANDOFF=$(grep -c "resume_handoff" "$HOME/.agent-config/commands/handoff.md" 2>/dev/null || true)
-UNDERSCORE_CHECKPOINT=$(grep -c "resume_handoff" "$HOME/.agent-config/commands/checkpoint.md" 2>/dev/null || true)
+# Verify no underscore typos remain anywhere in skills/commands
+UNDERSCORE_ALL=$( (grep -rl "resume_handoff\|create_handoff" "$HOME/.agent-config/commands/" "$HOME/.agent-config/skills/" --include="*.md" 2>/dev/null | grep -v "test-continuity" || true) | wc -l | tr -d ' ')
 
-assert "handoff.md has no /resume_handoff typo" \
-  "[[ '$UNDERSCORE_HANDOFF' == '0' ]]"
-
-assert "checkpoint.md has no /resume_handoff typo" \
-  "[[ '$UNDERSCORE_CHECKPOINT' == '0' ]]"
+assert "no underscore variants (resume_handoff/create_handoff) in any skill or command" \
+  "[[ '$UNDERSCORE_ALL' == '0' ]]"
 
 # Verify no $EDITOR in command Python blocks
 EDITOR_HANDOFF=$(grep -c 'EDITOR' "$HOME/.agent-config/commands/handoff.md" 2>/dev/null || true)

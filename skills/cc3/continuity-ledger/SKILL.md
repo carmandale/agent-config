@@ -5,7 +5,7 @@ description: Create or update continuity ledger for state preservation across cl
 
 # Continuity Ledger
 
-> **Note:** This skill is an alias for `/create_handoff`. Use the unified artifact system.
+> **Note:** Use `/checkpoint`, `/handoff`, or `/finalize` for the unified artifact system.
 
 Create a unified artifact to preserve session state across `/clear` or session boundaries.
 
@@ -51,7 +51,7 @@ After marking the outcome, confirm completion and provide the resume command:
 ```
 Artifact created! Outcome: [OUTCOME]
 
-/resume_handoff thoughts/shared/handoffs/<session>/[filename]
+/resume-handoff thoughts/shared/handoffs/<session>/[filename]
 ```
 
-For full details, follow `~/.claude/skills/create_handoff/SKILL.md`.
+For full details, use `/checkpoint`, `/handoff`, or `/finalize` commands.

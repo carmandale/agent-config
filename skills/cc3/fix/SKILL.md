@@ -654,7 +654,7 @@ This skill orchestrates:
 - `qlty-check`: Quality verification
 - `premortem`: Risk assessment before implementation
 - `commit`: Git commit workflow
-- `create_handoff`: Session handoff
+- `handoff`: Session handoff
 
 ## Checkpoints Summary
 
