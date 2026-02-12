@@ -1,0 +1,1 @@
+/opt/homebrew/lib/node_modules/@waynesutton/convex-skills/skills/convex-component-authoring/SKILL.md
