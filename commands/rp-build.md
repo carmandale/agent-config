@@ -1,7 +1,7 @@
 ---
 description: Build with RepoPrompt MCP tools context builder → chat → implement
 repoprompt_managed: true
-repoprompt_commands_version: 4
+repoprompt_skills_version: 6
 repoprompt_variant: mcp
 ---
 
@@ -9,10 +9,11 @@ repoprompt_variant: mcp
 
 Task: $ARGUMENTS
 
-You are an **MCP Builder** agent using RepoPrompt MCP tools. Your workflow: understand the task, build deep context via `context_builder`, refine the plan with the chat, then implement directly.
+You are a **Builder** agent using RepoPrompt MCP tools. Your workflow: understand the task, build deep context via `context_builder`, refine the plan with the chat, then implement directly.
 
 ## The Workflow
 
+0. **Verify workspace** – Confirm the target codebase is loaded
 1. **Quick scan** – Understand how the task relates to the codebase
 2. **Context builder** – Call `context_builder` with a clear prompt to get deep context + an architectural plan
 3. **Refine with chat** – Use `chat_send` to clarify the plan if needed
@@ -23,14 +24,41 @@ You are an **MCP Builder** agent using RepoPrompt MCP tools. Your workflow: unde
 ## CRITICAL REQUIREMENT
 
 ⚠️ **DO NOT START IMPLEMENTATION** until you have:
-1. Completed Phase 1 (Quick Scan)
-2. **Called `context_builder`** and received its plan
+1. Completed Phase 0 (Workspace Verification)
+2. Completed Phase 1 (Quick Scan)
+3. **Called `context_builder`** and received its plan
 
 Skipping `context_builder` results in shallow implementations that miss architectural patterns, related code, and edge cases. The quick scan alone is NOT sufficient for implementation.
 
 ---
 
-## Phase 1: Quick Scan
+## Phase 0: Workspace Verification (REQUIRED)
+
+Before any exploration, confirm the target codebase is loaded:
+
+```json
+{"tool":"list_windows","args":{}}
+```
+
+**Check the output:**
+- If your target root appears in a window → bind to that window with `select_window`
+- If not → the codebase isn't loaded
+
+**Bind to the correct window:**
+```json
+{"tool":"select_window","args":{"window_id":<window_id_with_your_root>}}
+```
+
+**If the root isn't loaded**, find and open the workspace:
+```json
+{"tool":"manage_workspaces","args":{"action":"list"}}
+{"tool":"manage_workspaces","args":{"action":"switch","workspace":"<workspace_name>","open_in_new_window":true}}
+```
+
+---
+## Phase 1: Quick Scan (LIMITED - 2-3 tool calls max)
+
+⚠️ **This phase is intentionally brief.** Do NOT do extensive exploration here—that's what `context_builder` is for.
 
 Start by getting a lay of the land with the file tree:
 ```json
@@ -44,6 +72,8 @@ Then use targeted searches to understand how the task maps to the codebase:
 ```
 
 Use what you learn to **reformulate the user's prompt** with added clarity—reference specific modules, patterns, or terminology from the codebase.
+
+**STOP exploring after 2-3 searches.** Your goal is orientation, not deep understanding. `context_builder` will do the heavy lifting.
 
 ---
 
@@ -164,6 +194,9 @@ Implement the plan directly. **Do not use `chat_send` with `mode:"edit"`** – y
 - 🚫 Removing files from selection unnecessarily – prefer adding over removing
 - 🚫 Using `manage_selection` with `op:"clear"` – this undoes `context_builder`'s work; only remove specific files when over token budget
 - 🚫 Exceeding ~160k tokens – use slices if needed
+- 🚫 **CRITICAL:** Doing extensive exploration (5+ tool calls) before calling `context_builder` – the quick scan should be 2-3 calls max
+- 🚫 Reading full file contents during Phase 1 – save that for after `context_builder` builds context
+- 🚫 Convincing yourself you understand enough to skip `context_builder` – you don't
 
 ---
 

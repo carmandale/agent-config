@@ -1,7 +1,7 @@
 ---
 description: Export context for oracle consultation using RepoPrompt MCP tools
 repoprompt_managed: true
-repoprompt_commands_version: 4
+repoprompt_skills_version: 6
 repoprompt_variant: mcp
 ---
 
@@ -22,6 +22,30 @@ You don't need to specify which files to include—just describe what you need h
 
 ## Workflow
 
+### 0: Workspace Verification (REQUIRED)
+
+Before any building context, confirm the target codebase is loaded:
+
+```json
+{"tool":"list_windows","args":{}}
+```
+
+**Check the output:**
+- If your target root appears in a window → bind to that window with `select_window`
+- If not → the codebase isn't loaded
+
+**Bind to the correct window:**
+```json
+{"tool":"select_window","args":{"window_id":<window_id_with_your_root>}}
+```
+
+**If the root isn't loaded**, find and open the workspace:
+```json
+{"tool":"manage_workspaces","args":{"action":"list"}}
+{"tool":"manage_workspaces","args":{"action":"switch","workspace":"<workspace_name>","open_in_new_window":true}}
+```
+
+---
 ### 1. Build Context
 
 ```json

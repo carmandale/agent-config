@@ -21,6 +21,8 @@ gj launch <app>           # Launch only (skip build)
 
 # Logs & Debugging
 gj logs <app> "pattern"   # Search logs (use as assertions)
+gj logs <app> -f             # Follow logs in real-time (like tail -f)
+gj logs <app> "error" -f     # Follow with pattern filter
 gj crash <app>            # View latest crash log (.ips) - first 80 lines
 gj crash <app> --full     # Show complete crash log with full backtrace
 gj crash <app> --list     # List all crash logs

@@ -1,7 +1,7 @@
 ---
 description: Deep codebase investigation and architecture research with RepoPrompt MCP tools
 repoprompt_managed: true
-repoprompt_commands_version: 4
+repoprompt_skills_version: 6
 repoprompt_variant: mcp
 ---
 
@@ -19,13 +19,39 @@ You are now in deep investigation mode for the issue described above. Follow thi
 3. **Question everything** - if something seems off, investigate it
 4. **Use `context_builder` aggressively** - it's designed for deep exploration
 
+### Phase 0: Workspace Verification (REQUIRED)
+
+Before any investigation, confirm the target codebase is loaded:
+
+```json
+{"tool":"list_windows","args":{}}
+```
+
+**Check the output:**
+- If your target root appears in a window → bind to that window with `select_window`
+- If not → the codebase isn't loaded
+
+**Bind to the correct window:**
+```json
+{"tool":"select_window","args":{"window_id":<window_id_with_your_root>}}
+```
+
+**If the root isn't loaded**, find and open the workspace:
+```json
+{"tool":"manage_workspaces","args":{"action":"list"}}
+{"tool":"manage_workspaces","args":{"action":"switch","workspace":"<workspace_name>","open_in_new_window":true}}
+```
+
+---
 ### Phase 1: Initial Assessment
 
 1. Read any provided files/reports (traces, logs, error reports)
 2. Summarize the symptoms and constraints
 3. Form initial hypotheses
 
-### Phase 2: Systematic Exploration
+### Phase 2: Systematic Exploration (via `context_builder` - REQUIRED)
+
+⚠️ **Do NOT skip this step.** You MUST call `context_builder` to get proper context before drawing conclusions.
 
 Use `context_builder` with detailed instructions:
 
@@ -126,4 +152,16 @@ Create a findings report as you investigate:
 
 ---
 
-Now begin the investigation. Read any provided context, then use `context_builder` to start systematic exploration.
+## Anti-patterns to Avoid
+
+- 🚫 **CRITICAL:** Skipping `context_builder` and attempting to investigate by reading files manually – you'll miss critical context
+- 🚫 Skipping Phase 0 (Workspace Verification) – you must confirm the target codebase is loaded first
+- 🚫 Doing extensive exploration (5+ tool calls) before calling `context_builder` – initial assessment should be brief
+- 🚫 Drawing conclusions before `context_builder` has built proper context
+- 🚫 Reading many full files during Phase 1 – save deep reading for after `context_builder`
+- 🚫 Assuming you understand the issue without systematic exploration via `context_builder`
+- 🚫 Using only chat follow-ups without an initial `context_builder` call
+
+---
+
+Now begin the investigation. Read any provided context, then **immediately** use `context_builder` to start systematic exploration. Do not attempt manual exploration first.

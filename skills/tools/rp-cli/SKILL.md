@@ -17,6 +17,32 @@ description: "Repo Prompt CLI - proxy MCP client for AI agents to access Repo Pr
 - MCP Server enabled in Repo Prompt settings
 - CLI installed (`/usr/local/bin/rp-cli`)
 
+## ⚠️ NO TIMEOUTS - CRITICAL
+
+**Do NOT add timeouts to `rp-cli` commands.**
+
+`rp-cli` is a normal CLI tool communicating with Repo Prompt over a socket—it is NOT a TUI that hangs. Commands like `builder` invoke AI-powered context analysis that legitimately takes 60-90+ seconds.
+
+**Wrong behavior:**
+```bash
+# ❌ WRONG - Adding arbitrary timeout, then declaring "failure" when it expires
+timeout 30 rp-cli -e 'builder "..."'  # Times out → "didn't work" → skip workflow
+```
+
+**Correct behavior:**
+```bash
+# ✅ RIGHT - Let it complete naturally
+rp-cli -e 'builder "Investigate auth flow"'  # Wait for actual completion
+```
+
+**Rules:**
+- Let `rp-cli` commands complete naturally
+- Only treat actual errors (non-zero exit, error messages) as failures
+- Do NOT bail on the prescribed workflow because a command "took too long"
+- If `builder` is taking time, it's working—wait for it
+
+---
+
 ## Quick Reference
 
 ```bash
