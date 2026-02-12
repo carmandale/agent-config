@@ -139,6 +139,37 @@ Every repo has this file. Update it when handing off or resuming work.
 2. Ask: "Am I trying to register a file with Xcode?" → You don't need to.
 3. Just put the file in the right folder. Done.
 
+### Hard Rule: AVPStreamKit Changes Must Propagate
+
+AVPStreamKit is a shared Swift Package used by multiple GrooveTech apps. **After ANY code change to AVPStreamKit, you MUST propagate.**
+
+**Dependent apps:**
+
+| App | Type |
+|-----|------|
+| **GMP** | AVP Media Player (visionOS) |
+| **Orchestrator** | iPad Controller |
+| **Pfizer** | AVP Scene App (visionOS) |
+| **Media Server** | macOS Server |
+
+**After editing AVPStreamKit:**
+
+1. Commit and push: `git add -A && git commit -m "fix: description" && git push`
+2. Note the commit SHA: `git rev-parse HEAD`
+3. Update each dependent app: `gj resolve --update <app>` (or `gj resolve --update all`)
+4. Verify builds: `gj build <app>`
+
+**Report to user:**
+```
+Changes committed and pushed
+Commit SHA: <sha>
+Updated: gj resolve --update all
+Build status: [pass/fail per app]
+```
+
+**NEVER** leave AVPStreamKit changes uncommitted/unpushed — downstream apps will not see them.
+**NEVER** use `swift package update` directly — use `gj resolve --update <app>`.
+
 ### The North Star: Best-in-Class, The Apple Way
 
 **The goal is best-in-class apps that follow modern Apple patterns.**
