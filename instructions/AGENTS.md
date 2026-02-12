@@ -1,7 +1,7 @@
 # AGENTS.md - Global Instructions
 
 > Universal standards for all AI coding agents
-> Last Updated: 2026-02-07
+> Last Updated: 2026-02-12
 
 ---
 
@@ -227,6 +227,19 @@ Before ANY action, answer these questions:
 - Is there a simpler approach?
 - Am I over-engineering?
 
+**4. Have I restated the use case?**
+- Before designing a solution, restate the core user scenario back to the user
+- Do NOT assume scale, architecture, or usage patterns — ask if unclear
+- Especially critical for visionOS/spatial computing where assumptions about cameras, streams, and device capabilities are often wrong
+- Get confirmation that your understanding matches reality before writing code
+
+**5. Was this already done?**
+- Check `git log --oneline -20` for recent work on this topic
+- Check `specs/` and `thoughts/shared/handoffs/` for prior session artifacts
+- Check `.beads/` via `bd list --status=open` for related tracked work
+- NEVER assume work is done or not done without checking
+- NEVER re-do work that was completed in a prior session
+
 ### PHASE 2: ALIGN (MANDATORY before significant actions)
 
 **"Significant" means:**
@@ -265,13 +278,20 @@ Does this align with what you want? Should I proceed?
 
 **Pre-Flight Checklist (BLOCKING):**
 
-1. **Git Status Check** - Before editing a file:
+1. **Session Context Check** - At the START of every session, before any work:
+   - Run `git log --oneline -10` and `git status` to understand current state
+   - Read the most recent handoff artifact in `thoughts/shared/handoffs/`
+   - Check `bd ready` for open tracked work
+   - Summarize what's already done and what's pending before proposing next steps
+   - This prevents re-doing completed work or missing important state
+
+2. **Git Status Check** - Before editing a file:
    - If **that file** was dirty before you started → STOP, ask before editing (except append-only `.learnings/*.md`)
    - If **you** dirtied it this session → it's WIP, keep working
    - Other dirty files? **Not your concern**
    - Wrong branch? → STOP, notify user
 
-2. **Create Beads** - If task has 2+ steps, create tracking beads
+3. **Create Beads** - If task has 2+ steps, create tracking beads
 
 **During Execution:**
 - One file at a time
@@ -393,6 +413,33 @@ You have native persistent task tracking via TaskCreate, TaskGet, TaskUpdate, an
 1. `TeamCreate` — create shared task list
 2. `TaskCreate` — create all tasks
 3. `Task` tool — spawn agents with team_name, they share the task list
+
+### Parallel Agent Limits (CRITICAL)
+
+**Max 5 concurrent agents.** More than 5 risks context window blowups during synthesis.
+
+**File-based synthesis pattern (MANDATORY for 3+ agents):**
+- Each agent MUST write its findings to a file (e.g., `specs/reviews/{agent-name}.md`)
+- The parent agent reads each file ONE AT A TIME after all agents complete
+- Extract only key items (P1/P2 issues, critical findings) during synthesis
+- Write the consolidated synthesis to a single output file
+- NEVER collect all agent outputs directly into conversation context
+
+**Why this is a hard rule:** Collecting 5-8 agent outputs in-context has repeatedly caused prompt-too-long errors, wasting entire sessions where all agent work completed successfully but could never be synthesized.
+
+```
+# CORRECT: File-based synthesis
+Agent 1 → writes to specs/reviews/architecture.md
+Agent 2 → writes to specs/reviews/security.md
+Agent 3 → writes to specs/reviews/performance.md
+Parent → reads each file, synthesizes → specs/reviews/SYNTHESIS.md
+
+# WRONG: In-context synthesis (WILL blow up with 3+ agents)
+Agent 1 → returns findings in conversation
+Agent 2 → returns findings in conversation
+Agent 3 → returns findings in conversation
+Parent → tries to synthesize → PROMPT TOO LONG
+```
 
 ### Task Design Principles
 
@@ -528,6 +575,18 @@ Is this correct, or am I missing something?
 
 Presenting guesses as facts is **lying**. It wastes user time and erodes trust.
 
+### Bounded Exploration (10 Tool Call Limit)
+
+When debugging or investigating code, set a hard limit:
+- After **10 tool calls** of exploration (Read, Grep, Glob), PAUSE
+- Present what you've found so far and your current hypothesis
+- Ask the user which direction to pursue
+- Do NOT silently explore the entire codebase hoping to stumble on the answer
+
+**Form a hypothesis early and test it.** If after 15 tool calls you don't have a strong lead, present your top 2-3 theories and ask which to pursue.
+
+**Why this matters:** Unbounded exploration wastes context window space, produces no visible output for the user, and often leads to interruptions when the user realizes you've been reading files for 20+ turns without surfacing findings.
+
 ### After 2 Failed Attempts
 1. STOP editing
 2. Report what was tried
@@ -567,6 +626,8 @@ Making claims about completeness without reading actual requirements is a fundam
 | **Fabrication** | Presenting inferences as findings; saying "Found it" when you deduced it; inventing sources |
 | **Legacy** | Wrapping v1/POC code instead of deleting it; adding "compatibility layers" for temporary code |
 | **Timeout Bail** | Adding arbitrary timeouts to CLI tools (especially `rp-cli`), then declaring "failure" when they expire, skipping prescribed workflows to fall back to manual approaches |
+| **Blind Exploration** | Reading 20+ files without surfacing findings; unbounded codebase exploration without forming a hypothesis |
+| **Stale Assumptions** | Starting work without checking git log or prior artifacts; re-doing completed work; declaring work "already done" without verifying |
 
 ### Workflow Compliance
 
