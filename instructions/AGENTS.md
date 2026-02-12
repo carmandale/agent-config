@@ -373,13 +373,23 @@ You have native persistent task tracking via TaskCreate, TaskGet, TaskUpdate, an
 
 ### Cross-Session Persistence
 
-Tasks persist to disk at `~/.claude/tasks/`. They survive session restarts. For multiple Claude Code sessions working on the same project:
+Tasks persist to disk at `~/.claude/tasks/`. They survive session restarts and context compactions.
 
-```bash
-export CLAUDE_CODE_TASK_LIST_ID=my-project
+**To share tasks across sessions**, set `CLAUDE_CODE_TASK_LIST_ID` in the project's `.claude/settings.json`:
+
+```json
+{
+  "env": {
+    "CLAUDE_CODE_TASK_LIST_ID": "my-project-name"
+  }
+}
 ```
 
-Set this before launching each session to share the same task list.
+This activates automatically when Claude Code runs in that project. All sessions see the same task list.
+
+**Ad-hoc** (one-off parallel sessions): `CLAUDE_CODE_TASK_LIST_ID=my-project claude`
+
+**UI**: Press `Ctrl+T` to toggle the task list in the terminal status area.
 
 ### The Rule
 
