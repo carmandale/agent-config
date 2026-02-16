@@ -148,6 +148,15 @@ cupertino search "Swift actor isolation"
 cupertino search "TaskGroup" --source swift-evolution
 ```
 
+## ⚠️ CRITICAL: Never Run `cupertino save`
+
+**DO NOT run `cupertino save`** - this rebuilds the database from local markdown files (which you don't have). It destroys the 2.4GB pre-built index.
+
+If database is corrupted (shows 0 frameworks or tiny size):
+```bash
+cupertino setup --force   # Re-download pre-built databases
+```
+
 ## Troubleshooting
 
 ```bash

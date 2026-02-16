@@ -167,6 +167,15 @@ All data stored in `~/.cupertino/`:
 | `search.db` | ~2.6 GB | Main FTS5 documentation index |
 | `samples.db` | ~50 MB | Sample code index |
 
+## ⚠️ CRITICAL: Never Run `cupertino save`
+
+**DO NOT run `cupertino save`** - this rebuilds the database from scratch using only local files (which you don't have). It will destroy the 2.4GB pre-built index and leave you with an empty database.
+
+If the database gets corrupted or shows 0 frameworks:
+```bash
+cupertino setup --force   # Re-download the pre-built databases
+```
+
 ## Troubleshooting
 
 ### MCP Not Connected
