@@ -167,9 +167,22 @@ All data stored in `~/.cupertino/`:
 | `search.db` | ~2.6 GB | Main FTS5 documentation index |
 | `samples.db` | ~50 MB | Sample code index |
 
-## ⚠️ CRITICAL: Never Run `cupertino save`
+## ⚠️ Known Limitations
 
-**DO NOT run `cupertino save`** - this rebuilds the database from scratch using only local files (which you don't have). It will destroy the 2.4GB pre-built index and leave you with an empty database.
+### Never Run `cupertino save`
+**DO NOT run `cupertino save`** - this rebuilds the database from scratch using only local files (which you don't have). It will destroy the 2.4GB pre-built index.
+
+### SQLite Locking with Parallel Searches
+**Run searches sequentially, not in parallel.** Concurrent `cupertino search` commands can hit SQLite database lock errors. If you need multiple searches, run them one at a time.
+
+```bash
+# ✅ Correct: Sequential
+cupertino search "SwiftUI State" --limit 5
+cupertino search "RealityKit Entity" --limit 5
+
+# ❌ Avoid: Parallel (may cause lock errors)
+cupertino search "SwiftUI" & cupertino search "RealityKit" &
+```
 
 If the database gets corrupted or shows 0 frameworks:
 ```bash
