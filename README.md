@@ -254,3 +254,26 @@ description: Brief description of what the skill does
 
 Detailed instructions for the skill...
 ```
+
+## Full Install (All Agents)
+
+For a complete setup that includes both symlinks AND compound-engineering plugin:
+
+```bash
+cd ~/.agent-config
+./install-all.sh
+```
+
+This runs:
+1. `install.sh` - Creates symlinks for commands, instructions, skills
+2. `bunx @every-env/compound-plugin install compound-engineering --to opencode --also codex,droid,pi`
+
+### What Each System Provides
+
+| Component | agent-config (symlinks) | compound-plugin (converter) |
+|-----------|------------------------|----------------------------|
+| Commands | ✓ Shared via symlink | — |
+| Instructions | ✓ AGENTS.md symlinked | — |
+| Skills | ✓ Shared via symlink | — |
+| Agent definitions | — | ✓ Per-format agents |
+| MCP config | — | ✓ mcporter.json, etc. |

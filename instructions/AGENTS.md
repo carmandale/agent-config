@@ -662,3 +662,38 @@ If you can't verify, say: "I made the change but couldn't verify because [reason
 ---
 
 *Unified agent configuration: https://github.com/carmandale/agent-config*
+
+<!-- BEGIN COMPOUND PI TOOL MAP -->
+## Compound Engineering (Pi compatibility)
+
+This block is managed by compound-plugin.
+
+Compatibility notes:
+- Claude Task(agent, args) maps to the subagent extension tool
+- For parallel agent runs, batch multiple subagent calls with multi_tool_use.parallel
+- AskUserQuestion maps to the ask_user_question extension tool
+- MCP access uses MCPorter via mcporter_list and mcporter_call extension tools
+- MCPorter config path: .pi/compound-engineering/mcporter.json (project) or ~/.pi/agent/compound-engineering/mcporter.json (global)
+<!-- END COMPOUND PI TOOL MAP -->
+
+<!-- BEGIN COMPOUND CODEX TOOL MAP -->
+## Compound Codex Tool Mapping (Claude Compatibility)
+
+This section maps Claude Code plugin tool references to Codex behavior.
+Only this block is managed automatically.
+
+Tool mapping:
+- Read: use shell reads (cat/sed) or rg
+- Write: create files via shell redirection or apply_patch
+- Edit/MultiEdit: use apply_patch
+- Bash: use shell_command
+- Grep: use rg (fallback: grep)
+- Glob: use rg --files or find
+- LS: use ls via shell_command
+- WebFetch/WebSearch: use curl or Context7 for library docs
+- AskUserQuestion/Question: ask the user in chat
+- Task/Subagent/Parallel: run sequentially in main thread; use multi_tool_use.parallel for tool calls
+- TodoWrite/TodoRead: use file-based todos in todos/ with file-todos skill
+- Skill: open the referenced SKILL.md and follow it
+- ExitPlanMode: ignore
+<!-- END COMPOUND CODEX TOOL MAP -->
