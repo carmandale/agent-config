@@ -8,6 +8,7 @@
 | 2026-02-10 | User | Hardcoded version number (2.28.0) in symlink path | Use `installed_plugins.json` installPath modification or version-agnostic approaches |
 | 2026-02-10 | User | Removed plugin from installed_plugins.json but left cached files | When uninstalling plugins, remove: (1) entry from installed_plugins.json, (2) cache directory, (3) marketplaces directory |
 | 2026-02-10 | Self | Kept proposing partial solutions without thinking through implications | When user says "you are not thinking" - STOP, step back, map everything before continuing |
+| 2026-02-22 | User | Wording allowed agents to infer bead linkage starts at implementation, not spec creation | State as hard gate: "No bead, no spec", require bead ID in `spec.md` at creation time, and add override in pre-flight checklist |
 
 ## User Preferences
 - Uses `~/.agent-config` as central distribution hub for all agents (pi-agent, codex, opencode, claude code)
@@ -15,6 +16,8 @@
 - Wants unified architecture - all agents should get content from same source
 - Values "no duplication" as a hard requirement
 - Asks probing questions to guide to better solutions rather than giving answers directly
+- Wants important generated artifacts (especially `/finalize` outputs in `thoughts/`) committed and tracked, not left uncommitted
+- Wants spec directories numbered sequentially with 3-digit IDs (`001-*`, `002-*`, ...) and each spec linked to an associated bead
 
 ## Patterns That Work
 - **Multi-agent symlink architecture**:

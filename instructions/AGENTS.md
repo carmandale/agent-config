@@ -1,7 +1,7 @@
 # AGENTS.md - Global Instructions
 
 > Universal standards for all AI coding agents
-> Last Updated: 2026-02-12
+> Last Updated: 2026-02-20
 
 ---
 
@@ -71,6 +71,17 @@ specs/<id>/
 ```
 
 **ID format:** `<number>-<short-slug>` (e.g., `001-improve-app-loading`, `042-quic-teardown-fix`)
+- Numbering is **sequential and zero-padded to 3 digits** (`001`, `002`, `003`, ...).
+- Always use the **next available** number in `specs/`; do not skip or reuse numbers.
+
+### Hard Rule: Spec Requires Bead At Creation Time
+
+Every spec must have an associated bead **when the spec is created**.
+- No bead, no spec. Do not create `specs/<id>-<slug>/` without a bead.
+- Create a new bead or link an existing bead **first**, then create `spec.md`.
+- `spec.md` MUST include the bead ID (for example: `Bead: b-123`).
+- Keep bead scope aligned to the spec slug/scope (1 primary spec ↔ 1 primary bead).
+- If a spec exists without a bead ID, treat it as non-compliant and fix immediately.
 
 This is the **only** place for planning artifacts. Not `plans/`, not `.agent-os/specs/`, not `Docs/Plans/`, not `thoughts/shared/plans/`. Just `specs/`.
 
@@ -95,8 +106,10 @@ Every repo has this file. Update it when handing off or resuming work.
 ### When Starting Work
 
 1. Check `specs/` for existing spec
-2. If none exists, create `specs/<next-id>-<slug>/spec.md`
-3. Before coding, have `plan.md` and `tasks.md`
+2. If none exists, create/find the bead first
+3. Create `specs/<next-id>-<slug>/spec.md` using the next sequential 3-digit ID (`001`, `002`, ...)
+4. Record the bead ID in `spec.md` at creation time
+5. Before coding, have `plan.md` and `tasks.md`
 
 ---
 
@@ -291,7 +304,8 @@ Does this align with what you want? Should I proceed?
    - Other dirty files? **Not your concern**
    - Wrong branch? → STOP, notify user
 
-3. **Create Beads** - If task has 2+ steps, create tracking beads
+3. **Create Beads** - If task has 2+ steps, create tracking beads.
+   - Spec work override: any work tracked in `specs/` MUST have a bead at spec creation time (no exceptions).
 
 **During Execution:**
 - One file at a time
@@ -336,6 +350,19 @@ bd sync
 ```
 
 **NEVER** run `git pull --rebase` blindly.
+
+### Artifact Commit Gate (CRITICAL)
+
+Artifacts created by `/finalize`, `/handoff`, `/checkpoint`, and planning/research commands are not scratch output. They are project memory and must be tracked.
+
+Before claiming work is complete:
+1. Run `git status --short` and look specifically for artifact paths (`thoughts/`, `specs/`, `.learnings/`, `docs/`, generated reports).
+2. Stage and commit relevant artifact files in the same task commit (or a dedicated follow-up commit).
+3. Push so artifacts are available to the next session/agent.
+
+If any artifact is intentionally left uncommitted, explicitly list the file and reason in your final update.
+
+Never leave important `/finalize` output untracked without telling the user.
 
 ---
 
@@ -485,6 +512,13 @@ If you're about to do multi-step work and you haven't created Tasks for it — s
 
 Quick ref: `gj build <app>`, `gj run <app>`, `gj test P0`, `gj logs <app> "pattern"`
 
+For physical-device deep OSLog capture, use:
+- `gj logs <app> --device-unified --since 20m`
+- This is the default agent path for on-device unified logs (slower; archive-based, not live stream).
+- For playback triage, prefer: `gj logs <app> --device-unified --player-summary`.
+- If summary is too sparse, widen with process-scoped CoreMedia: `--process <name> --include-coremedia`.
+- For unattended runs when admin auth is required, pre-cache once with: `gj auth unlock`.
+
 → **Full docs:** `gj-tool` skill
 
 ---
@@ -628,6 +662,7 @@ Making claims about completeness without reading actual requirements is a fundam
 | **Timeout Bail** | Adding arbitrary timeouts to CLI tools (especially `rp-cli`), then declaring "failure" when they expire, skipping prescribed workflows to fall back to manual approaches |
 | **Blind Exploration** | Reading 20+ files without surfacing findings; unbounded codebase exploration without forming a hypothesis |
 | **Stale Assumptions** | Starting work without checking git log or prior artifacts; re-doing completed work; declaring work "already done" without verifying |
+| **Artifact Loss** | Generating `/finalize` or handoff artifacts, then leaving them unstaged/uncommitted so project memory is lost |
 
 ### Workflow Compliance
 
