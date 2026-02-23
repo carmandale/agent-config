@@ -353,12 +353,14 @@ bd sync
 
 ### Artifact Commit Gate (CRITICAL)
 
-Artifacts created by `/finalize`, `/handoff`, `/checkpoint`, and planning/research commands are not scratch output. They are project memory and must be tracked.
+Artifacts created by `/finalize`, `/handoff`, `/checkpoint`, and planning/research commands are not scratch output. They are project memory, are critical first-class artifacts, and must be tracked.
 
 Before claiming work is complete:
 1. Run `git status --short` and look specifically for artifact paths (`thoughts/`, `specs/`, `.learnings/`, `docs/`, generated reports).
 2. Stage and commit relevant artifact files in the same task commit (or a dedicated follow-up commit).
 3. Push so artifacts are available to the next session/agent.
+
+Artifacts are part of the durable handoff contract: treat them like code changes and keep them in the same commit stream as the related feature/fix whenever possible.
 
 If any artifact is intentionally left uncommitted, explicitly list the file and reason in your final update.
 
