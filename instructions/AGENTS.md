@@ -1,7 +1,7 @@
 # AGENTS.md - Global Instructions
 
 > Universal standards for all AI coding agents
-> Last Updated: 2026-02-20
+> Last Updated: 2026-02-25
 
 ---
 
@@ -183,6 +183,40 @@ Build status: [pass/fail per app]
 **NEVER** leave AVPStreamKit changes uncommitted/unpushed — downstream apps will not see them.
 **NEVER** use `swift package update` directly — use `gj resolve --update <app>`.
 
+### Hard Rule: Swift Concurrency + Network Lifecycle Guardrails
+
+When working with QUIC, `Network.framework`, or long-lived stream/connection lifecycle code:
+
+1. **One connection = one owner task**
+   - `NetworkConnection` and stream objects must be created, used, and released in the same owner task scope.
+
+2. **No detached task ownership for teardown-sensitive objects**
+   - `Task.detached` must not own or release connection/stream lifetimes.
+
+3. **Never start Tasks from `deinit`**
+   - Teardown must be explicit, awaitable, and called before deallocation.
+
+4. **Cancellation handlers are signal-only**
+   - Do not perform object teardown in `onCancel`; teardown happens in normal runner flow.
+
+5. **Teardown contract is fixed**
+   - `cancel -> bounded join -> token/currentness check -> cleanup`
+
+6. **Never force-drop live lifecycle state**
+   - Do not `removeAll` or dictionary-wipe active transport ownership state; retire entries and release only after terminal-state confirmation.
+
+7. **Attach receive loop immediately after stream open**
+   - Do not insert actor `await` hops between `openStream` and first receive attachment.
+
+8. **Serialize lifecycle transitions**
+   - Start/stop/suspend/resume must run through a single transition owner; no parallel fire-and-forget transitions.
+
+9. **Health checks must validate stream + connection**
+   - “Connection ready” alone is insufficient; stream readiness/liveness must also be confirmed.
+
+10. **Every lifecycle fix must include regression tests**
+    - Cover connected-stop teardown safety, retired-state drain/release, rapid transition overlap, and zombie-connection detection.
+
 ### The North Star: Best-in-Class, The Apple Way
 
 **The goal is best-in-class apps that follow modern Apple patterns.**
@@ -295,6 +329,7 @@ Does this align with what you want? Should I proceed?
    - Run `git log --oneline -10` and `git status` to understand current state
    - Read the most recent handoff artifact in `thoughts/shared/handoffs/`
    - Check `bd ready` for open tracked work
+   - If `bd ready` fails with "no beads database found", run `bd --no-db ready` and continue (JSONL/no-db repos are valid)
    - Summarize what's already done and what's pending before proposing next steps
    - This prevents re-doing completed work or missing important state
 
@@ -375,7 +410,20 @@ Never leave important `/finalize` output untracked without telling the user.
 **✅ Use `bd sync`** to manage .beads/ files
 **❌ NEVER** `git restore .beads/` or `git checkout .beads/` or manually commit
 
-If dirty after sync: run `bd sync` again. If still dirty, ask user.
+**Dirty-state triage is deterministic (do not ask user unless required):**
+1. Use `git status --porcelain` for blocking commit state.
+2. Use `git status --short --ignored .beads` only for diagnostics.
+3. If tracked `.beads/` files are dirty, run `bd sync` (max 2 attempts).
+4. After 2 attempts:
+   - If tracked `.beads/` files are still dirty (`M`, `A`, `D`, `??`), ask the user.
+   - If only ignored runtime files remain (`!!`), proceed without asking.
+5. Never commit ignored runtime files such as:
+   - `.beads/.migration-hint-ts`
+   - `.beads/last-touched`
+   - `.beads/sync-state.json`
+   - `.beads/*.db`, `*.db-wal`, `*.db-shm`
+   - daemon/socket/lock files and rotated daemon logs
+6. If a runtime file is accidentally tracked, untrack it once with `git rm --cached <path>` and keep it ignored.
 
 ### Database Locking
 
@@ -398,6 +446,7 @@ If `sqlite3: database is locked`:
 
 ```bash
 bd ready                    # Actionable work (no blockers)
+# If no local DB exists: bd --no-db ready
 bd update <id> --status=in_progress
 bd close <id> --reason="Done"
 bd sync                     # Commit and push
