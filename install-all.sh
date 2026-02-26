@@ -39,10 +39,15 @@ if ! command -v bunx &> /dev/null; then
     echo "⚠ bunx not found. Install bun first: curl -fsSL https://bun.sh/install | bash"
     echo "  Skipping compound-engineering install."
 else
-    echo "Installing compound-engineering to: opencode, codex, droid, pi"
+    # NOTE: Pi and Codex use symlinks to agent-config, so they already have
+    # access to compound/ skills and commands. Running `install` for them
+    # would COPY skills into the symlinked directory, causing duplicates.
+    # Only run install for agents with their own (non-symlinked) directories.
+    echo "Installing compound-engineering to: opencode, droid"
+    echo "(Pi and Codex use symlinks - they get compound/ automatically)"
     bunx @every-env/compound-plugin install compound-engineering \
         --to opencode \
-        --also codex,droid,pi
+        --also droid
 fi
 
 #==============================================================================

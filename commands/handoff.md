@@ -10,7 +10,8 @@ This command uses the unified artifact generator: `~/.claude/scripts/cc-artifact
 - **Bead REQUIRED**
 - Artifact must be written to `thoughts/shared/handoffs/<session>/`
 - Outcome is required
-- Commit/push only if explicitly requested
+- Commit/push are required to complete `/handoff`
+- Include related planning artifacts in the same commit (for example: `specs/`, `tasks/`, `thoughts/shared/plans/`)
 
 ## Steps
 
@@ -259,9 +260,13 @@ State your inferred outcome from SESSION_SUMMARY, then let the user confirm or c
 
 "I think the outcome is <inferred_outcome> because <outcome_reason>. Want to change it?"
 
-### 4) Commit / push only if user requests
+### 4) Commit and push
 ```bash
 git add thoughts/shared/handoffs/*/*.yaml
+if [ -d specs ]; then git add specs; fi
+if [ -d docs/specs ]; then git add docs/specs; fi
+if [ -d tasks ]; then git add tasks; fi
+if [ -d thoughts/shared/plans ]; then git add thoughts/shared/plans; fi
 git commit -m "handoff: <short description>"
 git push
 ```

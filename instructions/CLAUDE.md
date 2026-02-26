@@ -286,9 +286,11 @@ Does this align with what you want? Should I proceed?
    - This prevents re-doing completed work or missing important state
 
 2. **Git Status Check** - Before editing a file:
-   - If **that file** was dirty before you started → STOP, ask before editing (except append-only `.learnings/*.md`)
-   - If **you** dirtied it this session → it's WIP, keep working
-   - Other dirty files? **Not your concern**
+   - This check is target-scoped, not repo-wide
+   - Pause only if a file you intend to edit is already dirty before you start, or if that same target file changes unexpectedly while you are editing it
+   - Unrelated dirty files elsewhere in the working tree do not block work and must not trigger a generic safety pause
+   - If unrelated changes appear mid-task, note them in your final report and continue
+   - If **you** dirtied the target file this session → it's WIP, keep working
    - Wrong branch? → STOP, notify user
 
 3. **Create Beads** - If task has 2+ steps, create tracking beads
@@ -297,7 +299,8 @@ Does this align with what you want? Should I proceed?
 - One file at a time
 - Verify after each change
 - Mark todos complete as you go
-- If something unexpected happens **with your current task** → STOP and report (unrelated dirty files are not "unexpected")
+- If something unexpected happens to the target file you are actively editing → STOP and report
+- If unrelated files change during your task, continue and report them in your final summary
 
 ### Stop Signals
 When user says any of: "stop", "wait", "hold on", "cancel", "no"
@@ -309,11 +312,12 @@ When user says any of: "stop", "wait", "hold on", "cancel", "no"
 
 ## 4) Git Safety
 
-**The rule:** Don't edit a file that was dirty before you started.
+**The rule:** Dirty-file safety is target-scoped, not repo-wide.
 
-- File has uncommitted changes **you didn't make** → STOP, ask before editing
-- **You** dirtied it this session → it's WIP, keep working
-- Other dirty files? **Not your concern**
+- Pause only if a file you intend to edit is already dirty before you start, or if that same target file changes unexpectedly while you are editing it
+- **You** dirtied the target file this session → it's WIP, keep working
+- Other dirty files do not block work
+- If unrelated changes appear mid-task, report them in your final summary and continue
 - Exception: `.learnings/*.md` is append-only
 
 **Ignored paths** (dirty is OK): `.worktrees/`, `.claude/`, `plans/`, `.beads/`, `.learnings/`, `.handoff/`, `.checkpoint/`, `.DS_Store`, `*.lock`, `*-wal`, `*-shm`

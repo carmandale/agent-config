@@ -9,6 +9,7 @@
 | 2026-02-10 | User | Removed plugin from installed_plugins.json but left cached files | When uninstalling plugins, remove: (1) entry from installed_plugins.json, (2) cache directory, (3) marketplaces directory |
 | 2026-02-10 | Self | Kept proposing partial solutions without thinking through implications | When user says "you are not thinking" - STOP, step back, map everything before continuing |
 | 2026-02-22 | User | Wording allowed agents to infer bead linkage starts at implementation, not spec creation | State as hard gate: "No bead, no spec", require bead ID in `spec.md` at creation time, and add override in pre-flight checklist |
+| 2026-02-26 | User | Agents stopped on unrelated working-tree changes with generic safety pause | Only pause for unexpected changes in files in the active edit scope; unrelated dirty files are non-blocking |
 
 ## User Preferences
 - Uses `~/.agent-config` as central distribution hub for all agents (pi-agent, codex, opencode, claude code)
@@ -18,6 +19,7 @@
 - Asks probing questions to guide to better solutions rather than giving answers directly
 - Wants important generated artifacts (especially `/finalize` outputs in `thoughts/`) committed and tracked, not left uncommitted
 - Wants spec directories numbered sequentially with 3-digit IDs (`001-*`, `002-*`, ...) and each spec linked to an associated bead
+- Wants dirty-file safety checks to be scoped to files being edited, not unrelated working-tree changes
 
 ## Patterns That Work
 - **Multi-agent symlink architecture**:
@@ -52,3 +54,6 @@
 - Pi-agent uses `prompts/` (not commands/) for slash commands
 - OpenCode has both `skill/` and `skills/`, `command/` and `commands/` directories
 - Codex uses `prompts/` for commands
+- In this repo, core architecture is a thin orchestration layer: `install.sh` wires canonical content (`commands/`, `instructions/`, `skills/`) into all agent homes via directory-level symlinks, while `tools-bin/` and `commands/` provide execution surfaces.
+- Succeeded: Added shaping skills via ~/.agent-config shared skill root so Claude/Codex/Pi/opencode automatically pick them up.
+- Caveat: shaping hook configured only in ~/.claude/settings.json (other agents don't have Claude-style hooks in this environment).

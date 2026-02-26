@@ -289,11 +289,18 @@ else
         -scheme \"$SCHEME_NAME\" \
         archive \
         -archivePath \"$ARCHIVE_PATH\" \
-        -destination \"$DESTINATION\""
+        -destination \"$DESTINATION\" \
+        -allowProvisioningUpdates"
     
     # Add derived data path for macOS workspaces
     if [[ -n "$DERIVED_DATA_PATH" ]]; then
         ARCHIVE_CMD="$ARCHIVE_CMD -derivedDataPath \"$DERIVED_DATA_PATH\""
+    fi
+
+    # For automatic macOS signing, archive can resolve to development signing.
+    # Keep archive consistent and let exportArchive re-sign for App Store.
+    if [[ "$PLATFORM" == "macos" ]]; then
+        ARCHIVE_CMD="$ARCHIVE_CMD DEVELOPMENT_TEAM=\"$TEAM_ID\" CODE_SIGN_IDENTITY=\"Apple Development\""
     fi
 
     eval $ARCHIVE_CMD 2>&1 | grep -E "ARCHIVE SUCCEEDED|ARCHIVE FAILED|warning:|error:|Signing" || true
@@ -306,6 +313,27 @@ else
     echo ""
     echo -e "${GREEN}✅ Archive created: $ARCHIVE_PATH${NC}"
     echo ""
+
+    # SwiftPM resource bundles may be development-signed in archive output.
+    # Remove those signatures so exportArchive can package them without
+    # mismatched-certificate rejections from App Store processing (90284).
+    if [[ "$PLATFORM" == "macos" ]]; then
+        ARCHIVED_APP_PATH="$ARCHIVE_PATH/Products/Applications/${SCHEME_NAME}.app"
+        if [[ -d "$ARCHIVED_APP_PATH/Contents/Resources" ]]; then
+            echo -e "${YELLOW}🔐 Normalizing resource bundle signatures (macOS)...${NC}"
+            stripped_count=0
+            shopt -s nullglob
+            for resource_bundle in "$ARCHIVED_APP_PATH"/Contents/Resources/*.bundle; do
+                if /usr/bin/codesign -dv --verbose=4 "$resource_bundle" 2>&1 | grep -q "Authority=Apple Development:"; then
+                    /usr/bin/codesign --remove-signature "$resource_bundle" >/dev/null 2>&1 || true
+                    stripped_count=$((stripped_count + 1))
+                fi
+            done
+            shopt -u nullglob
+            echo -e "${GREEN}   Stripped signatures from ${stripped_count} development-signed resource bundle(s)${NC}"
+            echo ""
+        fi
+    fi
 
     # Step 2: Export
     echo -e "${BLUE}═══════════════════════════════════════════════════════${NC}"
@@ -384,16 +412,53 @@ echo ""
 echo -e "${YELLOW}⏳ This may take 10-20 minutes for large IPAs...${NC}"
 echo ""
 
+UPLOAD_LOG=$(mktemp -t "testflight-upload.XXXXXX.log")
+set +e
 xcrun altool --upload-package "$PACKAGE_PATH" \
     --type "$UPLOAD_TYPE" \
     --apiKey "$API_KEY_ID" \
     --apiIssuer "$ISSUER_ID" \
-    --show-progress
-
-UPLOAD_STATUS=$?
+    --show-progress 2>&1 | tee "$UPLOAD_LOG"
+UPLOAD_STATUS=${PIPESTATUS[0]}
+set -e
 
 echo ""
 if [[ $UPLOAD_STATUS -eq 0 ]]; then
+    DELIVERY_UUID=$(grep -Eo 'Delivery UUID: [0-9a-f-]+' "$UPLOAD_LOG" | tail -1 | awk '{print $3}')
+
+    if [[ -n "$DELIVERY_UUID" ]]; then
+        echo -e "${YELLOW}🔎 Verifying App Store processing status...${NC}"
+        echo "   Delivery UUID: $DELIVERY_UUID"
+
+        BUILD_STATUS_RESULT=""
+        for attempt in $(seq 1 30); do
+            BUILD_STATUS_RESULT=$(xcrun altool --build-status \
+                --delivery-id "$DELIVERY_UUID" \
+                --apiKey "$API_KEY_ID" \
+                --apiIssuer "$ISSUER_ID" 2>&1 || true)
+
+            if echo "$BUILD_STATUS_RESULT" | grep -q "BUILD-STATUS: FAILED"; then
+                echo ""
+                echo "$BUILD_STATUS_RESULT"
+                echo -e "${RED}╔════════════════════════════════════════════════════════╗${NC}"
+                echo -e "${RED}║          ❌ PROCESSING FAILED AFTER UPLOAD             ║${NC}"
+                echo -e "${RED}╚════════════════════════════════════════════════════════╝${NC}"
+                rm -f "$UPLOAD_LOG"
+                exit 1
+            fi
+
+            if echo "$BUILD_STATUS_RESULT" | grep -q "BUILD-STATUS: VALID"; then
+                echo "   Processing status: VALID"
+                break
+            fi
+
+            if [[ "$attempt" -lt 30 ]]; then
+                sleep 10
+            fi
+        done
+    fi
+
+    rm -f "$UPLOAD_LOG"
     echo -e "${GREEN}╔════════════════════════════════════════════════════════╗${NC}"
     echo -e "${GREEN}║              🎉 UPLOAD SUCCESSFUL! 🎉                  ║${NC}"
     echo -e "${GREEN}╚════════════════════════════════════════════════════════╝${NC}"
@@ -421,6 +486,7 @@ if [[ $UPLOAD_STATUS -eq 0 ]]; then
     echo "   rm -rf \"$ARCHIVE_PATH\" \"$EXPORT_PATH\" \"$EXPORT_OPTIONS\""
     echo ""
 else
+    rm -f "$UPLOAD_LOG"
     echo -e "${RED}╔════════════════════════════════════════════════════════╗${NC}"
     echo -e "${RED}║                  ❌ UPLOAD FAILED                       ║${NC}"
     echo -e "${RED}╚════════════════════════════════════════════════════════╝${NC}"

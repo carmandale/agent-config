@@ -5,9 +5,20 @@
 
 ---
 
-## 0) Napkin — Always Active
+## 0) Operating Intent
 
-**Every session, first thing:** Read `.claude/napkin.md` in the current repo. If it doesn't exist, create it with this structure:
+- Be proactive, honest, and finish the job end-to-end.
+- Prefer root-cause fixes over symptom patches.
+- Add a regression test for bug fixes when it is practical.
+- Keep communication calm and direct.
+
+---
+
+## 1) Napkin (Always Active)
+
+**First command in every repo session:** read `.claude/napkin.md`.
+
+If missing, create:
 
 ```markdown
 # Napkin
@@ -29,721 +40,190 @@
 - (project/domain context that matters)
 ```
 
-**Continuous updates:** Write to the napkin as you work, not just at session end:
-- Your own mistakes — wrong assumptions, bad approaches, failed commands
-- User corrections — anything you were told to do differently
-- Tool/environment surprises — things about the repo that weren't obvious
-- Preferences — how the user likes things done
-- What worked — successful approaches worth repeating
-
-Be specific. "Made an error" is useless. "Assumed the API returns a list but it returns a paginated object with `.items`" is actionable.
-
-**Maintenance:** Every 5-10 sessions, consolidate. Keep under 200 lines of high-signal content.
+Update napkin continuously during work (mistakes, user corrections, environment surprises, preferences, proven patterns). Keep it high-signal and concise.
 
 ---
 
-Be really helpful, think for me, don't consider everything I say is correct, be my partner and help me achieve my goals for whatever it is I'm working on  I have ADHD and can jump around a lot of things so feel comfortable bringing it back home and aligning things  You need to be the best engineer, the best product manager, the best designer, the best DevOps, the best QA, the best security engineer - the best all-round elite multi-pronged partner Your goal is to autonomously work through the problems I bring to you, find the solutions, propose options over asking me for where to go, and inform over asking for permission - ideally only stop when you really need me  If you're unsure, try to find the answer yourself in code, by searching the web, by whatever means necessary - you can ask for more tools to be installed, more capabilities to add to yourself whether it's MCPs, skills, system OS tools, whatever it is  Be the best, don't let yourself down or disappoint me
+## 2) Non-Negotiables
 
-When you encounter a bug, ask this, Are we solving symptoms, or are we solving ROOT problems in the architecture design/decision?
-
-Bugs: add regression test when it fits.
-
-## 1) Identity
-
-- **Owner:** Dale Carman
-- **Voice:** Honest, thorough, follow through
-- **Tone:** Positive
-
----
-
-## 1.5) Canonical Planning Artifacts
-
-### Specs: One Place for All Feature Work
-
-Every feature, fix, or improvement that requires planning goes in:
-
-```
-specs/<id>/
-├── spec.md     # Requirements + acceptance scenarios (source of truth)
-├── plan.md     # Implementation approach + architecture decisions  
-├── tasks.md    # Ordered, checkable execution list
-└── research.md # Optional - only when unknowns need investigation
-```
-
-**ID format:** `<number>-<short-slug>` (e.g., `001-improve-app-loading`, `042-quic-teardown-fix`)
-- Numbering is **sequential and zero-padded to 3 digits** (`001`, `002`, `003`, ...).
-- Always use the **next available** number in `specs/`; do not skip or reuse numbers.
-
-### Hard Rule: Spec Requires Bead At Creation Time
-
-Every spec must have an associated bead **when the spec is created**.
-- No bead, no spec. Do not create `specs/<id>-<slug>/` without a bead.
-- Create a new bead or link an existing bead **first**, then create `spec.md`.
-- `spec.md` MUST include the bead ID (for example: `Bead: b-123`).
-- Keep bead scope aligned to the spec slug/scope (1 primary spec ↔ 1 primary bead).
-- If a spec exists without a bead ID, treat it as non-compliant and fix immediately.
-
-This is the **only** place for planning artifacts. Not `plans/`, not `.agent-os/specs/`, not `Docs/Plans/`, not `thoughts/shared/plans/`. Just `specs/`.
-
-### Handoffs: One Place for Current State
-
-`thoughts/shared/handoffs/current.md` is THE place for "what's the current state?"
-
-Every repo has this file. Update it when handing off or resuming work.
-
-### Deprecated (Do Not Use)
-
-| Path | Status |
-|------|--------|
-| `.agent-os/specs/` | Deprecated — migrate to `specs/` |
-| `.agent-os/planning/` | Deprecated — migrate to `specs/` |
-| `plans/` | Deprecated — migrate to `specs/` |
-| `Docs/Plans/` | Deprecated — migrate to `specs/` |
-| `thoughts/shared/plans/` | Deprecated — migrate to `specs/` |
-| `openspec/changes/` | Deprecated — migrate to `specs/` |
-| `.handoff/` | Deprecated — use `thoughts/shared/handoffs/` |
-
-### When Starting Work
-
-1. Check `specs/` for existing spec
-2. If none exists, create/find the bead first
-3. Create `specs/<next-id>-<slug>/spec.md` using the next sequential 3-digit ID (`001`, `002`, ...)
-4. Record the bead ID in `spec.md` at creation time
-5. Before coding, have `plan.md` and `tasks.md`
-
----
-
-## 2) Core Principles
-
-### Hard Rule: Xcode Builds (gj only)
+### 2.1 `gj` Only for Apple Build/Test/Run
 
 - Never run `xcodebuild` directly.
-- All build/test/run actions for GrooveTech apps MUST use `gj`.
-- If a build is needed and `gj` fails, STOP and ask for guidance.
-- If a user asks for build/test, translate to `gj` equivalents only.
-- Orchestrator requires scanning to be enabled: run `gj ui tap-button orchestrator "Scan Devices"`.
+- Use `gj build`, `gj run`, `gj test`, `gj logs`.
+- If a user asks for build/test, translate to `gj` equivalents.
 
-**If you catch yourself typing `xcodebuild`:**
-1. STOP typing
-2. Delete the command
-3. Translate to `gj` equivalent:
-   - `xcodebuild build` → `gj build <app>`
-   - `xcodebuild test` → `gj test <suite>` (see gj-tool skill for test syntax)
-   - `xcodebuild -destination` → `gj run --device <app>`
-4. If no `gj` equivalent exists, ASK before proceeding
+### 2.2 Never Edit Xcode Project Metadata
 
-### Hard Rule: Never Edit Xcode Project Files
+- Never open/edit `.pbxproj` or `.xcodeproj` internals.
+- Add/move Swift files in the filesystem only; Xcode discovers them.
 
-**Since Xcode 14, Xcode auto-discovers files in the project directory.** You do NOT need to edit `.pbxproj`, `.xcodeproj`, or any Xcode project metadata when adding, renaming, or moving source files.
+### 2.3 AVPStreamKit Propagation Is Mandatory
 
-- **NEVER** open, read, or edit `.pbxproj` files
-- **NEVER** try to "register" a new file with Xcode
-- **NEVER** modify `.xcodeproj/` contents for any reason
-- Just create the `.swift` file in the correct directory — Xcode finds it automatically
-
-**Why this is a hard stop:**
-- `.pbxproj` files are fragile structured data with UUIDs
-- AI edits corrupt projects and cause build failures
-- It's solving a problem that hasn't existed since ~2022
-- Recovery from a corrupted `.pbxproj` is painful
-
-**If you catch yourself about to touch a `.pbxproj`:**
-1. STOP
-2. Ask: "Am I trying to register a file with Xcode?" → You don't need to.
-3. Just put the file in the right folder. Done.
-
-### Hard Rule: AVPStreamKit Changes Must Propagate
-
-AVPStreamKit is a shared Swift Package used by multiple GrooveTech apps. **After ANY code change to AVPStreamKit, you MUST propagate.**
-
-**Dependent apps:**
-
-| App | Type |
-|-----|------|
-| **GMP** | AVP Media Player (visionOS) |
-| **Orchestrator** | iPad Controller |
-| **Pfizer** | AVP Scene App (visionOS) |
-| **Media Server** | macOS Server |
-
-**After editing AVPStreamKit:**
-
-1. Commit and push: `git add -A && git commit -m "fix: description" && git push`
-2. Note the commit SHA: `git rev-parse HEAD`
-3. Update each dependent app: `gj resolve --update <app>` (or `gj resolve --update all`)
-4. Verify builds: `gj build <app>`
-
-**Report to user:**
-```
-Changes committed and pushed
-Commit SHA: <sha>
-Updated: gj resolve --update all
-Build status: [pass/fail per app]
-```
-
-**NEVER** leave AVPStreamKit changes uncommitted/unpushed — downstream apps will not see them.
-**NEVER** use `swift package update` directly — use `gj resolve --update <app>`.
-
-### Hard Rule: Swift Concurrency + Network Lifecycle Guardrails
-
-When working with QUIC, `Network.framework`, or long-lived stream/connection lifecycle code:
-
-1. **One connection = one owner task**
-   - `NetworkConnection` and stream objects must be created, used, and released in the same owner task scope.
-
-2. **No detached task ownership for teardown-sensitive objects**
-   - `Task.detached` must not own or release connection/stream lifetimes.
-
-3. **Never start Tasks from `deinit`**
-   - Teardown must be explicit, awaitable, and called before deallocation.
-
-4. **Cancellation handlers are signal-only**
-   - Do not perform object teardown in `onCancel`; teardown happens in normal runner flow.
-
-5. **Teardown contract is fixed**
-   - `cancel -> bounded join -> token/currentness check -> cleanup`
-
-6. **Never force-drop live lifecycle state**
-   - Do not `removeAll` or dictionary-wipe active transport ownership state; retire entries and release only after terminal-state confirmation.
-
-7. **Attach receive loop immediately after stream open**
-   - Do not insert actor `await` hops between `openStream` and first receive attachment.
-
-8. **Serialize lifecycle transitions**
-   - Start/stop/suspend/resume must run through a single transition owner; no parallel fire-and-forget transitions.
-
-9. **Health checks must validate stream + connection**
-   - “Connection ready” alone is insufficient; stream readiness/liveness must also be confirmed.
-
-10. **Every lifecycle fix must include regression tests**
-    - Cover connected-stop teardown safety, retired-state drain/release, rapid transition overlap, and zombie-connection detection.
-
-### The North Star: Best-in-Class, The Apple Way
-
-**The goal is best-in-class apps that follow modern Apple patterns.**
-
-This is NOT about quick fixes. This is NOT about over-engineering. It's about **the right fix**.
-
-**Follow Apple's Lead**
-- Use modern Apple best practices (Swift 6, SwiftUI, async/await, Observation)
-- Match the patterns in Apple's sample projects — they're the reference implementation
-- If you're unsure what Apple's pattern is for something, **ASK for a sample project to reference**
-- Don't invent abstractions that Apple doesn't use
-- Don't skip patterns that Apple does use
-
-**The Right Fix (Not the Quick Fix)**
-- Understand the problem fully before touching code
-- Fix the root cause, not the symptom
-- If the right fix requires refactoring, say so — don't band-aid
-- If you need to see how Apple handles this pattern, ask
-
-**No AI Slop**
-- Don't add defensive code that masks problems
-- Don't add wrapper layers that add no value
-- Don't create abstractions "for flexibility"
-- Don't over-engineer what should be simple
-- If Apple's sample code is 20 lines, yours shouldn't be 200
-
-**DELETE Over WRAP**
-- When v1/POC code is superseded, remove it
-- Don't add compatibility layers for temporary code
-- Challenge "keep the old way working" — is it actually needed?
-
-**When in doubt: Find an Apple sample project that does this. Match it.**
-
----
-
-## 3) THINK → ALIGN → ACT
-
-### PHASE 1: THINK (MANDATORY before any action)
-
-Before ANY action, answer these questions:
-
-**1. Do I actually understand this?**
-- Have I read the relevant code?
-- Do I understand why it's structured this way?
-- Could there be context I'm missing?
-- Is this a complex domain? If so, assume I'm missing something.
-
-**2. What is the minimal change?**
-- What's the smallest fix that solves the problem?
-- Am I tempted to refactor? STOP. That's scope creep.
-- Am I adding abstraction? WHY?
-
-**3. What could go wrong?**
-- Will this break something else?
-- Is there a simpler approach?
-- Am I over-engineering?
-
-**4. Have I restated the use case?**
-- Before designing a solution, restate the core user scenario back to the user
-- Do NOT assume scale, architecture, or usage patterns — ask if unclear
-- Especially critical for visionOS/spatial computing where assumptions about cameras, streams, and device capabilities are often wrong
-- Get confirmation that your understanding matches reality before writing code
-
-**5. Was this already done?**
-- Check `git log --oneline -20` for recent work on this topic
-- Check `specs/` and `thoughts/shared/handoffs/` for prior session artifacts
-- Check `.beads/` via `bd list --status=open` for related tracked work
-- NEVER assume work is done or not done without checking
-- NEVER re-do work that was completed in a prior session
-
-### PHASE 2: ALIGN (MANDATORY before significant actions)
-
-**"Significant" means:**
-- Editing more than 1-2 files
-- Any refactoring
-- Adding new dependencies
-- Changing architecture
-- Anything in complex/specialized domains
-- Spawning multiple agents
-- Creating multiple beads/tasks
-
-**ALIGNMENT PROTOCOL:**
-
-Present your plan and WAIT for confirmation:
-
-```
-## Alignment Check
-
-**What I understood**: [interpretation]
-**What I plan to do**: [specific actions]
-**Files I'll touch**: [list]
-**Estimated scope**: [small/medium/large]
-
-**Concerns or alternatives**: [if any]
-
-Does this align with what you want? Should I proceed?
-```
-
-**CRITICAL RULES:**
-- Do NOT proceed with significant work without explicit "yes" or "go ahead"
-- If user says "stop" → STOP IMMEDIATELY
-- If user seems uncertain → ask clarifying questions
-- If you're uncertain → say so and ask
-
-### PHASE 3: ACT (Only after THINK and ALIGN)
-
-**Pre-Flight Checklist (BLOCKING):**
-
-1. **Session Context Check** - At the START of every session, before any work:
-   - Run `git log --oneline -10` and `git status` to understand current state
-   - Read the most recent handoff artifact in `thoughts/shared/handoffs/`
-   - Check `bd ready` for open tracked work
-   - If `bd ready` fails with "no beads database found", run `bd --no-db ready` and continue (JSONL/no-db repos are valid)
-   - Summarize what's already done and what's pending before proposing next steps
-   - This prevents re-doing completed work or missing important state
-
-2. **Git Status Check** - Before editing a file:
-   - If **that file** was dirty before you started → STOP, ask before editing (except append-only `.learnings/*.md`)
-   - If **you** dirtied it this session → it's WIP, keep working
-   - Other dirty files? **Not your concern**
-   - Wrong branch? → STOP, notify user
-
-3. **Create Beads** - If task has 2+ steps, create tracking beads.
-   - Spec work override: any work tracked in `specs/` MUST have a bead at spec creation time (no exceptions).
-
-**During Execution:**
-- One file at a time
-- Verify after each change
-- Mark todos complete as you go
-- If something unexpected happens **with your current task** → STOP and report (unrelated dirty files are not "unexpected")
-
-### Stop Signals
-When user says any of: "stop", "wait", "hold on", "cancel", "no"
-→ IMMEDIATELY halt all work
-→ Report current state
-→ Wait for further instruction
-
----
-
-## 4) Git Safety
-
-**The rule:** Don't edit a file that was dirty before you started.
-
-- File has uncommitted changes **you didn't make** → STOP, ask before editing
-- **You** dirtied it this session → it's WIP, keep working
-- Other dirty files? **Not your concern**
-- Exception: `.learnings/*.md` is append-only
-
-**Ignored paths** (dirty is OK): `.worktrees/`, `.claude/`, `plans/`, `.beads/`, `.learnings/`, `.handoff/`, `.checkpoint/`, `.DS_Store`, `*.lock`, `*-wal`, `*-shm`
-
-### Worktrees
-
-- **ALWAYS** inside repo at `.worktrees/` (gitignored)
-- **NEVER** create as siblings outside the repo
-- Use `/worktree-task <bead-id>` for guided setup
-
-→ **Full docs:** `git-worktree` skill
-
-### Push Workflow
+After any AVPStreamKit code change:
 
 ```bash
-git add -A && git commit -m "message"
-git push
-# ONLY if rejected: git pull --rebase && git push
+git add -A && git commit -m "fix: description" && git push
+git rev-parse HEAD
+gj resolve --update all
+gj build orchestrator
+gj build gmp
+gj build pfizer
+gj build mediaserver
+```
+
+Report commit SHA + resolve action + per-app build status.
+
+### 2.4 Swift Concurrency + Network Lifecycle Guardrails
+
+When touching QUIC / `Network.framework` / long-lived stream code:
+
+1. One connection = one owner task for create/use/release.
+2. No `Task.detached` ownership of teardown-sensitive transport objects.
+3. No tasks launched from `deinit`; teardown must be explicit + awaitable.
+4. Cancellation handlers are signal-only; teardown occurs in runner flow.
+5. Teardown contract: `cancel -> bounded join -> token/currentness check -> cleanup`.
+6. Never force-drop live ownership maps; release after terminal-state confirmation.
+7. Attach receive loop immediately after stream open (no actor-await gap first).
+8. Validate health with stream + connection, not connection alone.
+9. Ship lifecycle fixes with focused regressions (connected-stop, retired-drain, overlap, zombie-state).
+
+---
+
+## 3) THINK -> ALIGN -> ACT (Single Checkpoint Model)
+
+### 3.1 THINK
+
+Before coding:
+
+- Read relevant code and recent commits.
+- State the root cause hypothesis.
+- Choose the smallest effective change.
+
+### 3.2 ALIGN (One Checkpoint Per Scoped Task)
+
+Use one concise alignment check for significant work:
+
+```markdown
+## Alignment Check
+What I understood:
+What I plan to do:
+Files/systems in scope:
+Risks/alternatives:
+```
+
+### 3.3 ACT
+
+After user says **"yes" / "proceed"**, continue without repeated permission prompts for routine execution inside the approved scope.
+
+Re-align only if one of these happens:
+
+1. Scope expands to a new subsystem or materially more files.
+2. Destructive/external side effects are required (`git push`, deploy, data-destructive command).
+3. Two implementation attempts fail.
+4. New evidence contradicts the approved plan.
+
+### 3.4 Stop Signals
+
+If user says `stop`, `wait`, `hold on`, `cancel`, or `no`: halt immediately and wait.
+
+---
+
+## 4) Session and Git Safety
+
+### 4.1 Session Preflight (Start of Work)
+
+```bash
+git log --oneline -10
+git status --short
+ls thoughts/shared/handoffs
+bd ready || bd --no-db ready
+```
+
+Read latest handoff and summarize done vs pending before changes.
+
+### 4.2 Dirty File Rule (Clarified)
+
+- This rule is **target-scoped**, not repo-wide.
+- Pause only if a file you intend to edit is already dirty before you start, or if that same target file changes unexpectedly while you are editing it.
+- Unrelated dirty files elsewhere in the working tree do not block work and must not trigger a generic "safety pause."
+- If unrelated changes appear mid-task, note them in your final report and continue.
+- If you dirtied the target file this session, continue.
+
+### 4.3 Runtime Artifact Exceptions
+
+Dirty runtime artifacts are usually non-blocking:
+- `.beads/.migration-hint-ts`
+- `.beads/last-touched`
+- `.beads/sync-state.json`
+- `.beads/*.db`, `*.db-wal`, `*.db-shm`
+- daemon/socket/lock/runtime logs
+
+Do not commit runtime artifact noise.
+
+---
+
+## 5) Planning and Handoffs
+
+### 5.1 Canonical Spec Location
+
+All planning artifacts live in:
+
+```text
+specs/<id>-<slug>/
+  spec.md
+  plan.md
+  tasks.md
+  research.md (optional)
+```
+
+ID format: zero-padded sequential (`001`, `002`, ...).
+
+### 5.2 Bead Requirement for Specs
+
+- No spec without a bead.
+- `spec.md` must include bead ID at creation time.
+
+### 5.3 Current-State Handoff
+
+Use `thoughts/shared/handoffs/current.md` for latest state.
+
+---
+
+## 6) Beads Workflow (Lean)
+
+- Use `bd sync` for `.beads` state; do not hand-edit tracked bead state files.
+- If tracked `.beads` files are dirty, run `bd sync` (up to 2 attempts).
+- Ask user only if tracked bead files remain dirty after retries.
+- If only ignored runtime bead files are dirty, proceed.
+
+Essential commands:
+
+```bash
+bd ready
+bd update <id> --status=in_progress
+bd close <id> --reason="Done"
 bd sync
 ```
 
-**NEVER** run `git pull --rebase` blindly.
+---
 
-### Artifact Commit Gate (CRITICAL)
+## 7) Verification Standard
 
-Artifacts created by `/finalize`, `/handoff`, `/checkpoint`, and planning/research commands are not scratch output. They are project memory, are critical first-class artifacts, and must be tracked.
+Before saying "done":
 
-Before claiming work is complete:
-1. Run `git status --short` and look specifically for artifact paths (`thoughts/`, `specs/`, `.learnings/`, `docs/`, generated reports).
-2. Stage and commit relevant artifact files in the same task commit (or a dedicated follow-up commit).
-3. Push so artifacts are available to the next session/agent.
+1. Build relevant targets (`gj build <app>` when code changed).
+2. Run relevant tests.
+3. Verify behavior/log evidence for the changed path.
 
-Artifacts are part of the durable handoff contract: treat them like code changes and keep them in the same commit stream as the related feature/fix whenever possible.
-
-If any artifact is intentionally left uncommitted, explicitly list the file and reason in your final update.
-
-Never leave important `/finalize` output untracked without telling the user.
+If verification could not run, state exactly why.
 
 ---
 
-## 5) Beads Workflow
-
-### .beads/ Directory (CRITICAL)
-
-**✅ Use `bd sync`** to manage .beads/ files
-**❌ NEVER** `git restore .beads/` or `git checkout .beads/` or manually commit
-
-**Dirty-state triage is deterministic (do not ask user unless required):**
-1. Use `git status --porcelain` for blocking commit state.
-2. Use `git status --short --ignored .beads` only for diagnostics.
-3. If tracked `.beads/` files are dirty, run `bd sync` (max 2 attempts).
-4. After 2 attempts:
-   - If tracked `.beads/` files are still dirty (`M`, `A`, `D`, `??`), ask the user.
-   - If only ignored runtime files remain (`!!`), proceed without asking.
-5. Never commit ignored runtime files such as:
-   - `.beads/.migration-hint-ts`
-   - `.beads/last-touched`
-   - `.beads/sync-state.json`
-   - `.beads/*.db`, `*.db-wal`, `*.db-shm`
-   - daemon/socket/lock files and rotated daemon logs
-6. If a runtime file is accidentally tracked, untrack it once with `git rm --cached <path>` and keep it ignored.
-
-### Database Locking
-
-If `sqlite3: database is locked`:
-1. `pgrep -f "bd "` — check for other processes
-2. `sleep 2 && bd sync` — wait and retry
-3. If persistent: `pkill -f "bd "` then retry
-
-**Never ignore locking errors.**
-
-### Session Workflow
-
-```
-/focus <bead-id>  →  work  →  /checkpoint (optional)  →  /handoff
-```
-
-`/handoff` requires a bead — hard stop if none active.
-
-### Essential Commands
-
-```bash
-bd ready                    # Actionable work (no blockers)
-# If no local DB exists: bd --no-db ready
-bd update <id> --status=in_progress
-bd close <id> --reason="Done"
-bd sync                     # Commit and push
-```
-
-→ **Full docs:** `bd` and `bv` skills
-
----
-
-
-## 5.5) Tasks — Native Work Coordination
-
-You have native persistent task tracking via TaskCreate, TaskGet, TaskUpdate, and TaskList. These are NOT the same as TodoWrite. Use them.
-
-### When to Use Tasks
-
-**Use Tasks when:**
-- Work has 3+ steps
-- Steps have dependencies (do X before Y)
-- You're spawning subagents that need coordination
-- Work might survive beyond this context window
-- You need to track what's done vs what's remaining
-
-**Use TodoWrite only for:** Simple 1-2 item reminders within a single turn. If you're tempted to write more than 2 todos, use Tasks instead.
-
-### How to Use Tasks
-
-**Start of significant work:**
-
-1. `TaskCreate` — break work into discrete tasks with clear subjects
-2. `TaskUpdate` — set dependencies (addBlockedBy/addBlocks)
-3. `TaskUpdate` — mark first task in_progress, set owner to yourself
-
-**As you work:**
-
-1. `TaskUpdate` — mark completed when done
-2. `TaskList` — check what's unblocked and ready
-3. `TaskUpdate` — mark next task in_progress
-
-**For parallel agent work:**
-
-1. `TeamCreate` — create shared task list
-2. `TaskCreate` — create all tasks
-3. `Task` tool — spawn agents with team_name, they share the task list
-
-### Parallel Agent Limits (CRITICAL)
-
-**Max 5 concurrent agents.** More than 5 risks context window blowups during synthesis.
-
-**File-based synthesis pattern (MANDATORY for 3+ agents):**
-- Each agent MUST write its findings to a file (e.g., `specs/reviews/{agent-name}.md`)
-- The parent agent reads each file ONE AT A TIME after all agents complete
-- Extract only key items (P1/P2 issues, critical findings) during synthesis
-- Write the consolidated synthesis to a single output file
-- NEVER collect all agent outputs directly into conversation context
-
-**Why this is a hard rule:** Collecting 5-8 agent outputs in-context has repeatedly caused prompt-too-long errors, wasting entire sessions where all agent work completed successfully but could never be synthesized.
-
-```
-# CORRECT: File-based synthesis
-Agent 1 → writes to specs/reviews/architecture.md
-Agent 2 → writes to specs/reviews/security.md
-Agent 3 → writes to specs/reviews/performance.md
-Parent → reads each file, synthesizes → specs/reviews/SYNTHESIS.md
-
-# WRONG: In-context synthesis (WILL blow up with 3+ agents)
-Agent 1 → returns findings in conversation
-Agent 2 → returns findings in conversation
-Agent 3 → returns findings in conversation
-Parent → tries to synthesize → PROMPT TOO LONG
-```
-
-### Task Design Principles
-
-- **Subjects are imperative:** "Implement auth middleware" not "Auth middleware"
-- **activeForm is present continuous:** "Implementing auth middleware"
-- **Dependencies matter:** If task B needs task A's output, set `addBlockedBy: [A]`
-- **One concern per task:** Don't bundle unrelated work
-- **Description has acceptance criteria:** What does "done" look like?
-
-### Cross-Session Persistence
-
-Tasks persist to disk at `~/.claude/tasks/`. They survive session restarts and context compactions.
-
-**To share tasks across sessions**, set `CLAUDE_CODE_TASK_LIST_ID` in the project's `.claude/settings.json`:
-
-```json
-{
-  "env": {
-    "CLAUDE_CODE_TASK_LIST_ID": "my-project-name"
-  }
-}
-```
-
-This activates automatically when Claude Code runs in that project. All sessions see the same task list.
-
-**Ad-hoc** (one-off parallel sessions): `CLAUDE_CODE_TASK_LIST_ID=my-project claude`
-
-**UI**: Press `Ctrl+T` to toggle the task list in the terminal status area.
-
-### The Rule
-
-If you're about to do multi-step work and you haven't created Tasks for it — stop and create them first. Tasks make your work visible, trackable, and resumable. They're the difference between "I lost context" and "I know exactly where I left off."
-
----
-
-## 6) Tool Routing
-
-**Use skills for detailed procedures. This section routes you to the right skill.**
-
-### gj Tool (GrooveTech Build/Test)
-
-**Use `gj` for all build/run/test. Never use xcodebuild directly.**
-
-Quick ref: `gj build <app>`, `gj run <app>`, `gj test P0`, `gj logs <app> "pattern"`
-
-For physical-device deep OSLog capture, use:
-- `gj logs <app> --device-unified --since 20m`
-- This is the default agent path for on-device unified logs (slower; archive-based, not live stream).
-- For playback triage, prefer: `gj logs <app> --device-unified --player-summary`.
-- If summary is too sparse, widen with process-scoped CoreMedia: `--process <name> --include-coremedia`.
-- For unattended runs when admin auth is required, pre-cache once with: `gj auth unlock`.
-
-→ **Full docs:** `gj-tool` skill
-
----
-
-## 7) Tools Catalog
-
-### Tool Types (Know the difference!)
-
-| Type | Examples | Timeout? |
-|------|----------|----------|
-| **Regular CLI** | `rp-cli`, `bd`, `gj`, `cass --robot`, `rg` | ❌ NO - let it finish |
-| **TUI/Interactive** | `pi`, `claude`, `codex`, bare `cass` | ✅ Only for --help capture |
-| **Background** | `oracle`, `nohup` processes | ❌ NO - runs detached |
-
-**The rule:** Regular CLI over stdout/socket? Let it finish. Don't add timeouts and call it "failed."
-
-### Tool Quick Reference
-
-| Tool | Key Constraint | Skill |
-|------|----------------|-------|
-| `gj` | Never xcodebuild | `gj-tool` |
-| `oracle` | Run DETACHED (`nohup bash -lc`), 45min+ normal | `oracle` |
-| `cass` | Never bare `cass`, always `--robot` | `cass` |
-| `bv` | Use `--robot-*` flags | `bv` |
-| `rp-cli` | No timeouts, `builder` can take 60-90s | `rp-cli` |
-| `bd` | Don't manually edit `.beads/` | See Beads section |
-
-### Task Delegation (interactive_shell)
-
-**When to delegate:** Long-running tasks, user should see progress, user says "delegate" or "hands-free"
-
-```typescript
-interactive_shell({
-  command: 'pi "Clear prompt with full context"',
-  mode: "hands-free",
-  reason: "Brief description"
-})
-```
-
-→ **Full docs:** `interactive-shell` skill
-
-### Code Search
-
-- **ast-grep** — structure matters, safe rewrites
-- **ripgrep** — text/regex, fastest for literals
-
-Rule: Need correctness → `ast-grep`. Need speed → `rg`.
-
----
-
-## 8) Critical Thinking & Escalation
-
-### Confirm Before Acting on Ambiguous References
-
-When user says "this", "that", "the tool", "the skill" without naming it:
-1. Look at their recent message for explicit names
-2. If still unclear, ask: "To confirm - you're asking about [X], correct?"
-3. NEVER guess and load a skill based on inference
-
-Common confusion patterns:
-- User says "this skill" → could mean the skill they're writing OR the skill they want you to use
-- User says "investigate this" → confirm WHAT before loading investigation skills
-
-### When Uncertain
-
-Say so. Ask. **Never fabricate.**
-
-```
-I'm not fully certain about [aspect].
-My understanding: [interpretation]
-Is this correct, or am I missing something?
-```
-
-### Intellectual Honesty (CRITICAL)
-
-**Inferences are not findings.** When you deduce, guess, or infer something:
-- Say "I think..." or "My guess is..." or "I couldn't find it, but I infer..."
-- NEVER say "Found it" or present conclusions as discoveries
-- NEVER fabricate sources, rules, or explanations you can't point to
-- If you searched and found nothing, say "I searched X, Y, Z and found nothing"
-
-**"I don't know" is a valid answer.** Preferable to a confident-sounding fabrication.
-
-**Distinguish clearly:**
-- **Found**: "Line 47 of config.yaml says X" (citable)
-- **Inferred**: "Based on the naming pattern, I think X" (reasoning visible)
-- **Don't know**: "I couldn't find where this comes from"
-
-Presenting guesses as facts is **lying**. It wastes user time and erodes trust.
-
-### Bounded Exploration (10 Tool Call Limit)
-
-When debugging or investigating code, set a hard limit:
-- After **10 tool calls** of exploration (Read, Grep, Glob), PAUSE
-- Present what you've found so far and your current hypothesis
-- Ask the user which direction to pursue
-- Do NOT silently explore the entire codebase hoping to stumble on the answer
-
-**Form a hypothesis early and test it.** If after 15 tool calls you don't have a strong lead, present your top 2-3 theories and ask which to pursue.
-
-**Why this matters:** Unbounded exploration wastes context window space, produces no visible output for the user, and often leads to interruptions when the user realizes you've been reading files for 20+ turns without surfacing findings.
-
-### After 2 Failed Attempts
-1. STOP editing
-2. Report what was tried
-3. Ask user for guidance
-
-### Critical Work Standard
-
-When asked to check status against requirements, specifications, or documents:
-- You MUST find, read, and verify against the actual source document
-- NEVER rely on memory, assumptions, or prior knowledge
-- If you cannot locate the document, explicitly state this and ask for the path
-- Always say "Let me find and read [document name]" before making status assessments
-
-Making claims about completeness without reading actual requirements is a fundamental failure.
-
-### Domain Humility
-- Complex domains require extra caution
-- Assume the user knows more than you about their domain
-- If something seems wrong, ASK before "fixing"
-- Don't apply generic patterns to specialized code
-
-### Scope Creep Prevention
-- NEVER refactor while fixing bugs
-- NEVER "improve" code that wasn't requested
-- NEVER add abstraction "for the future"
-- If tempted to do more than asked → STOP and ask
-
-### Anti-Patterns (NEVER DO)
-
-| Category | Anti-Pattern |
-|----------|--------------|
-| **Autonomy** | Acting without alignment on significant work |
-| **Scope** | Refactoring while fixing bugs |
-| **Abstraction** | Adding layers "for the future" |
-| **Continuation** | Proceeding after "stop" |
-| **Assumptions** | Guessing instead of reading source documents |
-| **Fabrication** | Presenting inferences as findings; saying "Found it" when you deduced it; inventing sources |
-| **Legacy** | Wrapping v1/POC code instead of deleting it; adding "compatibility layers" for temporary code |
-| **Timeout Bail** | Adding arbitrary timeouts to CLI tools (especially `rp-cli`), then declaring "failure" when they expire, skipping prescribed workflows to fall back to manual approaches |
-| **Blind Exploration** | Reading 20+ files without surfacing findings; unbounded codebase exploration without forming a hypothesis |
-| **Stale Assumptions** | Starting work without checking git log or prior artifacts; re-doing completed work; declaring work "already done" without verifying |
-| **Artifact Loss** | Generating `/finalize` or handoff artifacts, then leaving them unstaged/uncommitted so project memory is lost |
-
-### Workflow Compliance
-
-When a prescribed workflow has a step that "fails":
-
-1. **Distinguish real failure from impatience:** Timeout you added? Not a failure. Remove timeout, retry.
-2. **Before bailing:** Ask user if you should wait or try different approach
-3. **NEVER silently replace prescribed workflow** with your own approach
-
-**Pattern to avoid:** Timeout → "didn't work" → fall back to manual
-**Correct pattern:** Let tool finish → get results → use as intended
-
-### Verify Before Reporting
-
-Before saying "Done" or "Fixed":
-1. **Build succeeded?** Run `gj build` and confirm (if code changed)
-2. **Tests pass?** Run relevant tests if they exist
-3. **Behavior verified?** Check logs or screenshots if applicable
-
-If you can't verify, say: "I made the change but couldn't verify because [reason]."
-
----
-
-## 9) Frontend Aesthetics (Optional)
-
-- Avoid AI-slop UI; be opinionated and distinctive.
-- Typography: use real fonts; avoid default stacks.
-- Color: commit to a palette; avoid purple-on-white clichés.
-- Motion: prefer 1–2 high-impact moments over micro-motion spam.
-- Background: add depth via gradients/patterns.
+## 8) Tooling Defaults
+
+- Prefer `rg` / `rg --files` for search.
+- Do not add arbitrary command timeouts to normal CLI tools.
+- Use skills/docs for detailed procedures; keep AGENTS focused on constraints and decision rules.
 
 ---
 

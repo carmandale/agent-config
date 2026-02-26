@@ -10,7 +10,8 @@ This command uses the unified artifact generator: `~/.claude/scripts/cc-artifact
 - **Bead REQUIRED**
 - Artifact must be written to `thoughts/shared/handoffs/<session>/`
 - Outcome is required
-- Commit/push only if explicitly requested
+- Commit/push are required to complete `/finalize`
+- Include related planning artifacts in the same commit (for example: `specs/`, `tasks/`, `thoughts/shared/plans/`)
 
 ## Steps
 
@@ -278,9 +279,13 @@ gh issue close <num> -c "Completed - see finalize artifact"
 
 If there is no `external-ref`, **skip this step** and proceed to commit/push. Do NOT ask the user for a GH issue number.
 
-### 6) Commit / push only if user requests
+### 6) Commit and push
 ```bash
 git add thoughts/shared/handoffs/*/*.yaml
+if [ -d specs ]; then git add specs; fi
+if [ -d docs/specs ]; then git add docs/specs; fi
+if [ -d tasks ]; then git add tasks; fi
+if [ -d thoughts/shared/plans ]; then git add thoughts/shared/plans; fi
 git commit -m "finalize: <short description>"
 git push
 ```
