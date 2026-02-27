@@ -1,7 +1,8 @@
 ---
+name: rp-reminder
 description: Reminder to use rp-cli
 repoprompt_managed: true
-repoprompt_skills_version: 6
+repoprompt_skills_version: 7
 repoprompt_variant: cli
 ---
 
