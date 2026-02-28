@@ -34,8 +34,8 @@ emit() {
     local value="$*"
     value="${value//$'\n'/ }"
     value="${value//$'\r'/ }"
-    if [[ -n "${HOME:-}" ]]; then
-        value="${value//${HOME}/~}"
+    if [[ -n "${HOME:-}" && "$value" == "$HOME"* ]]; then
+        value="~${value#"$HOME"}"
     fi
     printf '%s=%s\n' "$key" "$value"
 }
@@ -109,28 +109,41 @@ record_external_path() {
 
 record_tool() {
     local name="$1"
+    local bin=""
     local ver=""
-    if command -v "$name" >/dev/null 2>&1; then
+    if [[ -x "/opt/homebrew/bin/$name" ]]; then
+        bin="/opt/homebrew/bin/$name"
+    elif command -v "$name" >/dev/null 2>&1; then
+        bin="$(command -v "$name")"
+    fi
+
+    if [[ -n "$bin" ]]; then
         case "$name" in
-            git) ver="$(git --version 2>/dev/null | head -n 1 || true)" ;;
-            bash) ver="$(bash --version 2>/dev/null | head -n 1 || true)" ;;
-            bun) ver="$(bun --version 2>/dev/null | head -n 1 || true)" ;;
+            git) ver="$("$bin" --version 2>/dev/null | head -n 1 || true)" ;;
+            bash) ver="$("$bin" --version 2>/dev/null | head -n 1 || true)" ;;
+            bun) ver="$("$bin" --version 2>/dev/null | head -n 1 || true)" ;;
             bunx)
-                ver="$(bunx --version 2>/dev/null | head -n 1 || true)"
-                if [[ -z "$ver" ]] && command -v bun >/dev/null 2>&1; then
-                    ver="bundled-with-bun $(bun --version 2>/dev/null | head -n 1 || true)"
+                ver="$("$bin" --version 2>/dev/null | head -n 1 || true)"
+                if [[ -z "$ver" ]]; then
+                    if [[ -x "/opt/homebrew/bin/bun" ]]; then
+                        ver="bundled-with-bun $(/opt/homebrew/bin/bun --version 2>/dev/null | head -n 1 || true)"
+                    elif command -v bun >/dev/null 2>&1; then
+                        ver="bundled-with-bun $(bun --version 2>/dev/null | head -n 1 || true)"
+                    fi
                 fi
                 ;;
-            node) ver="$(node --version 2>/dev/null | head -n 1 || true)" ;;
-            bd) ver="$(bd --version 2>/dev/null | head -n 1 || true)" ;;
-            rg) ver="$(rg --version 2>/dev/null | head -n 1 || true)" ;;
+            node) ver="$("$bin" --version 2>/dev/null | head -n 1 || true)" ;;
+            bd) ver="$("$bin" --version 2>/dev/null | head -n 1 || true)" ;;
+            rg) ver="$("$bin" --version 2>/dev/null | head -n 1 || true)" ;;
             *) ver="present" ;;
         esac
         [[ -n "$ver" ]] || ver="present"
         emit "tool.${name}.present" "yes"
+        emit "tool.${name}.bin" "$bin"
         emit "tool.${name}.version" "$ver"
     else
         emit "tool.${name}.present" "no"
+        emit "tool.${name}.bin" "missing"
         emit "tool.${name}.version" "missing"
     fi
 }
