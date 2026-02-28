@@ -34,6 +34,8 @@ cd ~/.agent-config
 │   └── ...
 ├── instructions/
 │   └── AGENTS.md            # Unified global instructions
+├── tools-bin/
+│   └── agent-config-parity  # Cross-machine parity + version sync utility
 ├── install.sh               # Creates symlinks
 └── README.md
 ```
@@ -46,13 +48,16 @@ The `install.sh` script creates symlinks from each agent's config location to th
 ~/.pi/agent/commands     → ~/.agent-config/commands
 ~/.claude/commands       → ~/.agent-config/commands
 ~/.codex/prompts         → ~/.agent-config/commands
-~/.factory/commands      → ~/.agent-config/commands
 ~/.config/opencode/commands → ~/.agent-config/commands
 
 ~/.pi/agent/AGENTS.md    → ~/.agent-config/instructions/AGENTS.md
 ~/.claude/CLAUDE.md      → ~/.agent-config/instructions/AGENTS.md
 ~/.codex/AGENTS.md       → ~/.agent-config/instructions/AGENTS.md
-~/.factory/droids/       → ~/.agent-config/skills (custom droids)
+
+~/.claude/skills         → ~/.agent-config/skills
+~/.codex/skills          → ~/.agent-config/skills
+~/.config/agent-skills   → ~/.agent-config/skills
+~/.pi/agent/skills       → ~/.agent-config/skills
 ```
 
 ## Dual Instructions Support
@@ -177,6 +182,61 @@ git pull
 ./install.sh  # Re-run if symlinks are broken
 ```
 
+## Parity and Version Sync (Laptop <-> Mac Mini)
+
+Use `tools-bin/agent-config-parity` to make parity explicit and reproducible.
+
+### Step 1: Align repo version on both machines
+
+```bash
+cd ~/.agent-config
+git fetch origin
+git checkout main
+git pull --ff-only
+git rev-parse HEAD
+```
+
+The `git rev-parse HEAD` value must match on laptop and Mac mini.
+
+### Step 2: Run installers from the same checkout
+
+```bash
+cd ~/.agent-config
+./install.sh
+./install-all.sh
+```
+
+### Step 3: Capture snapshots
+
+Laptop:
+```bash
+~/.agent-config/tools-bin/agent-config-parity snapshot --output /tmp/laptop.snapshot
+```
+
+Mac mini:
+```bash
+~/.agent-config/tools-bin/agent-config-parity snapshot --output /tmp/mini.snapshot
+```
+
+### Step 4: Compare snapshots
+
+```bash
+~/.agent-config/tools-bin/agent-config-parity compare /tmp/laptop.snapshot /tmp/mini.snapshot
+```
+
+No diff means parity for tracked repo/symlink/tool keys.
+
+### Step 5: Human-readable audit
+
+```bash
+~/.agent-config/tools-bin/agent-config-parity report
+```
+
+Focus on:
+- `repo.sha`
+- `managed.*.status` and `managed.*.actual`
+- `tool.*.version`
+
 ## Troubleshooting
 
 ### Commands not showing up
@@ -198,6 +258,17 @@ cd ~/.agent-config
 - **Claude Code**: Instructions load per-session
 - **Codex**: Restart codex
 - **Droid**: Custom droids load from `~/.factory/droids/`
+
+## What Is Outside `.agent-config`
+
+These are not fully contained in this repo and can still break parity:
+
+- Agent-local settings files (`~/.claude/settings.json`, `~/.codex/config.*`, `~/.pi/agent/config.json`, `~/.config/opencode/config.*`)
+- Compound/plugin-generated directories in agent homes (for example under `~/.pi/agent/compound-engineering`, `~/.config/opencode/compound-engineering`, `~/.factory/`)
+- Toolchain versions (`git`, `bash`, `bun/bunx`, `node`, `bd`, `rg`)
+- Auth state and credentials (environment variables, keychain entries, logged-in sessions)
+
+Run `~/.agent-config/tools-bin/agent-config-parity report` to see these surfaces explicitly.
 
 ## License
 
@@ -266,7 +337,7 @@ cd ~/.agent-config
 
 This runs:
 1. `install.sh` - Creates symlinks for commands, instructions, skills
-2. `bunx @every-env/compound-plugin install compound-engineering --to opencode --also codex,droid,pi`
+2. `bunx @every-env/compound-plugin install compound-engineering --to opencode --also droid`
 
 ### What Each System Provides
 

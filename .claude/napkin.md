@@ -37,12 +37,15 @@
 - Directory symlinks (not individual file symlinks) - new files automatically appear
 - For Claude Code: uninstall native plugin, use symlinks via ~/.agent-config
 - For agents: `~/.claude/agents/compound` → `~/.agent-config/agents/compound` (add inside existing directory)
+- For cross-machine setup, capture and diff a symlink/dir matrix between source and target machines before declaring parity
+- Use `tools-bin/agent-config-parity` snapshots plus `compare` to validate parity and external-surface/tool-version drift
 
 ## Patterns That Don't Work
 - Individual per-skill symlinks - get stale when new skills are added to repo
 - Native plugin + symlinks together - causes duplication
 - Modifying installPath without removing cached files - duplicates remain
 - Proposing solutions before understanding complete architecture
+- Assuming README install behavior is fully current without checking `install.sh` and `install-all.sh` directly
 
 ## Domain Notes
 - **Claude Code plugins** provide: skills/, commands/, agents/, CLAUDE.md, .claude-plugin/

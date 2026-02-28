@@ -1,0 +1,310 @@
+#!/usr/bin/env bash
+#==============================================================================
+# agent-config-parity - Capture and compare cross-machine config parity
+#
+# Commands:
+#   report                     Human-readable parity report (default)
+#   snapshot [--output FILE]   Machine-readable snapshot for diff/compare
+#   compare <A> <B>            Compare two snapshot files
+#
+# This script makes two things explicit:
+# 1) What is managed by ~/.agent-config symlinks
+# 2) What lives outside ~/.agent-config and still affects behavior
+#==============================================================================
+
+set -euo pipefail
+
+usage() {
+    cat <<'USAGE'
+Usage:
+  agent-config-parity report
+  agent-config-parity snapshot [--output FILE]
+  agent-config-parity compare <snapshot_a> <snapshot_b>
+
+Examples:
+  ~/.agent-config/tools-bin/agent-config-parity snapshot --output /tmp/laptop.snapshot
+  ~/.agent-config/tools-bin/agent-config-parity snapshot --output /tmp/mini.snapshot
+  ~/.agent-config/tools-bin/agent-config-parity compare /tmp/laptop.snapshot /tmp/mini.snapshot
+USAGE
+}
+
+emit() {
+    local key="$1"
+    shift
+    local value="$*"
+    value="${value//$'\n'/ }"
+    value="${value//$'\r'/ }"
+    if [[ -n "${HOME:-}" ]]; then
+        value="${value//${HOME}/~}"
+    fi
+    printf '%s=%s\n' "$key" "$value"
+}
+
+path_state() {
+    local path="$1"
+    if [[ -L "$path" ]]; then
+        printf 'symlink|%s' "$(readlink "$path")"
+    elif [[ -d "$path" ]]; then
+        printf 'dir|%s' "$path"
+    elif [[ -f "$path" ]]; then
+        printf 'file|%s' "$path"
+    elif [[ -e "$path" ]]; then
+        printf 'other|%s' "$path"
+    else
+        printf 'missing|'
+    fi
+}
+
+record_managed_path() {
+    local key="$1"
+    local path="$2"
+    local expected="$3"
+
+    local state kind actual status
+    state="$(path_state "$path")"
+    kind="${state%%|*}"
+    actual="${state#*|}"
+
+    case "$kind" in
+        symlink)
+            if [[ "$actual" == "$expected" ]]; then
+                status="ok"
+            else
+                status="drift_target"
+            fi
+            ;;
+        missing)
+            status="missing"
+            ;;
+        dir|file|other)
+            status="drift_not_symlink_${kind}"
+            ;;
+        *)
+            status="unknown"
+            ;;
+    esac
+
+    emit "managed.${key}.path" "$path"
+    emit "managed.${key}.expected" "$expected"
+    emit "managed.${key}.kind" "$kind"
+    emit "managed.${key}.actual" "$actual"
+    emit "managed.${key}.status" "$status"
+}
+
+record_external_path() {
+    local key="$1"
+    local path="$2"
+    local note="$3"
+
+    local state kind actual
+    state="$(path_state "$path")"
+    kind="${state%%|*}"
+    actual="${state#*|}"
+
+    emit "external.${key}.path" "$path"
+    emit "external.${key}.kind" "$kind"
+    emit "external.${key}.actual" "$actual"
+    emit "external.${key}.note" "$note"
+}
+
+record_tool() {
+    local name="$1"
+    local ver=""
+    if command -v "$name" >/dev/null 2>&1; then
+        case "$name" in
+            git) ver="$(git --version 2>/dev/null | head -n 1 || true)" ;;
+            bash) ver="$(bash --version 2>/dev/null | head -n 1 || true)" ;;
+            bun) ver="$(bun --version 2>/dev/null | head -n 1 || true)" ;;
+            bunx)
+                ver="$(bunx --version 2>/dev/null | head -n 1 || true)"
+                if [[ -z "$ver" ]] && command -v bun >/dev/null 2>&1; then
+                    ver="bundled-with-bun $(bun --version 2>/dev/null | head -n 1 || true)"
+                fi
+                ;;
+            node) ver="$(node --version 2>/dev/null | head -n 1 || true)" ;;
+            bd) ver="$(bd --version 2>/dev/null | head -n 1 || true)" ;;
+            rg) ver="$(rg --version 2>/dev/null | head -n 1 || true)" ;;
+            *) ver="present" ;;
+        esac
+        [[ -n "$ver" ]] || ver="present"
+        emit "tool.${name}.present" "yes"
+        emit "tool.${name}.version" "$ver"
+    else
+        emit "tool.${name}.present" "no"
+        emit "tool.${name}.version" "missing"
+    fi
+}
+
+generate_snapshot() {
+    local tmp
+    tmp="$(mktemp "${TMPDIR:-/tmp}/agent-config-parity.XXXXXX")"
+
+    local script_dir repo_dir host_name
+    script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    repo_dir="$(cd "$script_dir/.." && pwd)"
+    host_name="$(scutil --get ComputerName 2>/dev/null || hostname)"
+
+    {
+        emit "snapshot.version" "1"
+        emit "snapshot.generated_at_utc" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+        emit "snapshot.host" "$host_name"
+        emit "snapshot.user" "${USER:-unknown}"
+
+        emit "repo.path" "$repo_dir"
+        if git -C "$repo_dir" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+            emit "repo.branch" "$(git -C "$repo_dir" rev-parse --abbrev-ref HEAD)"
+            emit "repo.sha" "$(git -C "$repo_dir" rev-parse HEAD)"
+            emit "repo.origin" "$(git -C "$repo_dir" remote get-url origin 2>/dev/null || echo missing)"
+            emit "repo.dirty_entries" "$(git -C "$repo_dir" status --short | wc -l | tr -d ' ')"
+        else
+            emit "repo.branch" "not-a-git-repo"
+            emit "repo.sha" "unknown"
+            emit "repo.origin" "unknown"
+            emit "repo.dirty_entries" "unknown"
+        fi
+
+        emit "system.os" "$(uname -s)"
+        emit "system.arch" "$(uname -m)"
+        if command -v sw_vers >/dev/null 2>&1; then
+            emit "system.macos.version" "$(sw_vers -productVersion)"
+            emit "system.macos.build" "$(sw_vers -buildVersion)"
+        fi
+
+        # Managed by install.sh
+        record_managed_path "pi_commands" "$HOME/.pi/agent/commands" "$repo_dir/commands"
+        record_managed_path "pi_instructions" "$HOME/.pi/agent/AGENTS.md" "$repo_dir/instructions/AGENTS.md"
+        record_managed_path "claude_commands" "$HOME/.claude/commands" "$repo_dir/commands"
+        record_managed_path "claude_instructions" "$HOME/.claude/CLAUDE.md" "$repo_dir/instructions/AGENTS.md"
+        record_managed_path "codex_prompts" "$HOME/.codex/prompts" "$repo_dir/commands"
+        record_managed_path "codex_instructions" "$HOME/.codex/AGENTS.md" "$repo_dir/instructions/AGENTS.md"
+        record_managed_path "opencode_commands" "$HOME/.config/opencode/commands" "$repo_dir/commands"
+        record_managed_path "claude_skills" "$HOME/.claude/skills" "$repo_dir/skills"
+        record_managed_path "codex_skills" "$HOME/.codex/skills" "$repo_dir/skills"
+        record_managed_path "agent_skills" "$HOME/.config/agent-skills" "$repo_dir/skills"
+        record_managed_path "pi_skills" "$HOME/.pi/agent/skills" "$repo_dir/skills"
+
+        # Outside .agent-config (important for full parity)
+        record_external_path "claude_settings" "$HOME/.claude/settings.json" "agent-local settings/hook config"
+        record_external_path "codex_config_toml" "$HOME/.codex/config.toml" "agent-local settings"
+        record_external_path "codex_config_json" "$HOME/.codex/config.json" "agent-local settings"
+        record_external_path "pi_config_json" "$HOME/.pi/agent/config.json" "agent-local settings"
+        record_external_path "opencode_config_json" "$HOME/.config/opencode/config.json" "agent-local settings"
+        record_external_path "opencode_config_toml" "$HOME/.config/opencode/config.toml" "agent-local settings"
+        record_external_path "pi_compound_engineering" "$HOME/.pi/agent/compound-engineering" "compound-plugin generated content"
+        record_external_path "opencode_compound_engineering" "$HOME/.config/opencode/compound-engineering" "compound-plugin generated content"
+        record_external_path "factory_commands" "$HOME/.factory/commands" "may be plugin-managed or manual"
+        record_external_path "factory_droids" "$HOME/.factory/droids" "may be plugin-managed or manual"
+
+        emit "external.note_1" "API keys/tokens in env vars, keychain, and login state are outside .agent-config"
+        emit "external.note_2" "Tool binaries and versions are outside .agent-config and must be compared"
+
+        record_tool git
+        record_tool bash
+        record_tool bun
+        record_tool bunx
+        record_tool node
+        record_tool bd
+        record_tool rg
+    } >"$tmp"
+
+    LC_ALL=C sort "$tmp"
+    rm -f "$tmp"
+}
+
+report_snapshot() {
+    local tmp
+    tmp="$(mktemp "${TMPDIR:-/tmp}/agent-config-parity-report.XXXXXX")"
+    generate_snapshot >"$tmp"
+
+    echo "== Agent Config Parity Report =="
+    grep -E '^snapshot\.|^repo\.|^system\.' "$tmp"
+    echo ""
+    echo "== Managed Surfaces (from install.sh expectations) =="
+    grep -E '^managed\..*\.status=' "$tmp"
+    echo ""
+    echo "== Managed Surfaces (actual targets) =="
+    grep -E '^managed\..*\.actual=' "$tmp"
+    echo ""
+    echo "== Outside .agent-config (still affects parity) =="
+    grep -E '^external\..*\.kind=|^external\..*\.actual=|^external\.note_' "$tmp"
+    echo ""
+    echo "== Tool Versions (outside .agent-config) =="
+    grep -E '^tool\..*\.version=' "$tmp"
+    echo ""
+    echo "Tip: create stable snapshot files and compare with:"
+    echo "  agent-config-parity snapshot --output /tmp/laptop.snapshot"
+    echo "  agent-config-parity compare /tmp/laptop.snapshot /tmp/mini.snapshot"
+
+    rm -f "$tmp"
+}
+
+compare_snapshots() {
+    local a="$1"
+    local b="$2"
+    if [[ ! -f "$a" ]]; then
+        echo "Snapshot not found: $a" >&2
+        exit 2
+    fi
+    if [[ ! -f "$b" ]]; then
+        echo "Snapshot not found: $b" >&2
+        exit 2
+    fi
+
+    local fa fb
+    fa="$(mktemp "${TMPDIR:-/tmp}/agent-config-parity-compare-a.XXXXXX")"
+    fb="$(mktemp "${TMPDIR:-/tmp}/agent-config-parity-compare-b.XXXXXX")"
+
+    grep -Ev '^(snapshot\.generated_at_utc|snapshot\.host|snapshot\.user)=' "$a" >"$fa"
+    grep -Ev '^(snapshot\.generated_at_utc|snapshot\.host|snapshot\.user)=' "$b" >"$fb"
+
+    if diff -u "$fa" "$fb"; then
+        rm -f "$fa" "$fb"
+        echo ""
+        echo "Parity check passed: snapshots are identical."
+        exit 0
+    fi
+
+    rm -f "$fa" "$fb"
+    echo ""
+    echo "Parity drift detected."
+    echo "Focus first on:"
+    echo "  repo.sha"
+    echo "  managed.*.status"
+    echo "  managed.*.actual"
+    echo "  tool.*.version"
+    exit 1
+}
+
+cmd="${1:-report}"
+case "$cmd" in
+    report)
+        report_snapshot
+        ;;
+    snapshot)
+        shift || true
+        if [[ "${1:-}" == "--output" ]]; then
+            if [[ -z "${2:-}" ]]; then
+                echo "Missing value for --output" >&2
+                exit 2
+            fi
+            generate_snapshot >"$2"
+            echo "Wrote snapshot: $2"
+        else
+            generate_snapshot
+        fi
+        ;;
+    compare)
+        if [[ $# -ne 3 ]]; then
+            usage
+            exit 2
+        fi
+        compare_snapshots "$2" "$3"
+        ;;
+    -h|--help|help)
+        usage
+        ;;
+    *)
+        usage
+        exit 2
+        ;;
+esac
