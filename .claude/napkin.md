@@ -20,6 +20,7 @@
 - Wants important generated artifacts (especially `/finalize` outputs in `thoughts/`) committed and tracked, not left uncommitted
 - Wants spec directories numbered sequentially with 3-digit IDs (`001-*`, `002-*`, ...) and each spec linked to an associated bead
 - Wants dirty-file safety checks to be scoped to files being edited, not unrelated working-tree changes
+- Does not want laptop state treated as gospel during parity migrations; use repo-defined standards and clean up laptop drift
 
 ## Patterns That Work
 - **Multi-agent symlink architecture**:

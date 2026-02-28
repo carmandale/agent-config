@@ -14,17 +14,17 @@ Plan: `specs/001-openclaw-mac-mini-parity-rollout/plan.md`
 
 ## Phase 2: Install (OpenClaw Mac Mini)
 
-- [ ] Ensure Mac mini repo checkout matches baseline SHA.
-- [ ] Run `./install.sh` and record output.
-- [ ] Run `./install-all.sh` if parity scope includes plugin-generated surfaces.
-- [ ] Capture any installer backup paths created during run.
+- [x] Ensure Mac mini repo checkout matches baseline SHA.
+- [x] Run `./install.sh` and record output.
+- [x] Run `./install-all.sh` if parity scope includes plugin-generated surfaces.
+- [x] Capture any installer backup paths created during run.
 
 ## Phase 3: Verify Parity
 
-- [ ] Run `tools-bin/agent-config-parity snapshot --output /tmp/mini.snapshot` on Mac mini.
-- [ ] Run `tools-bin/agent-config-parity compare /tmp/laptop.snapshot /tmp/mini.snapshot`.
-- [ ] Run smoke checks for representative command/instruction/skill visibility per agent.
-- [ ] Classify each delta as expected, intentional, or blocking.
+- [x] Run `tools-bin/agent-config-parity snapshot --output /tmp/mini.snapshot` on Mac mini.
+- [x] Run `tools-bin/agent-config-parity compare /tmp/laptop.snapshot /tmp/mini.snapshot`.
+- [x] Run smoke checks for representative command/instruction/skill visibility per agent.
+- [x] Classify each delta as expected, intentional, or blocking.
 
 ## Phase 4: Resolve Drift
 

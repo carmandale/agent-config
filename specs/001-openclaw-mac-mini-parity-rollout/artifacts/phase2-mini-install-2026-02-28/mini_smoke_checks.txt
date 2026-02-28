@@ -1,0 +1,10 @@
+OK /Users/chipcarman/.pi/agent/commands/handoff.md
+OK /Users/chipcarman/.pi/agent/AGENTS.md
+OK /Users/chipcarman/.pi/agent/skills
+OK /Users/chipcarman/.claude/commands/handoff.md
+OK /Users/chipcarman/.claude/CLAUDE.md
+OK /Users/chipcarman/.claude/skills
+OK /Users/chipcarman/.codex/prompts/handoff.md
+OK /Users/chipcarman/.codex/AGENTS.md
+OK /Users/chipcarman/.codex/skills
+OK /Users/chipcarman/.config/opencode/commands/handoff.md

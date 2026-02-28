@@ -1,0 +1,78 @@
+
+╔════════════════════════════════════════════════════════════════╗
+║           Complete Agent Setup - All Platforms                 ║
+╚════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────┐
+│ Step 1: Setting up symlinks (commands, instructions, skills)   │
+└─────────────────────────────────────────────────────────────────┘
+
+╔════════════════════════════════════════════════════════════════╗
+║              Agent Config - Unified Setup                      ║
+╚════════════════════════════════════════════════════════════════╝
+
+[0;34m▸[0m Source: /Users/chipcarman/.agent-config
+
+─── Pi Agent ───
+[0;32m✓[0m Linked: /Users/chipcarman/.pi/agent/commands → /Users/chipcarman/.agent-config/commands
+[0;32m✓[0m Linked: /Users/chipcarman/.pi/agent/AGENTS.md → /Users/chipcarman/.agent-config/instructions/AGENTS.md
+
+─── Claude Code ───
+[0;32m✓[0m Linked: /Users/chipcarman/.claude/commands → /Users/chipcarman/.agent-config/commands
+[0;32m✓[0m Linked: /Users/chipcarman/.claude/CLAUDE.md → /Users/chipcarman/.agent-config/instructions/AGENTS.md
+
+─── Codex ───
+[0;32m✓[0m Linked: /Users/chipcarman/.codex/prompts → /Users/chipcarman/.agent-config/commands
+[0;32m✓[0m Linked: /Users/chipcarman/.codex/AGENTS.md → /Users/chipcarman/.agent-config/instructions/AGENTS.md
+
+─── OpenCode ───
+[0;32m✓[0m Linked: /Users/chipcarman/.config/opencode/commands → /Users/chipcarman/.agent-config/commands
+[0;34m▸[0m OpenCode uses project-level .opencode/ for instructions
+
+╔════════════════════════════════════════════════════════════════╗
+║                    Setup Complete! ✓                           ║
+╚════════════════════════════════════════════════════════════════╝
+
+Commands available: 46
+
+Try these commands in any agent:
+  /handoff     - End-of-session summary
+  /checkpoint  - Mid-session context compression
+  /commit      - Smart commit workflow
+  /debug       - Structured debugging
+
+Edit global instructions:
+  /Users/chipcarman/.agent-config/instructions/AGENTS.md
+
+─── Skills (Unified) ───
+[0;32m✓[0m Linked: /Users/chipcarman/.claude/skills → /Users/chipcarman/.agent-config/skills
+[0;32m✓[0m Linked: /Users/chipcarman/.codex/skills → /Users/chipcarman/.agent-config/skills
+[0;32m✓[0m Linked: /Users/chipcarman/.config/agent-skills → /Users/chipcarman/.agent-config/skills
+[0;32m✓[0m Linked: /Users/chipcarman/.pi/agent/skills → /Users/chipcarman/.agent-config/skills
+
+[0;34m▸[0m Skills unified: 226 skills across 257 categories
+
+
+┌─────────────────────────────────────────────────────────────────┐
+│ Step 2: Installing compound-engineering plugin (all targets)   │
+└─────────────────────────────────────────────────────────────────┘
+
+⚠ bunx not found. Install bun first: curl -fsSL https://bun.sh/install | bash
+  Skipping compound-engineering install.
+
+╔════════════════════════════════════════════════════════════════╗
+║                    All Agents Updated! ✓                       ║
+╚════════════════════════════════════════════════════════════════╝
+
+Global targets installed:
+  ✓ Pi          ~/.pi/agent/
+  ✓ Claude      ~/.claude/
+  ✓ Codex       ~/.codex/
+  ✓ OpenCode    ~/.config/opencode/
+  ✓ Factory     ~/.factory/
+
+Project-level targets (run in each project):
+  bunx @every-env/compound-plugin install compound-engineering --to copilot
+  bunx @every-env/compound-plugin install compound-engineering --to gemini
+  bunx @every-env/compound-plugin install compound-engineering --to kiro
+
