@@ -84,6 +84,16 @@ log_info "Source: $SCRIPT_DIR"
 echo ""
 
 #==============================================================================
+# Git Submodules (skill repos)
+#==============================================================================
+if [[ -f "$SCRIPT_DIR/.gitmodules" ]]; then
+    echo "─── Git Submodules ───"
+    git -C "$SCRIPT_DIR" submodule update --init --recursive
+    log_success "Submodules initialized"
+    echo ""
+fi
+
+#==============================================================================
 # Pi Agent
 #==============================================================================
 echo "─── Pi Agent ───"

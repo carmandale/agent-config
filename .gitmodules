@@ -1,0 +1,9 @@
+[submodule "skills/domain/shaping/shaping-skills"]
+	path = skills/domain/shaping/shaping-skills
+	url = https://github.com/rjs/shaping-skills.git
+[submodule "skills/domain/shaping/napkin"]
+	path = skills/domain/shaping/napkin
+	url = https://github.com/blader/napkin.git
+[submodule "skills/tools/last30days"]
+	path = skills/tools/last30days
+	url = https://github.com/mvanhorn/last30days-skill.git
