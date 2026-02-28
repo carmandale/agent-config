@@ -1,0 +1,61 @@
+---
+schema_version: "1.0.0"
+mode: handoff
+date: 2026-02-28T14:40:00.000Z
+session: ".agent-config-7yo-portability-v1-clean-house"
+outcome: "PARTIAL_PLUS"
+primary_bead: ".agent-config-7yo"
+---
+
+goal: "Eliminate external symlinks, apply functional taxonomy, make agent-config fully self-contained and portable across machines."
+now: "V1 complete and committed. Next session starts V2: add git submodules for skill-repos (shaping-skills, napkin, last30days)."
+
+git:
+  branch: "main"
+  commit: "cef10da"
+  remote: "https://github.com/carmandale/agent-config.git"
+
+done_this_session:
+  - "Shaped spec 003 (Agent Config Portability) through full shaping methodology: Frame, Requirements (R0-R7), 4 shapes (A-D), fit check, spike on category taxonomy."
+  - "Selected Shape D: Hybrid Sync + Functional Taxonomy."
+  - "Created slices doc with 4 vertical slices: V1 (clean house), V2 (submodule skill-repos), V3 (vendor externals), V4 (taxonomy restructure)."
+  - "Executed V1: deleted broken create-handoff symlink, vendored swiftui-expert-skill (148K), vendored interactive-shell/SKILL.md (15K). Zero broken symlinks remaining."
+  - "Committed and pushed at cef10da."
+
+next:
+  - "V2: Add git submodules for shaping-skills (breadboarding + shaping), napkin, last30days (skip assets/). Update install.sh for submodule init. Remove old external symlinks for these. Create top-level discovery symlinks. See slices.md V2 section for details."
+  - "V3: Vendor remaining externals — surf, compound (19 skills), xcode-26, remotion-best-practices, find-skills. Resolve 3 compound duplicates (diff both copies). Create scripts/vendor-sync.sh with provenance manifest. See slices.md V3 section."
+  - "V4: Taxonomy restructure — replace origin-based categories (cc3, personal, etc.) with functional taxonomy (tools/, review/, workflows/, meta/, domain/). Reclassify all 275 skills. Regenerate top-level symlinks. See slices.md V4 + spike-categories.md for full mapping."
+
+decisions:
+  - "Shape D selected: hybrid sync (submodules for skill-repos, vendor for subdirectory extracts) + functional taxonomy."
+  - "Out of scope: redesigning vendor discovery mechanisms (Claude Code vs Codex skill discovery is their design choice)."
+  - "Categories are purely for human organization — agents discover via top-level symlinks. Restructuring categories has zero risk to agent discovery."
+  - "5 functional categories: tools/, review/, workflows/, meta/, domain/ with named sub-groups (domain/swift/, domain/compound/, etc.)."
+  - "Sequential decision rule for skill placement: wraps CLI? → tools. Reviews? → review. Orchestrates? → workflows. Tech-specific? → domain. Agent rules? → meta."
+  - "last30days: vendor skill files only (~250K), skip assets/ (14MB demo images)."
+  - "Compound 19 skills stay grouped as domain/compound/ when vendored."
+
+findings:
+  - "11 external symlinks found (not 8 as initially reported) — 2 broken, 9 resolving on laptop only."
+  - "60 skills sitting uncategorized at top level as real dirs."
+  - "3 duplicate skills between compound plugin and agent-config (document-review, orchestrating-swarms, setup)."
+  - "commands/compound is also an external symlink to the compound plugin — same class of problem, noted for V3."
+  - "cc3/ category had 104 skills — was a catch-all with no decision rule."
+
+files:
+  - "specs/003-agent-config-portability/shaping.md — Shape D selected, R0-R7, fit check"
+  - "specs/003-agent-config-portability/slices.md — V1-V4 slice definitions with verify steps"
+  - "specs/003-agent-config-portability/spike-categories.md — Full taxonomy analysis + draft mapping of all 60 strays"
+
+blockers: []
+
+continuation_prompt: |
+  Resume from handoff. Bead .agent-config-7yo is in_progress.
+  V1 is complete (committed at cef10da). Start V2.
+  Read specs/003-agent-config-portability/slices.md V2 section for the plan.
+  Key V2 tasks: git submodule add for shaping-skills, napkin, last30days repos.
+  Note: last30days assets/ (14MB) should be excluded — vendor skill files only.
+  Note: submodule paths should use the V4 taxonomy locations (domain/shaping/, tools/)
+  so they won't need to move again during V4.
+  After V2, proceed to V3 (vendor remaining externals).

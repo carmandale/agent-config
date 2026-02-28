@@ -1,0 +1,85 @@
+---
+schema_version: "1.0.0"
+mode: handoff
+date: 2026-02-28T15:30:00.000Z
+session: ".agent-config-7yo-portability-v2v3-vendor-submodule"
+outcome: "PARTIAL_PLUS"
+primary_bead: ".agent-config-7yo"
+---
+
+goal: "Eliminate external symlinks, apply functional taxonomy, make agent-config fully self-contained and portable across machines."
+now: "V1-V3 complete. Zero external symlinks. Next session starts V4: taxonomy restructure (biggest slice — reclassify all 275 skills)."
+
+git:
+  branch: "main"
+  commits:
+    - "cef10da — V1: clean house (broken symlinks)"
+    - "642ab48 — V2: submodule skill-repos (shaping-skills, napkin, last30days)"
+    - "fb099e1 — V3: vendor remaining externals (compound, surf, xcode-26, remotion, find-skills)"
+  remote: "https://github.com/carmandale/agent-config.git"
+
+done_this_session:
+  - "V2: Added 3 git submodules (shaping-skills, napkin, last30days) at V4 taxonomy paths (domain/shaping/, tools/). Replaced 4 external symlinks with internal relative discovery symlinks. Updated install.sh with git submodule update --init --recursive."
+  - "V3: Vendored 5 remaining external skills (compound 19 skills + commands, surf, xcode-26, remotion-best-practices, find-skills) as real directories. Zero external symlinks in skills/ or commands/."
+  - "V3/D7: Resolved 3 duplicate skills (document-review, orchestrating-swarms, setup) — all identical, compound copy kept as canonical."
+  - "V3/D8: Created scripts/vendor-sync.sh with provenance manifest (source repos, paths, commit SHAs for all vendored skills)."
+  - "V3: Cleaned visual-explainer nested .git directory (was an untracked nested repo, now a normal vendored dir)."
+
+next:
+  - "V4: Taxonomy restructure — the biggest slice. Replace origin-based categories (cc3/, personal/, tools/, compound/, ralph-o/, swift/, setup/) with functional taxonomy: tools/, review/, workflows/, meta/, domain/."
+  - "V4/D5: Create new category dirs under skills/."
+  - "V4/D6: Reclassify all 275 skills using the sequential decision rule in spike-categories.md. Write a migration script (scripts/restructure-categories.sh) with dry-run mode."
+  - "V4/D10: Regenerate all top-level discovery symlinks to point at new category locations."
+  - "Verify: every skill in exactly one category, every top-level symlink resolves, skill count unchanged (~275)."
+  - "Note: submodules at domain/shaping/ and tools/last30days are already at V4 paths — they won't move."
+
+decisions:
+  - "All 3 duplicate skills (document-review, orchestrating-swarms, setup) were byte-identical between compound and standalone copies. Compound copies kept as canonical, standalone copies deleted."
+  - "visual-explainer had a full nested .git directory (not a submodule). Cleaned to a normal vendored dir. Added to vendor-sync.sh manifest."
+  - "Compound commands (commands/compound/) also vendored — same external symlink class as skills."
+  - "remotion-best-practices, find-skills, and visual-explainer have no upstream git repo (came from ~/.agents/skills/). Recorded as local: sources in vendor-sync.sh."
+
+findings:
+  - "visual-explainer was a nested git clone in skills/ (not in the original 11 external symlinks list). Discovered during V2 submodule status warning. Now cleaned."
+  - "All external symlink targets still resolved on this laptop at time of vendoring."
+  - "last30days submodule includes assets/ (14MB). Parent repo only stores commit pointer. Could add sparse checkout in install.sh later if clone size matters."
+
+files:
+  - ".gitmodules — 3 submodule definitions"
+  - "install.sh — added submodule init step"
+  - "scripts/vendor-sync.sh — provenance manifest for all vendored skills"
+  - "skills/compound/ — 19 skills vendored as real dirs (was external symlink)"
+  - "commands/compound/ — 18 commands vendored as real dirs (was external symlink)"
+  - "skills/domain/shaping/shaping-skills — submodule (breadboarding, shaping)"
+  - "skills/domain/shaping/napkin — submodule"
+  - "skills/tools/last30days — submodule"
+  - "skills/surf/ — vendored from surf-cli"
+  - "skills/swift/xcode-26/ — vendored from Xcode26-Agent-Skills"
+  - "skills/remotion-best-practices/ — vendored from ~/.agents/skills/"
+  - "skills/find-skills/ — vendored from ~/.agents/skills/"
+  - "specs/003-agent-config-portability/shaping.md — Shape D selected"
+  - "specs/003-agent-config-portability/slices.md — V1-V4 slice definitions"
+  - "specs/003-agent-config-portability/spike-categories.md — full taxonomy mapping"
+
+blockers: []
+
+continuation_prompt: |
+  Resume from handoff. Bead .agent-config-7yo is in_progress.
+  V1-V3 are complete. Zero external symlinks remain. Start V4.
+  Read specs/003-agent-config-portability/slices.md V4 section for the plan.
+  Read specs/003-agent-config-portability/spike-categories.md for the full skill mapping.
+
+  Key V4 tasks:
+  1. Write scripts/restructure-categories.sh with dry-run mode.
+  2. Create new category dirs: tools/, review/, workflows/, meta/, domain/ (with sub-groups).
+  3. Move all skills from old categories (cc3/, personal/, ralph-o/) into new taxonomy.
+  4. Move 60 uncategorized top-level real dirs into appropriate categories (see spike-categories.md draft mapping).
+  5. Regenerate all top-level discovery symlinks.
+  6. Remove empty old category dirs.
+  7. Verify: every SKILL.md in exactly one category, every symlink resolves, count ~275.
+
+  Notes:
+  - Submodules at domain/shaping/ and tools/last30days are already at V4 paths.
+  - compound/ stays as domain/compound/ per decision.
+  - Sequential decision rule: CLI/API? -> tools/. Reviews? -> review/. Orchestrates? -> workflows/. Tech-specific? -> domain/. Agent rules? -> meta/.
+  - V4 is the biggest blast radius — test with dry-run first.
