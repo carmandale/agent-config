@@ -1,0 +1,34 @@
+---
+schema_version: "1.0.0"
+mode: handoff
+date: 2026-02-28T12:35:05.035Z
+session: ".agent-config-qxx-shape-a-low-maintenance-north-star-aligned-control-plane-strategy-for-cross-machine-agent-config-parity-with-a-bead-backed-spec-plan-tasks-flow"
+outcome: "SUCCEEDED"
+primary_bead: ".agent-config-qxx"
+---
+
+goal: "Shape and lock a low-maintenance, North-Star-aligned control-plane direction for cross-machine parity so config work stays lightweight and does not steal focus from Vision Pro product work."
+now: "Bead .agent-config-qxx is in progress with a full 002 spec set created and pushed at 26915c4; North Star hard-gate criteria are now encoded in the plan and tasks, and the next concrete work is Phase 1 baseline/scorecard execution."
+
+# Optional fields (YAML)
+# done_this_session:, next:, blockers:, questions:, decisions:, findings:, worked:, failed:, files:, test:, git:
+git:
+  branch: "main"
+  commit: "26915c4df07f3d8dcf411cd2118116cb4ab54967"
+  remote: "https://github.com/carmandale/agent-config.git"
+done_this_session:
+  - "Created bead-backed planning set under specs/002-low-maintenance-config-control-plane/ (spec.md, plan.md, tasks.md, research.md)."
+  - "Added explicit North Star anti-bloat and anti-overengineering hard gates with measurable complexity-budget checks."
+  - "Updated bead .agent-config-qxx notes and synced bead state."
+  - "Committed and pushed changes in commit 26915c4."
+next:
+  - "Execute Tasks 002 Phase 1: define managed/external/system ownership policy and baseline scorecard thresholds."
+  - "Capture baseline maintenance-time/setup-time metrics and decision-gate pass/fail rules."
+  - "Only proceed to Phase 2 hybrid prototype if Gate A fails."
+decisions:
+  - "Preferred path is hybrid (keep ~/.agent-config + add chezmoi + brew bundle + mise), with escalation to Nix only if hybrid misses metrics."
+files:
+  - "specs/002-low-maintenance-config-control-plane/spec.md"
+  - "specs/002-low-maintenance-config-control-plane/plan.md"
+  - "specs/002-low-maintenance-config-control-plane/tasks.md"
+  - "specs/002-low-maintenance-config-control-plane/research.md"
