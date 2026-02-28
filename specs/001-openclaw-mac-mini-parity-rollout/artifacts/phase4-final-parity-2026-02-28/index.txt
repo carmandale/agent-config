@@ -1,0 +1,13 @@
+phase4-final generated
+2026-02-28T12:00:27Z
+compare_vs_laptop.txt
+index.txt
+laptop.report.txt
+laptop.snapshot
+laptop_smoke_checks.txt
+laptop_snapshot_cmd.log
+local_repo_sha.txt
+mini.report.txt
+mini.snapshot
+mini_smoke_checks.txt
+mini_sync_and_capture.log

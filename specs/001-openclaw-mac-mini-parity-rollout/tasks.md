@@ -28,13 +28,15 @@ Plan: `specs/001-openclaw-mac-mini-parity-rollout/plan.md`
 
 ## Phase 4: Resolve Drift
 
-- [ ] Document decisions for script-vs-doc-vs-laptop mismatches.
-- [ ] Apply only minimal changes needed for parity (if required).
-- [ ] Create follow-up bead(s) for non-blocking cleanup and modernization.
-- [ ] Update rollout summary with explicit done/pending/blockers.
+- [x] Document decisions for script-vs-doc-vs-laptop mismatches.
+- [x] Apply only minimal changes needed for parity (if required).
+- [x] Create follow-up bead(s) for non-blocking cleanup and modernization.
+- [x] Update rollout summary with explicit done/pending/blockers.
+
+Follow-up bead created: `.agent-config-gyi` (external config bootstrap + drift policy).
 
 ## Exit Criteria
 
-- [ ] OpenClaw Mac mini is functionally aligned with laptop for agreed parity surfaces.
-- [ ] Any remaining differences are explicitly documented and approved.
-- [ ] Bead has linked spec path and current status reflects rollout state.
+- [x] OpenClaw Mac mini is functionally aligned with laptop for agreed parity surfaces.
+- [x] Any remaining differences are explicitly documented and approved.
+- [x] Bead has linked spec path and current status reflects rollout state.

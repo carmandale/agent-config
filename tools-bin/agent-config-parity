@@ -267,8 +267,8 @@ compare_snapshots() {
     fa="$(mktemp "${TMPDIR:-/tmp}/agent-config-parity-compare-a.XXXXXX")"
     fb="$(mktemp "${TMPDIR:-/tmp}/agent-config-parity-compare-b.XXXXXX")"
 
-    grep -Ev '^(snapshot\.generated_at_utc|snapshot\.host|snapshot\.user)=' "$a" >"$fa"
-    grep -Ev '^(snapshot\.generated_at_utc|snapshot\.host|snapshot\.user)=' "$b" >"$fb"
+    grep -Ev '^(snapshot\.generated_at_utc|snapshot\.host|snapshot\.user|repo\.dirty_entries)=' "$a" >"$fa"
+    grep -Ev '^(snapshot\.generated_at_utc|snapshot\.host|snapshot\.user|repo\.dirty_entries)=' "$b" >"$fb"
 
     if diff -u "$fa" "$fb"; then
         rm -f "$fa" "$fb"

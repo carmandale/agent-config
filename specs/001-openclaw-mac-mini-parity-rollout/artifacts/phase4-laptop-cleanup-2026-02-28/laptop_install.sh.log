@@ -1,0 +1,46 @@
+
+╔════════════════════════════════════════════════════════════════╗
+║              Agent Config - Unified Setup                      ║
+╚════════════════════════════════════════════════════════════════╝
+
+[0;34m▸[0m Source: /Users/dalecarman/.agent-config
+
+─── Pi Agent ───
+[0;32m✓[0m Linked: /Users/dalecarman/.pi/agent/commands → /Users/dalecarman/.agent-config/commands
+[0;32m✓[0m Linked: /Users/dalecarman/.pi/agent/AGENTS.md → /Users/dalecarman/.agent-config/instructions/AGENTS.md
+
+─── Claude Code ───
+[0;32m✓[0m Linked: /Users/dalecarman/.claude/commands → /Users/dalecarman/.agent-config/commands
+[0;32m✓[0m Linked: /Users/dalecarman/.claude/CLAUDE.md → /Users/dalecarman/.agent-config/instructions/AGENTS.md
+
+─── Codex ───
+[0;32m✓[0m Linked: /Users/dalecarman/.codex/prompts → /Users/dalecarman/.agent-config/commands
+[0;32m✓[0m Linked: /Users/dalecarman/.codex/AGENTS.md → /Users/dalecarman/.agent-config/instructions/AGENTS.md
+
+─── OpenCode ───
+[0;32m✓[0m Linked: /Users/dalecarman/.config/opencode/commands → /Users/dalecarman/.agent-config/commands
+[0;34m▸[0m OpenCode uses project-level .opencode/ for instructions
+
+╔════════════════════════════════════════════════════════════════╗
+║                    Setup Complete! ✓                           ║
+╚════════════════════════════════════════════════════════════════╝
+
+Commands available: 46
+
+Try these commands in any agent:
+  /handoff     - End-of-session summary
+  /checkpoint  - Mid-session context compression
+  /commit      - Smart commit workflow
+  /debug       - Structured debugging
+
+Edit global instructions:
+  /Users/dalecarman/.agent-config/instructions/AGENTS.md
+
+─── Skills (Unified) ───
+[0;32m✓[0m Linked: /Users/dalecarman/.claude/skills → /Users/dalecarman/.agent-config/skills
+[0;32m✓[0m Linked: /Users/dalecarman/.codex/skills → /Users/dalecarman/.agent-config/skills
+[0;32m✓[0m Linked: /Users/dalecarman/.config/agent-skills → /Users/dalecarman/.agent-config/skills
+[0;32m✓[0m Linked: /Users/dalecarman/.pi/agent/skills → /Users/dalecarman/.agent-config/skills
+
+[0;34m▸[0m Skills unified: 230 skills across 257 categories
+

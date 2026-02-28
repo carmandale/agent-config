@@ -1,0 +1,12 @@
+==> Fetching downloads for: ripgrep
+==> Installing ripgrep dependency: pcre2
+==> Pouring pcre2--10.47_1.arm64_sequoia.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/pcre2/10.47_1: 244 files, 7.3MB
+==> Pouring ripgrep--15.1.0.arm64_sequoia.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/ripgrep/15.1.0: 14 files, 6.5MB
+==> Running `brew cleanup ripgrep`...
+Disable this behaviour by setting `HOMEBREW_NO_INSTALL_CLEANUP=1`.
+Hide these hints with `HOMEBREW_NO_ENV_HINTS=1` (see `man brew`).
+==> Caveats
+zsh completions have been installed to:
+  /opt/homebrew/share/zsh/site-functions

@@ -1,0 +1,8 @@
+bun was installed successfully to ~/.bun/bin/bun 
+
+Added "~/.bun/bin" to $PATH in "~/.zshrc" 
+
+To get started, run: 
+
+  exec /bin/zsh 
+  bun --help 

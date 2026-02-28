@@ -2,7 +2,7 @@
 
 Bead: `.agent-config-k2j`  
 Created: 2026-02-28  
-Status: Draft (planning)
+Status: Completed (rollout executed; follow-up cleanup bead opened)
 
 ## Summary
 

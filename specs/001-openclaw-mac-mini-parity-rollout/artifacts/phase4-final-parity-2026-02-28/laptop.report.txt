@@ -1,0 +1,77 @@
+== Agent Config Parity Report ==
+repo.branch=main
+repo.dirty_entries=6
+repo.origin=https://github.com/carmandale/agent-config.git
+repo.path=~/.agent-config
+repo.sha=69d12dc63a4de93add516b98604a09f35a1b368e
+snapshot.generated_at_utc=2026-02-28T12:00:25Z
+snapshot.host=Dale's MacBook Pro M4
+snapshot.user=dalecarman
+snapshot.version=1
+system.arch=arm64
+system.macos.build=25D125
+system.macos.version=26.3
+system.os=Darwin
+
+== Managed Surfaces (from install.sh expectations) ==
+managed.agent_skills.status=ok
+managed.claude_commands.status=ok
+managed.claude_instructions.status=ok
+managed.claude_skills.status=ok
+managed.codex_instructions.status=ok
+managed.codex_prompts.status=ok
+managed.codex_skills.status=ok
+managed.opencode_commands.status=ok
+managed.pi_commands.status=ok
+managed.pi_instructions.status=ok
+managed.pi_skills.status=ok
+
+== Managed Surfaces (actual targets) ==
+managed.agent_skills.actual=~/.agent-config/skills
+managed.claude_commands.actual=~/.agent-config/commands
+managed.claude_instructions.actual=~/.agent-config/instructions/AGENTS.md
+managed.claude_skills.actual=~/.agent-config/skills
+managed.codex_instructions.actual=~/.agent-config/instructions/AGENTS.md
+managed.codex_prompts.actual=~/.agent-config/commands
+managed.codex_skills.actual=~/.agent-config/skills
+managed.opencode_commands.actual=~/.agent-config/commands
+managed.pi_commands.actual=~/.agent-config/commands
+managed.pi_instructions.actual=~/.agent-config/instructions/AGENTS.md
+managed.pi_skills.actual=~/.agent-config/skills
+
+== Outside .agent-config (still affects parity) ==
+external.claude_settings.actual=~/.claude/settings.json
+external.claude_settings.kind=file
+external.codex_config_json.actual=~/.codex/config.json
+external.codex_config_json.kind=file
+external.codex_config_toml.actual=~/.codex/config.toml
+external.codex_config_toml.kind=file
+external.factory_commands.actual=~/.factory/commands
+external.factory_commands.kind=dir
+external.factory_droids.actual=~/.factory/droids
+external.factory_droids.kind=dir
+external.note_1=API keys/tokens in env vars, keychain, and login state are outside .agent-config
+external.note_2=Tool binaries and versions are outside .agent-config and must be compared
+external.opencode_compound_engineering.actual=
+external.opencode_compound_engineering.kind=missing
+external.opencode_config_json.actual=~/.config/opencode/config.json
+external.opencode_config_json.kind=file
+external.opencode_config_toml.actual=
+external.opencode_config_toml.kind=missing
+external.pi_compound_engineering.actual=~/.pi/agent/compound-engineering
+external.pi_compound_engineering.kind=dir
+external.pi_config_json.actual=
+external.pi_config_json.kind=missing
+
+== Tool Versions (outside .agent-config) ==
+tool.bash.version=GNU bash, version 5.3.9(1)-release (aarch64-apple-darwin25.1.0)
+tool.bd.version=bd version 0.50.3 (bd25acbc)
+tool.bun.version=1.3.10
+tool.bunx.version=1.3.10
+tool.git.version=git version 2.53.0
+tool.node.version=v25.6.1
+tool.rg.version=ripgrep 15.1.0
+
+Tip: create stable snapshot files and compare with:
+  agent-config-parity snapshot --output /tmp/laptop.snapshot
+  agent-config-parity compare /tmp/laptop.snapshot /tmp/mini.snapshot

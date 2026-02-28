@@ -1,0 +1,4 @@
+PATH=/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/homebrew/bin
+SHELL=/bin/zsh
+drwxrwxr-x@ 58 chipcarman  admin  1856 Feb 27 19:53 /opt/homebrew/bin
+HOMEBREW_BIN_WRITABLE=YES

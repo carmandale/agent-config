@@ -1,0 +1,31 @@
+Your branch is behind 'origin/main' by 2 commits, and can be fast-forwarded.
+  (use "git pull" to update your local branch)
+Updating 9c9ee3d..69d12dc
+Fast-forward
+ .beads/issues.jsonl                                |   2 +-
+ .claude/napkin.md                                  |   1 +
+ .../compare_vs_laptop_current.txt                  | 204 ++++++++++++++++++++
+ .../compare_vs_phase1.txt                          | 205 +++++++++++++++++++++
+ .../install-all.sh.log                             |  78 ++++++++
+ .../phase2-mini-install-2026-02-28/install.sh.log  |  48 +++++
+ .../laptop-current.snapshot                        | 124 +++++++++++++
+ .../phase2-mini-install-2026-02-28/mini.report.txt |  77 ++++++++
+ .../phase2-mini-install-2026-02-28/mini.snapshot   | 124 +++++++++++++
+ .../mini_repo_sync.log                             |   8 +
+ .../mini_smoke_checks.txt                          |  10 +
+ .../phase2-mini-install-2026-02-28/summary.md      |  81 ++++++++
+ .../001-openclaw-mac-mini-parity-rollout/tasks.md  |  16 +-
+ tools-bin/agent-config-parity                      |  37 ++--
+ 14 files changed, 994 insertions(+), 21 deletions(-)
+ create mode 100644 specs/001-openclaw-mac-mini-parity-rollout/artifacts/phase2-mini-install-2026-02-28/compare_vs_laptop_current.txt
+ create mode 100644 specs/001-openclaw-mac-mini-parity-rollout/artifacts/phase2-mini-install-2026-02-28/compare_vs_phase1.txt
+ create mode 100644 specs/001-openclaw-mac-mini-parity-rollout/artifacts/phase2-mini-install-2026-02-28/install-all.sh.log
+ create mode 100644 specs/001-openclaw-mac-mini-parity-rollout/artifacts/phase2-mini-install-2026-02-28/install.sh.log
+ create mode 100644 specs/001-openclaw-mac-mini-parity-rollout/artifacts/phase2-mini-install-2026-02-28/laptop-current.snapshot
+ create mode 100644 specs/001-openclaw-mac-mini-parity-rollout/artifacts/phase2-mini-install-2026-02-28/mini.report.txt
+ create mode 100644 specs/001-openclaw-mac-mini-parity-rollout/artifacts/phase2-mini-install-2026-02-28/mini.snapshot
+ create mode 100644 specs/001-openclaw-mac-mini-parity-rollout/artifacts/phase2-mini-install-2026-02-28/mini_repo_sync.log
+ create mode 100644 specs/001-openclaw-mac-mini-parity-rollout/artifacts/phase2-mini-install-2026-02-28/mini_smoke_checks.txt
+ create mode 100644 specs/001-openclaw-mac-mini-parity-rollout/artifacts/phase2-mini-install-2026-02-28/summary.md
+69d12dc63a4de93add516b98604a09f35a1b368e
+Wrote snapshot: /tmp/mini.phase4.final.snapshot

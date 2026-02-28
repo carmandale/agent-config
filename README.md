@@ -226,6 +226,11 @@ Mac mini:
 
 No diff means parity for tracked repo/symlink/tool keys.
 
+If there is diff output, classify each key before making changes:
+- `managed.*` drift is usually actionable and should be fixed.
+- `external.*` drift is often machine-local and should be reviewed, not blindly copied.
+- `system.*` drift is expected when macOS versions differ between machines.
+
 ### Step 5: Human-readable audit
 
 ```bash

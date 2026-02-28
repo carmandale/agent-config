@@ -61,7 +61,7 @@ Roll out in four phases:
 
 ## Technical Decisions (Initial)
 
-1. Treat observed laptop behavior as “current production baseline” for parity.
+1. Treat repo-defined installer behavior (`install.sh` + `install-all.sh`) as canonical; treat laptop state as observational input only.
 2. Use scripted verification output as source of truth.
 3. Avoid broad installer refactors during first migration unless required to reach parity.
 

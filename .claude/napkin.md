@@ -10,6 +10,7 @@
 | 2026-02-10 | Self | Kept proposing partial solutions without thinking through implications | When user says "you are not thinking" - STOP, step back, map everything before continuing |
 | 2026-02-22 | User | Wording allowed agents to infer bead linkage starts at implementation, not spec creation | State as hard gate: "No bead, no spec", require bead ID in `spec.md` at creation time, and add override in pre-flight checklist |
 | 2026-02-26 | User | Agents stopped on unrelated working-tree changes with generic safety pause | Only pause for unexpected changes in files in the active edit scope; unrelated dirty files are non-blocking |
+| 2026-02-28 | Self | Non-interactive SSH sessions on mini still resolved Apple `/usr/bin/git` and `/bin/bash` despite `.zshenv` edits | For zsh login SSH sessions, set Homebrew PATH precedence in `~/.zprofile` (path_helper runs later) and re-verify with `command -v` |
 
 ## User Preferences
 - Uses `~/.agent-config` as central distribution hub for all agents (pi-agent, codex, opencode, claude code)
@@ -40,6 +41,7 @@
 - For agents: `~/.claude/agents/compound` → `~/.agent-config/agents/compound` (add inside existing directory)
 - For cross-machine setup, capture and diff a symlink/dir matrix between source and target machines before declaring parity
 - Use `tools-bin/agent-config-parity` snapshots plus `compare` to validate parity and external-surface/tool-version drift
+- Upgrade toolchain on both machines from Homebrew before parity snapshots when strict version sync matters
 
 ## Patterns That Don't Work
 - Individual per-skill symlinks - get stale when new skills are added to repo

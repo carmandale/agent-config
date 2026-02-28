@@ -1,0 +1,57 @@
+--- /var/folders/2j/3tf17x5d7pj10gdjbp1ydpf40000gn/T//agent-config-parity-compare-a.QtNrsa	2026-02-28 06:03:16
++++ /var/folders/2j/3tf17x5d7pj10gdjbp1ydpf40000gn/T//agent-config-parity-compare-b.Dywtjq	2026-02-28 06:03:16
+@@ -2,8 +2,8 @@
+ external.claude_settings.kind=file
+ external.claude_settings.note=agent-local settings/hook config
+ external.claude_settings.path=~/.claude/settings.json
+-external.codex_config_json.actual=~/.codex/config.json
+-external.codex_config_json.kind=file
++external.codex_config_json.actual=
++external.codex_config_json.kind=missing
+ external.codex_config_json.note=agent-local settings
+ external.codex_config_json.path=~/.codex/config.json
+ external.codex_config_toml.actual=~/.codex/config.toml
+@@ -24,16 +24,16 @@
+ external.opencode_compound_engineering.kind=missing
+ external.opencode_compound_engineering.note=compound-plugin generated content
+ external.opencode_compound_engineering.path=~/.config/opencode/compound-engineering
+-external.opencode_config_json.actual=~/.config/opencode/config.json
+-external.opencode_config_json.kind=file
++external.opencode_config_json.actual=
++external.opencode_config_json.kind=missing
+ external.opencode_config_json.note=agent-local settings
+ external.opencode_config_json.path=~/.config/opencode/config.json
+ external.opencode_config_toml.actual=
+ external.opencode_config_toml.kind=missing
+ external.opencode_config_toml.note=agent-local settings
+ external.opencode_config_toml.path=~/.config/opencode/config.toml
+-external.pi_compound_engineering.actual=~/.pi/agent/compound-engineering
+-external.pi_compound_engineering.kind=dir
++external.pi_compound_engineering.actual=
++external.pi_compound_engineering.kind=missing
+ external.pi_compound_engineering.note=compound-plugin generated content
+ external.pi_compound_engineering.path=~/.pi/agent/compound-engineering
+ external.pi_config_json.actual=
+@@ -101,12 +101,12 @@
+ repo.sha=69d12dc63a4de93add516b98604a09f35a1b368e
+ snapshot.version=1
+ system.arch=arm64
+-system.macos.build=25D125
+-system.macos.version=26.3
++system.macos.build=24F74
++system.macos.version=15.5
+ system.os=Darwin
+ tool.bash.bin=/opt/homebrew/bin/bash
+ tool.bash.present=yes
+-tool.bash.version=GNU bash, version 5.3.9(1)-release (aarch64-apple-darwin25.1.0)
++tool.bash.version=GNU bash, version 5.3.9(1)-release (aarch64-apple-darwin24.6.0)
+ tool.bd.bin=/opt/homebrew/bin/bd
+ tool.bd.present=yes
+ tool.bd.version=bd version 0.50.3 (bd25acbc)
+
+Parity drift detected.
+Focus first on:
+  repo.sha
+  managed.*.status
+  managed.*.actual
+  tool.*.version
