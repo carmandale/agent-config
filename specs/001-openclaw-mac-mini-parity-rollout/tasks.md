@@ -6,11 +6,11 @@ Plan: `specs/001-openclaw-mac-mini-parity-rollout/plan.md`
 
 ## Phase 1: Baseline (Laptop)
 
-- [ ] Record baseline commit SHA for `~/.agent-config`.
-- [ ] Run `tools-bin/agent-config-parity snapshot --output /tmp/laptop.snapshot`.
-- [ ] Capture tool prerequisites (`bunx`, `bd`, shell environment essentials).
-- [ ] Review outside-of-repo surfaces from parity report (settings, plugin dirs, auth/tooling context).
-- [ ] Save baseline evidence artifact for later diff.
+- [x] Record baseline commit SHA for `~/.agent-config`.
+- [x] Run `tools-bin/agent-config-parity snapshot --output /tmp/laptop.snapshot`.
+- [x] Capture tool prerequisites (`bunx`, `bd`, shell environment essentials).
+- [x] Review outside-of-repo surfaces from parity report (settings, plugin dirs, auth/tooling context).
+- [x] Save baseline evidence artifact for later diff.
 
 ## Phase 2: Install (OpenClaw Mac Mini)
 
