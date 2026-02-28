@@ -1,0 +1,61 @@
+---
+schema_version: "1.0.0"
+mode: finalize
+date: 2026-02-28T22:30:00.000Z
+session: ".agent-config-7yo-portability-v4-taxonomy"
+outcome: "SUCCEEDED"
+primary_bead: ".agent-config-7yo"
+---
+
+goal: "Eliminate external symlinks, apply functional taxonomy, make agent-config fully self-contained and portable."
+now: "All work complete. Bead closed."
+
+git:
+  branch: "main"
+  commits:
+    - "cef10da — V1: clean house (broken symlinks)"
+    - "642ab48 — V2: submodule skill-repos (shaping-skills, napkin, last30days)"
+    - "fb099e1 — V3: vendor remaining externals (compound, surf, xcode-26, remotion, find-skills)"
+    - "ed5b03e — V4: taxonomy restructure (222 skills moved, 256 symlinks regenerated)"
+    - "dd355e9 — beads sync"
+    - "99b230a — bead closure"
+  remote: "https://github.com/carmandale/agent-config.git"
+
+done_this_session:
+  - task: "V4 taxonomy restructure"
+    files:
+      - scripts/restructure-categories.sh
+    details: |
+      Wrote migration script with dry-run mode. Moved 222 skills from origin-based
+      categories (cc3/, personal/, ralph-o/, compound/, swift/) into 5 functional
+      categories (tools/, review/, workflows/, meta/, domain/). Regenerated 256
+      discovery symlinks with priority-based collision resolution. Removed all 5
+      old category directories. 303 skill files preserved, 0 broken symlinks.
+
+done_previous_sessions:
+  - "V1: Removed broken symlinks (cef10da)"
+  - "V2: Added 3 git submodules — shaping-skills, napkin, last30days (642ab48)"
+  - "V3: Vendored 5 remaining externals, resolved 3 duplicates, created vendor-sync.sh (fb099e1)"
+
+decisions:
+  - what: "Functional taxonomy with 5 top-level categories"
+    why: "Sequential decision rule (tools? review? workflows? domain? meta?) eliminates ambiguity. 5 categories is the sweet spot — fewer creates catch-alls, more adds confusion."
+  - what: "Domain sub-groups for coherent technology sets"
+    why: "agentica, compound, gitnexus, math, notion, ralph, shaping, swift each have 4+ related skills. Single-skill domains go in domain/other/."
+  - what: "Priority-based symlink collision resolution (tools > review > workflows > meta > domain)"
+    why: "When a skill name exists in multiple categories (e.g., agent-browser in both tools/ and domain/compound/), the more general/primary version gets the top-level symlink."
+  - what: "cc3/_sandbox → meta/_sandbox, ralph-o/_presets → domain/ralph/_presets"
+    why: "Internal directories migrated with their parent categories, no special handling needed."
+
+worked:
+  - "Migration script with dry-run mode caught the bash arithmetic issue (set -e + ((x++))) before real execution"
+  - "git mv handles symlink-heavy repos correctly — all 222 moves clean"
+  - "Priority-based symlink generation resolved the 1 collision (agent-browser) automatically"
+
+findings:
+  - "303 skill files total (more than the ~275 estimate — submodule skills like breadboard-reflection weren't counted in spike)"
+  - "Category distribution: tools (76), workflows (54), meta (42), review (21), domain (60)"
+  - "visual-explainer triggered a harmless git warning about .gitmodules (cleaned nested .git in V3, no actual issue)"
+
+next: []
+blockers: []
