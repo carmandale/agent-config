@@ -508,11 +508,14 @@ echo -e "\n  (Found $REAL_COUNT real artifacts in project)"
 section "10. Symlink integrity"
 # ============================================================
 
-assert "resume-handoff skill symlinked to ~/.claude/skills/" \
-  "[[ -L '$HOME/.claude/skills/cc3/resume-handoff/SKILL.md' || -f '$HOME/.claude/skills/cc3/resume-handoff/SKILL.md' ]]"
+assert "resume-handoff skill exists in workflows category" \
+  "[[ -f '$HOME/.claude/skills/workflows/resume-handoff/SKILL.md' ]]"
 
-assert "create-handoff skill fully removed (not just deprecated)" \
-  "[[ ! -e '$HOME/.claude/skills/cc3/create-handoff/SKILL.md' ]]"
+assert "resume-handoff top-level symlink resolves" \
+  "[[ -L '$HOME/.claude/skills/resume-handoff' && -d '$HOME/.claude/skills/resume-handoff' ]]"
+
+assert "create-handoff skill fully removed" \
+  "[[ ! -e '$HOME/.claude/skills/workflows/create-handoff/SKILL.md' && ! -e '$HOME/.claude/skills/create-handoff' ]]"
 
 assert "handoff command symlinked to ~/.claude/commands/" \
   "[[ -L '$HOME/.claude/commands/handoff.md' || -f '$HOME/.claude/commands/handoff.md' ]]"
@@ -548,8 +551,8 @@ assert "finalize.md has no EDITOR references" \
   "[[ '$EDITOR_FINALIZE' == '0' ]]"
 
 # Verify create-handoff is fully deleted (not just deprecated)
-assert "create-handoff source directory fully removed" \
-  "[[ ! -d '$HOME/.agent-config/skills/cc3/create-handoff' ]]"
+assert "old cc3 category directory fully removed" \
+  "[[ ! -d '$HOME/.agent-config/skills/cc3' ]]"
 
 # ============================================================
 # Report

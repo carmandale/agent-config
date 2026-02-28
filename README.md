@@ -281,14 +281,21 @@ MIT
 
 ## Skills (Unified)
 
-Skills are now unified across all agents, organized into categories:
+Skills are unified across all agents, organized by function:
 
 ```
 ~/.agent-config/skills/
-├── cc3/            # Continuous-Claude-v3 framework skills (106)
-├── tools/          # CLI/tool integrations (28): cass, bv, gj-tool, oracle, etc.
-├── swift/          # SwiftUI/iOS development (4)
-└── personal/       # User additions (20): checkpoint, finalize, etc.
+├── tools/          # Wraps external CLI/API/service (76)
+├── review/         # Analyzes/reviews code or content (21)
+├── workflows/      # Orchestrates multi-step dev processes (54)
+├── meta/           # Agent behavior rules, patterns (42)
+├── domain/         # Technology-specific knowledge (60)
+│   ├── swift/      # Apple/Swift platform
+│   ├── compound/   # Vendored compound plugin set
+│   ├── ralph/      # Ralph orchestrator
+│   ├── shaping/    # Shaping methodology (submodules)
+│   └── ...         # agentica, gitnexus, math, notion, other
+└── <name> -> <category>/<name>  # Discovery symlinks
 ```
 
 ### Symlinks
@@ -305,15 +312,17 @@ All agents point to the same unified location:
 
 ### Adding Skills
 
-Add new skills to the appropriate category:
+Add new skills to the appropriate category using the decision rule:
+1. Wraps external CLI/API/service? -> `tools/`
+2. Analyzes/reviews code or content? -> `review/`
+3. Orchestrates multi-step dev process? -> `workflows/`
+4. Specific to a named technology domain? -> `domain/<sub>/`
+5. Agent behavior rule or pattern? -> `meta/`
 
 ```bash
-# For tool integrations
 mkdir ~/.agent-config/skills/tools/my-tool
 # Create SKILL.md with description and instructions
-
-# For personal skills
-mkdir ~/.agent-config/skills/personal/my-skill
+ln -s tools/my-tool skills/my-tool  # Discovery symlink
 ```
 
 ### Skill Format

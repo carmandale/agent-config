@@ -35,7 +35,7 @@ declare -A VENDOR_SOURCE VENDOR_PATH VENDOR_DEST VENDOR_COMMIT
 # compound (19 skills) — from compound-engineering-plugin
 VENDOR_SOURCE[compound]="git@github.com:anthropics/compound-engineering-plugin.git"
 VENDOR_PATH[compound]="plugins/compound-engineering/skills"
-VENDOR_DEST[compound]="skills/compound"
+VENDOR_DEST[compound]="skills/domain/compound"
 VENDOR_COMMIT[compound]="03898070a7f2f2c8ab7ec2cc9c09481a79d4781e"
 
 # compound commands — same source repo
@@ -47,31 +47,31 @@ VENDOR_COMMIT[compound-commands]="03898070a7f2f2c8ab7ec2cc9c09481a79d4781e"
 # surf — from surf-cli
 VENDOR_SOURCE[surf]="git@github.com:nichochar/surf-cli.git"
 VENDOR_PATH[surf]="skills/surf"
-VENDOR_DEST[surf]="skills/surf"
+VENDOR_DEST[surf]="skills/tools/surf"
 VENDOR_COMMIT[surf]="dfbc169bdde6ca1156055e29b5ec473e13b9d871"
 
 # xcode-26 — from Xcode26-Agent-Skills
 VENDOR_SOURCE[xcode-26]="git@github.com:nichochar/Xcode26-Agent-Skills.git"
 VENDOR_PATH[xcode-26]="xcode-26"
-VENDOR_DEST[xcode-26]="skills/swift/xcode-26"
+VENDOR_DEST[xcode-26]="skills/domain/swift/xcode-26"
 VENDOR_COMMIT[xcode-26]="b11f995ecb7bc404774d8e03e1d4d78309454170"
 
 # remotion-best-practices — from ~/.agents/skills (no upstream git repo)
 VENDOR_SOURCE[remotion-best-practices]="local:~/.agents/skills/remotion-best-practices"
 VENDOR_PATH[remotion-best-practices]="."
-VENDOR_DEST[remotion-best-practices]="skills/remotion-best-practices"
+VENDOR_DEST[remotion-best-practices]="skills/domain/other/remotion-best-practices"
 VENDOR_COMMIT[remotion-best-practices]="none"
 
 # find-skills — from ~/.agents/skills (no upstream git repo)
 VENDOR_SOURCE[find-skills]="local:~/.agents/skills/find-skills"
 VENDOR_PATH[find-skills]="."
-VENDOR_DEST[find-skills]="skills/find-skills"
+VENDOR_DEST[find-skills]="skills/tools/find-skills"
 VENDOR_COMMIT[find-skills]="none"
 
 # visual-explainer — was a nested git clone, now vendored (no upstream)
 VENDOR_SOURCE[visual-explainer]="local:~/.agents/skills/visual-explainer"
 VENDOR_PATH[visual-explainer]="."
-VENDOR_DEST[visual-explainer]="skills/visual-explainer"
+VENDOR_DEST[visual-explainer]="skills/workflows/visual-explainer"
 VENDOR_COMMIT[visual-explainer]="none"
 
 ALL_VENDORS=(compound compound-commands surf xcode-26 remotion-best-practices find-skills visual-explainer)

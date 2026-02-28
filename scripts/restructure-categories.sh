@@ -175,6 +175,13 @@ UNCATEGORIZED_DOMAIN_OTHER=(remotion-best-practices)
 # PRE-FLIGHT CHECK
 # ─────────────────────────────────────────────────────────────
 
+info "Pre-flight: ensuring submodules are initialized"
+if [[ -f .gitmodules ]]; then
+  if ! git submodule update --init --recursive 2>/dev/null; then
+    warn "Submodule init had warnings (non-fatal) — continuing"
+  fi
+fi
+
 info "Pre-flight: counting skills before migration"
 BEFORE_COUNT=$(find skills -name "SKILL.md" -o -name "skill.md" | wc -l | tr -d ' ')
 info "Found $BEFORE_COUNT skill files before migration"
@@ -386,7 +393,7 @@ for sub_skill in breadboarding breadboard-reflection shaping; do
   sub_path="domain/shaping/shaping-skills/$sub_skill"
   if [[ -d "skills/$sub_path" ]]; then
     link="skills/$sub_skill"
-    [[ -L "$link" ]] && rm -f "$link"
+    [[ -L "$link" ]] && do_rm_symlink "$link"
     do_create_symlink "$sub_path" "$link"
     CLAIMED[$sub_skill]="domain/shaping"
     SYMLINKS_CREATED=$((SYMLINKS_CREATED + 1))
@@ -396,19 +403,19 @@ done
 # napkin is directly in shaping submodule
 if [[ -d "skills/domain/shaping/napkin" ]]; then
   link="skills/napkin"
-  [[ -L "$link" ]] && rm -f "$link"
+  [[ -L "$link" ]] && do_rm_symlink "$link"
   do_create_symlink "domain/shaping/napkin" "$link"
   CLAIMED[napkin]="domain/shaping"
-  ((SYMLINKS_CREATED++))
+  SYMLINKS_CREATED=$((SYMLINKS_CREATED + 1))
 fi
 
 # tools/last30days submodule
 if [[ -d "skills/tools/last30days" ]]; then
   link="skills/last30days"
-  [[ -L "$link" ]] && rm -f "$link"
+  [[ -L "$link" ]] && do_rm_symlink "$link"
   do_create_symlink "tools/last30days" "$link"
   CLAIMED[last30days]="tools"
-  ((SYMLINKS_CREATED++))
+  SYMLINKS_CREATED=$((SYMLINKS_CREATED + 1))
 fi
 
 info "Created $SYMLINKS_CREATED symlinks ($SYMLINK_COLLISIONS name collisions resolved by priority)"
@@ -455,16 +462,22 @@ info "  Broken links:  $BROKEN"
 info "  Stray dirs:    $NON_CATEGORY_DIRS"
 info "  Errors:        $ERRORS"
 
+VERIFY_FAIL=0
 if [[ "$BEFORE_COUNT" != "$AFTER_COUNT" ]]; then
   warn "SKILL COUNT CHANGED! Was $BEFORE_COUNT, now $AFTER_COUNT — investigate!"
+  VERIFY_FAIL=1
 fi
 if [[ "$BROKEN" -gt 0 ]]; then
   warn "Broken symlinks found:"
   find skills -maxdepth 1 -type l ! -exec test -e {} \; -print
+  VERIFY_FAIL=1
 fi
 if [[ "$NON_CATEGORY_DIRS" -gt 0 ]]; then
   warn "Stray top-level directories (not categories):"
   find skills -maxdepth 1 -type d -not -name skills \
     -not -name tools -not -name review -not -name workflows \
     -not -name meta -not -name domain -not -name '.system'
+  VERIFY_FAIL=1
 fi
+
+exit "$VERIFY_FAIL"
