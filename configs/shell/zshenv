@@ -1,0 +1,25 @@
+#==============================================================================
+# ~/.zshenv baseline — sourced by ALL zsh shells (interactive, scripts, SSH)
+#
+# Keep this minimal: only PATH setup and secrets loading.
+# Interactive config goes in ~/.zshrc. Machine-specific in ~/.zshrc.local.
+#
+# Managed by: ~/.agent-config/scripts/bootstrap.sh
+#==============================================================================
+
+# Homebrew — available to all shells including non-interactive SSH
+if [ -d "/opt/homebrew/bin" ]; then
+  export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
+  # Keg-only tools that need explicit PATH
+  [ -d "/opt/homebrew/opt/trash/bin" ] && export PATH="/opt/homebrew/opt/trash/bin:$PATH"
+fi
+
+# Agent config tools
+export PATH="$HOME/.agent-config/tools-bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
+
+# Secrets — env vars for API keys (not tracked, 600 permissions)
+# Aligns with OpenClaw env provider: { source: "env", provider: "default", id: "KEY" }
+if [ -f "$HOME/.secrets/agent-keys.env" ]; then
+  set -a; source "$HOME/.secrets/agent-keys.env"; set +a
+fi

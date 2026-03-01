@@ -1,0 +1,33 @@
+#==============================================================================
+# ~/.zshrc baseline — interactive shell config
+#
+# Paths and secrets are in ~/.zshenv (sourced before this).
+# Machine-specific config goes in ~/.zshrc.local (sourced at end).
+#
+# Managed by: ~/.agent-config/scripts/bootstrap.sh
+#==============================================================================
+
+########## Behavior ##########
+setopt HIST_IGNORE_DUPS SHARE_HISTORY
+setopt AUTO_CD AUTO_PUSHD PUSHD_SILENT
+
+########## Completions ##########
+autoload -Uz compinit && compinit
+
+########## Paths (interactive-only) ##########
+export PATH="$HOME/.bun/bin:$PATH"
+export PATH="$HOME/bin:$PATH"
+
+########## Prompt ##########
+if command -v starship >/dev/null 2>&1; then
+  eval "$(starship init zsh)"
+fi
+
+########## Plugins ##########
+for plugin in zsh-autosuggestions zsh-syntax-highlighting; do
+  local p="$(brew --prefix 2>/dev/null)/share/$plugin/$plugin.zsh"
+  [ -r "$p" ] && source "$p"
+done
+
+########## Machine-local overrides (not tracked) ##########
+[ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"

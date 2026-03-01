@@ -137,6 +137,12 @@ apply_dir() {
 #==============================================================================
 do_check() {
   echo ""
+  echo "─── Shell Config ───"
+  check_file "$CONFIGS/shell/zshenv" "$HOME/.zshenv"
+  # Strip .zshrc.local sourcing line — that's machine-specific and always present
+  check_file "$CONFIGS/shell/zshrc" "$HOME/.zshrc"
+
+  echo ""
   echo "─── Codex (~/.codex) ───"
   # Strip [projects] section (machine-specific) before comparing config.toml
   check_file "$CONFIGS/codex/config.toml" "$HOME/.codex/config.toml" '/^\[projects\]/,$d'
@@ -153,6 +159,39 @@ do_check() {
   check_dir "$CONFIGS/pi/agents" "$HOME/.pi/agent/agents"
   check_file "$CONFIGS/pi/mcporter.json" "$HOME/.pi/agent/compound-engineering/mcporter.json"
   check_dir "$CONFIGS/pi/extensions" "$HOME/.pi/agent/extensions"
+
+  echo ""
+  echo "─── Claude Hooks (dependencies of settings.json) ───"
+  # Parse settings.json for hook file paths and verify each one exists
+  local settings="$CONFIGS/claude/settings.json"
+  if [[ -f "$settings" ]]; then
+    local hook_paths
+    # Extract all paths matching $HOME/.claude/hooks/* or ~/.claude/hooks/*
+    hook_paths=$(grep -oE '(\$HOME|~)/\.claude/hooks/[^"\\]+' "$settings" \
+      | sed "s|\\\$HOME|$HOME|g; s|^~|$HOME|" \
+      | sort -u)
+
+    local hook_ok=0
+    local hook_missing=0
+    while IFS= read -r hp; do
+      [[ -z "$hp" ]] && continue
+      local label="${hp/#$HOME/~}"
+      if [[ -f "$hp" ]]; then
+        hook_ok=$((hook_ok + 1))
+      else
+        log_err "MISSING: $label"
+        hook_missing=$((hook_missing + 1))
+      fi
+    done <<< "$hook_paths"
+
+    if [[ $hook_missing -eq 0 ]]; then
+      log_ok "OK: all $hook_ok hook files present"
+      MATCHED=$((MATCHED + 1))
+    else
+      log_err "$hook_missing hook file(s) missing ($hook_ok present)"
+      MISSING=$((MISSING + 1))
+    fi
+  fi
 
   echo ""
   echo "─── Symlinks (from install.sh) ───"
@@ -204,6 +243,25 @@ do_check() {
 #==============================================================================
 do_apply() {
   echo ""
+  echo "─── Shell Config ───"
+  apply_file "$CONFIGS/shell/zshenv" "$HOME/.zshenv"
+  apply_file "$CONFIGS/shell/zshrc" "$HOME/.zshrc"
+
+  # Ensure secrets directory exists with correct permissions
+  if [[ ! -d "$HOME/.secrets" ]]; then
+    mkdir -p "$HOME/.secrets"
+    chmod 700 "$HOME/.secrets"
+    log_ok "Created ~/.secrets/ (mode 700)"
+  fi
+  if [[ ! -f "$HOME/.secrets/agent-keys.env" ]]; then
+    if [[ -f "$CONFIGS/shell/secrets-template.env" ]]; then
+      cp "$CONFIGS/shell/secrets-template.env" "$HOME/.secrets/agent-keys.env"
+      chmod 600 "$HOME/.secrets/agent-keys.env"
+      log_ok "Created ~/.secrets/agent-keys.env from template"
+    fi
+  fi
+
+  echo ""
   echo "─── Codex ───"
   apply_file "$CONFIGS/codex/config.toml" "$HOME/.codex/config.toml"
   apply_file "$CONFIGS/codex/config.json" "$HOME/.codex/config.json"
@@ -236,6 +294,11 @@ do_status() {
   echo ""
   echo "Tracked baseline configs:"
   echo ""
+  echo "  Shell (~/):"
+  echo "    .zshenv          — PATH setup, secrets loading (all shells incl SSH)"
+  echo "    .zshrc           — interactive shell config (prompt, plugins, history)"
+  echo "    ~/.secrets/      — agent-keys.env (API keys, 600 perms, not tracked)"
+  echo ""
   echo "  Codex (~/.codex):"
   echo "    config.toml      — model, MCP servers, features, agents (excludes [projects])"
   echo "    config.json      — provider URLs, tool settings"
@@ -244,6 +307,9 @@ do_status() {
   echo ""
   echo "  Claude Code (~/.claude):"
   echo "    settings.json    — permissions, hooks, plugins, statusline"
+  echo "    hooks/           — TypeScript hooks (src/ → dist/ via esbuild)"
+  echo "                       settings.json references ~28 .mjs files in hooks/dist/"
+  echo "                       Build: cd ~/.claude/hooks && npm install && npm run build"
   echo ""
   echo "  Pi Agent (~/.pi/agent):"
   echo "    agents/          — agent chain definitions (6 files)"

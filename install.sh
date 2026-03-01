@@ -144,6 +144,9 @@ echo ""
 echo "Edit global instructions:"
 echo "  $AGENTS_MD"
 echo ""
+echo "For full machine setup (brew, shell, agents):"
+echo "  ./scripts/setup.sh"
+echo ""
 
 #==============================================================================
 # Skills (Unified across all agents)
