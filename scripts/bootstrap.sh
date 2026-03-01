@@ -147,7 +147,6 @@ do_check() {
   echo ""
   echo "─── Claude Code (~/.claude) ───"
   check_file "$CONFIGS/claude/settings.json" "$HOME/.claude/settings.json"
-  check_file "$CONFIGS/claude/hooks.json" "$HOME/.claude/hooks.json"
 
   echo ""
   echo "─── Pi Agent (~/.pi/agent) ───"
@@ -165,7 +164,7 @@ do_check() {
     "$HOME/.codex/prompts:$REPO_ROOT/commands" \
     "$HOME/.codex/AGENTS.md:$REPO_ROOT/instructions/AGENTS.md" \
     "$HOME/.pi/agent/skills:$REPO_ROOT/skills" \
-    "$HOME/.pi/agent/commands:$REPO_ROOT/commands" \
+    "$HOME/.pi/agent/prompts:$REPO_ROOT/commands" \
     "$HOME/.pi/agent/AGENTS.md:$REPO_ROOT/instructions/AGENTS.md" \
   ; do
     local link="${link_target%%:*}"
@@ -214,7 +213,6 @@ do_apply() {
   echo ""
   echo "─── Claude Code ───"
   apply_file "$CONFIGS/claude/settings.json" "$HOME/.claude/settings.json"
-  apply_file "$CONFIGS/claude/hooks.json" "$HOME/.claude/hooks.json"
 
   echo ""
   echo "─── Pi Agent ───"
@@ -246,7 +244,6 @@ do_status() {
   echo ""
   echo "  Claude Code (~/.claude):"
   echo "    settings.json    — permissions, hooks, plugins, statusline"
-  echo "    hooks.json       — additional hook config"
   echo ""
   echo "  Pi Agent (~/.pi/agent):"
   echo "    agents/          — agent chain definitions (6 files)"

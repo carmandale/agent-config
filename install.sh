@@ -97,7 +97,7 @@ fi
 # Pi Agent
 #==============================================================================
 echo "─── Pi Agent ───"
-create_symlink "$COMMANDS_DIR" "$HOME/.pi/agent/commands"
+create_symlink "$COMMANDS_DIR" "$HOME/.pi/agent/prompts"
 create_symlink "$AGENTS_MD" "$HOME/.pi/agent/AGENTS.md"
 echo ""
 
