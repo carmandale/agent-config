@@ -1,38 +1,15 @@
 ## Current State
-**Updated:** 2026-02-28
+**Updated:** 2026-03-01
 **Branch:** main
-**Latest commit:** 99b230a
 
-### Bead `.agent-config-7yo` — CLOSED
+### Completed This Session
+- **`.agent-config-gyi`** (CLOSED) — Bootstrap system: `configs/` baselines + `scripts/bootstrap.sh` check/apply/status. 28/28 checks pass. Pi extension packages excluded (per-machine npm install).
+- **`.agent-config-1m9`** (CLOSED) — Pi-agent compatibility: all critical issues resolved by V4 restructure. Removed duplicate agent-browser from domain/compound/, fixed last30days variant name mismatch. ~60 unknown frontmatter fields are non-blocking warnings.
+- **`.agent-config-sw8`** (CLOSED) — Hook-equivalent evaluation complete. Findings:
+  - Pi: Full event system (20+ events), `tool_call`/`tool_result` replicate Pre/PostToolUse with blocking and transformation. 6 live extensions prove it.
+  - Claude Code: JSON-based PreToolUse/PostToolUse hooks via external commands. Simpler but functional.
+  - Codex: No hook/event system. Only MCP servers, feature flags, and policies.
+  - Conclusion: No cross-agent hook tooling until Codex adds an event system. Pi and Claude Code hooks remain agent-specific.
 
-All 4 portability slices complete. Agent-config is fully self-contained and portable.
-
-| Slice | Commit | Summary |
-|-------|--------|---------|
-| V1 | cef10da | Removed broken symlinks |
-| V2 | 642ab48 | Added 3 git submodules (shaping-skills, napkin, last30days) |
-| V3 | fb099e1 | Vendored 5 remaining externals, resolved duplicates, vendor-sync.sh |
-| V4 | ed5b03e | Taxonomy restructure: 222 skills moved to functional categories |
-
-### Skills Taxonomy (V4)
-
-Origin-based categories (`cc3/`, `personal/`, `ralph-o/`, `compound/`, `swift/`) replaced with:
-
-| Category | Count | Decision rule |
-|----------|-------|---------------|
-| `tools/` | 76 | Wraps external CLI/API/service |
-| `workflows/` | 54 | Orchestrates multi-step dev processes |
-| `meta/` | 42 | Agent behavior rules, patterns |
-| `review/` | 21 | Analyzes/reviews code or content |
-| `domain/` | 60 | Technology-specific (sub-groups: agentica, compound, gitnexus, math, notion, other, ralph, shaping, swift) |
-
-303 skill files preserved. 256 discovery symlinks. Zero broken links.
-
-### Key Files
-- `specs/003-agent-config-portability/` — spec, plan, slices, spike
-- `scripts/restructure-categories.sh` — V4 migration script (with --dry-run)
-- `scripts/vendor-sync.sh` — provenance manifest for vendored skills
-- `.gitmodules` — 3 submodule definitions
-
-### No open work
-All portability work is done. No blockers or pending tasks.
+### All 3 Open Beads Resolved
+No remaining open beads from the portability/compatibility effort.
