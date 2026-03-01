@@ -11,10 +11,16 @@ This is **the source of truth** for agent configuration across Pi, Claude Code, 
 ```
 ~/.agent-config/
 ├── skills/                  # Shared skills (symlinked to ~/.claude/skills, ~/.pi/agent/skills, etc.)
-│   ├── personal/            # User-created skills
-│   ├── tools/               # CLI/tool integrations
-│   ├── cc3/                 # Claude Code v3 framework skills
-│   ├── compound/            # Compound skills
+│   ├── tools/               # Wraps external CLI/API/service (~76)
+│   ├── review/              # Analyzes/reviews code or content (~21)
+│   ├── workflows/           # Orchestrates multi-step dev processes (~54)
+│   ├── meta/                # Agent behavior rules, patterns (~42)
+│   ├── domain/              # Technology-specific knowledge (~60)
+│   │   ├── swift/           # Apple/Swift platform
+│   │   ├── compound/        # Vendored compound plugin set
+│   │   ├── ralph/           # Ralph orchestrator
+│   │   ├── shaping/         # Shaping methodology (submodules)
+│   │   └── ...              # agentica, gitnexus, math, notion, other
 │   └── [name] -> [category]/[name]  # Top-level symlinks for discovery
 ├── commands/                # Slash commands (shared across agents)
 ├── instructions/
@@ -45,7 +51,7 @@ The `install.sh` script creates these symlinks:
 ### Skill Format
 
 ```
-skills/personal/my-skill/
+skills/<category>/my-skill/
 └── SKILL.md
 ```
 
@@ -73,10 +79,14 @@ The `description` field in YAML frontmatter is **the primary mechanism** for ski
 
 ### Skill Organization
 
-- `skills/personal/` - User-created skills
-- `skills/tools/` - CLI tool integrations
-- `skills/cc3/` - Framework skills
-- Top-level symlinks (e.g., `skills/bird -> personal/bird`) enable discovery
+Functional taxonomy with a sequential decision rule for placement:
+1. Wraps external CLI/API/service? -> `tools/`
+2. Analyzes/reviews code or content? -> `review/`
+3. Orchestrates multi-step dev process? -> `workflows/`
+4. Specific to a named technology domain? -> `domain/<sub>/`
+5. Agent behavior rule or pattern? -> `meta/`
+
+Top-level symlinks (e.g., `skills/bird -> tools/bird`) enable discovery.
 
 ## Commands
 
@@ -103,9 +113,9 @@ Changes take effect immediately for new agent sessions (no restart needed for mo
 
 ### Add a new skill
 ```bash
-mkdir -p skills/personal/my-skill
-# Create skills/personal/my-skill/SKILL.md
-ln -s personal/my-skill skills/my-skill  # Top-level symlink for discovery
+mkdir -p skills/tools/my-skill           # Choose the right category
+# Create skills/tools/my-skill/SKILL.md
+ln -s tools/my-skill skills/my-skill     # Top-level symlink for discovery
 ```
 
 ### Fix broken symlinks

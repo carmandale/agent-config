@@ -219,7 +219,17 @@ If verification could not run, state exactly why.
 
 ---
 
-## 8) Tooling Defaults
+## 8) Destructive Command Guard (dcg)
+
+- dcg is installed as a pre-execution hook for AI coding agents.
+- When dcg blocks a destructive command, prefer safer alternatives over overriding:
+  - **macOS**: Use `mv path ~/.Trash/` or `trash path` (Homebrew: `brew install trash`) instead of `rm -rf`.
+  - **Linux**: Use `trash-put path` or `gio trash path` instead of `rm -rf`.
+- Only use `dcg allow <code>` to override a block when the destructive command is genuinely required.
+
+---
+
+## 9) Tooling Defaults
 
 - Prefer `rg` / `rg --files` for search.
 - Do not add arbitrary command timeouts to normal CLI tools.
