@@ -1,15 +1,26 @@
 ## Current State
 **Updated:** 2026-03-01
 **Branch:** main
+**Commit:** d283d9a
+
+### Session Summary
+Closed all 6 remaining open/in-progress beads. Board is clean (13/13 closed, 0 open).
 
 ### Completed This Session
-- **`.agent-config-gyi`** (CLOSED) — Bootstrap system: `configs/` baselines + `scripts/bootstrap.sh` check/apply/status. 28/28 checks pass. Pi extension packages excluded (per-machine npm install).
-- **`.agent-config-1m9`** (CLOSED) — Pi-agent compatibility: all critical issues resolved by V4 restructure. Removed duplicate agent-browser from domain/compound/, fixed last30days variant name mismatch. ~60 unknown frontmatter fields are non-blocking warnings.
-- **`.agent-config-sw8`** (CLOSED) — Hook-equivalent evaluation complete. Findings:
-  - Pi: Full event system (20+ events), `tool_call`/`tool_result` replicate Pre/PostToolUse with blocking and transformation. 6 live extensions prove it.
-  - Claude Code: JSON-based PreToolUse/PostToolUse hooks via external commands. Simpler but functional.
-  - Codex: No hook/event system. Only MCP servers, feature flags, and policies.
-  - Conclusion: No cross-agent hook tooling until Codex adds an event system. Pi and Claude Code hooks remain agent-specific.
+1. **`.agent-config-gyi`** — Bootstrap config baseline system (`configs/` + `scripts/bootstrap.sh`). 28/28 checks pass.
+2. **`.agent-config-1m9`** — Pi-agent skill compatibility. Removed duplicate agent-browser, fixed variant name. Rest resolved by V4.
+3. **`.agent-config-sw8`** — Hook evaluation. Pi has full event hooks, Codex has none. No cross-agent tooling warranted.
+4. **`.agent-config-qxx`** — Config control plane. Decision Gate A passes: current stack sufficient. No chezmoi/brew/mise/nix needed.
+5. **`.agent-config-8jh`** — Xcode26-Agent-Skills already integrated in V3/V4.
+6. **`.agent-config-cys`** — Finalize/handoff/checkpoint all 7 improvements already implemented. GH #1 closed.
 
-### All 3 Open Beads Resolved
-No remaining open beads from the portability/compatibility effort.
+### Key Artifacts Created
+- `configs/` — Baseline configs for Codex, Claude Code, Pi Agent
+- `scripts/bootstrap.sh` — Check/apply/status for cross-machine config parity
+- `configs/pi/extensions/.gitignore` — Excludes per-machine npm packages
+- `specs/002-*/tasks.md` — Decision Gate A evaluation with scorecard
+
+### Board Status
+- **Open:** 0
+- **In Progress:** 0
+- **Closed:** 13
