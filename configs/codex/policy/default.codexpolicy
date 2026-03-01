@@ -1,0 +1,2 @@
+prefix_rule(pattern=["./.claude/scripts/xcodebuild", "-project", "orchestrator.xcodeproj", "-scheme", "orchestrator", "-destination", "platform=iOS Simulator,name=iPad Pro 11-inch (M5)", "-derivedDataPath", "./build/DerivedData"], decision="allow")
+prefix_rule(pattern=["./.claude/scripts/xcodebuild", "test", "-project", "orchestrator.xcodeproj", "-scheme", "orchestrator", "-destination", "platform=iOS Simulator,name=iPad Pro 13-inch (M5)"], decision="allow")

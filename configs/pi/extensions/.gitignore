@@ -1,0 +1,9 @@
+# Extension packages are installed per-machine via npm/bun
+# Only the top-level .ts config scripts are tracked as baselines
+interactive-shell/
+interview/
+peekaboo/
+pi-review-loop/
+ralph/
+repoprompt-mcp/
+node_modules/

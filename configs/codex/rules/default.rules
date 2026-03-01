@@ -1,0 +1,30 @@
+prefix_rule(pattern=["gj", "run", "orchestrator"], decision="allow")
+prefix_rule(pattern=["gj", "test", "P0"], decision="allow")
+prefix_rule(pattern=["git", "add", "GrooveTech Media Server/GrooveTech Media Server/App/AppState/AppState.swift", "GrooveTech Media Server/GrooveTech Media Server/Features/Control/Networking/CommandServer.swift", "GrooveTech Media Server/GrooveTech Media Server/Features/MediaOrganization/Views/MainSplitView.swift", "GrooveTech Media Server/GrooveTech Media Server/Features/Playback/Services/MediaServerController.swift", "GrooveTech Media Server/GrooveTech Media Server/Features/Playback/Views/VideoPlaybackView.swift", "GrooveTech Media Server/GrooveTech Media Server/Services/CloudSyncService.swift", "GrooveTech Media Server/GrooveTech Media Server/Services/ProfileService.swift", "GrooveTech Media Server/GrooveTech Media Server/Services/ProjectProfileManager.swift", "GrooveTech Media Server/GrooveTech Media Server/Services/Resource/MediaImportService.swift"], decision="allow")
+prefix_rule(pattern=["git", "add", "GrooveTech Media Server/GrooveTech Media Server/Services/ProjectProfileManager.swift"], decision="allow")
+prefix_rule(pattern=["git", "commit", "-m", "fix: migrate profiles from legacy prefs"], decision="allow")
+
+prefix_rule(
+    pattern = ["git", "commit", "-m", "fix: sync picker with external playback"],
+    decision = "allow",
+)
+
+prefix_rule(
+    pattern = ["git", "push", "-u", "origin", "codex/2026-01-22-media-list-active-file"],
+    decision = "allow",
+)
+
+prefix_rule(
+    pattern = ["gh", "pr", "create", "--base", "main", "--head", "codex/2026-01-22-media-list-active-file", "--title", "fix: sync picker on external playback", "--body", "## Summary\\n- sync selected item to current playback only when no pending command and picker is closed\\n- track active picker device to avoid overriding operator intent\\n\\n## Testing\\n- Not run (not requested)\\n\\n## Bead\\n- orchestrator-zyys"],
+    decision = "allow",
+)
+
+prefix_rule(
+    pattern = ["/bin/zsh", "-lc", "cd '/Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/codex-orchestrator' && git add -A && git diff --cached --stat"],
+    decision = "allow",
+)
+prefix_rule(pattern=["git", "branch", "-m"], decision="allow")
+prefix_rule(pattern=["git", "checkout", "-b", "feat/91"], decision="allow")
+prefix_rule(pattern=["git", "checkout", "-b", "feat/79", "main"], decision="allow")
+prefix_rule(pattern=["git", "switch", "-c", "feat/284"], decision="allow")
+prefix_rule(pattern=["git", "checkout", "-b", "feat/2"], decision="allow")

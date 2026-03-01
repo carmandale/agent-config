@@ -1,0 +1,44 @@
+tool_output_token_limit = 25000
+model = "gpt-5.3-codex"
+model_reasoning_effort = "xhigh"
+personality = "friendly"
+
+[mcp_servers.RepoPrompt]
+command = "/Users/dalecarman/RepoPrompt/repoprompt_cli"
+args = []
+tool_timeout_sec = 10000
+enabled = false
+
+[mcp_servers.pencil]
+command = "/Applications/Pencil.app/Contents/Resources/app.asar.unpacked/out/mcp-server-darwin-arm64"
+args = [ "--app", "desktop" ]
+
+[features]
+collaboration_modes = true
+steer = true
+unified_exec = true
+apps = true
+multi_agent = true
+memories = true
+shell_snapshot = true
+
+[agents]
+max_threads = 6
+
+[projects."/Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/GJ-testflight-release"]
+trust_level = "trusted"
+
+[projects."/Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/orchestrator"]
+trust_level = "trusted"
+
+[projects."/Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/groovetech-media-player"]
+trust_level = "trusted"
+
+[projects."/Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/groovetech-media-server"]
+trust_level = "trusted"
+
+[projects."/Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/KaiserEmpathy"]
+trust_level = "trusted"
+
+[projects."/Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/PfizerOutdoCancerV2"]
+trust_level = "trusted"

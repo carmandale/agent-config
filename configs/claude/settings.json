@@ -1,0 +1,286 @@
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "permissions": {
+    "allow": [
+      "mcp__pencil"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/dist/import-validator.mjs\"",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/dist/typescript-preflight.mjs\"",
+            "timeout": 40
+          },
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/dist/compiler-in-the-loop.mjs\"",
+            "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/dist/post-edit-notify.mjs\"",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/dist/post-edit-diagnostics.mjs\"",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/dist/handoff-index.mjs\""
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/dist/import-error-detector.mjs\"",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/shaping-ripple.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/dist/pre-compact-continuity.mjs\""
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bd prime"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/dist/installed-binary-guard.mjs\"",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/usr/local/bin/dcg"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/dist/pre-tool-use-broadcast.mjs\""
+          }
+        ]
+      },
+      {
+        "matcher": "Read|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/dist/path-rules.mjs\"",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/dist/tldr-read-enforcer.mjs\"",
+            "timeout": 20
+          }
+        ]
+      },
+      {
+        "matcher": "Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/dist/smart-search-router.mjs\"",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/dist/tldr-context-inject.mjs\"",
+            "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/dist/arch-context-inject.mjs\"",
+            "timeout": 30
+          }
+        ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/dist/file-claims.mjs\"",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/dist/edit-context-inject.mjs\"",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/dist/signature-helper.mjs\"",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Grep|Glob|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"/Users/dalecarman/.claude/hooks/gitnexus/gitnexus-hook.cjs\"",
+            "timeout": 8000,
+            "statusMessage": "Enriching with GitNexus graph context..."
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/dist/session-end-cleanup.mjs\""
+          },
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/dist/session-outcome.mjs\""
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/dist/session-register.mjs\"",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "resume|compact|clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/dist/session-start-continuity.mjs\""
+          }
+        ]
+      },
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/dist/session-start-tldr-cache.mjs\"",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "(node \"$HOME/.claude/hooks/dist/session-start-dead-code.mjs\" &>/dev/null &)",
+            "timeout": 2
+          }
+        ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bd prime"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$HOME/.claude/hooks/dist/compiler-in-the-loop-stop.mjs\""
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run \"$HOME/.claude/hooks/hook_launcher.py\" premortem-suggest",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "input=$(cat); dir=$(echo \"$input\" | jq -r '.workspace.current_dir // \"\"'); dir_name=$(basename \"${dir:-$(pwd)}\"); model=$(echo \"$input\" | jq -r '.model.display_name // \"Claude\"'); output_style=$(echo \"$input\" | jq -r '.output_style.name // \"\"'); remaining=$(echo \"$input\" | jq -r '.context_window.remaining_percentage // empty'); git_branch=\"\"; if git rev-parse --git-dir > /dev/null 2>&1; then branch=$(git branch --show-current 2>/dev/null); [ -n \"$branch\" ] && git_branch=\" 🌱 $branch\"; fi; printf \"\\033[1;36m╭─\\033[0m\\033[1;36m%s\\033[0m\" \"$dir_name\"; [ -n \"$git_branch\" ] && printf \"\\033[1;35m%s\\033[0m\" \"$git_branch\"; printf \" \\033[0;90m│\\033[0m \\033[0;37m%s\\033[0m\" \"$model\"; [ -n \"$output_style\" ] && [ \"$output_style\" != \"default\" ] && printf \" \\033[0;90m│\\033[0m \\033[0;33m%s\\033[0m\" \"$output_style\"; [ -n \"$remaining\" ] && printf \" \\033[0;90m│\\033[0m \\033[0;32m%s%%\\033[0m\" \"$remaining\"; printf \"\\n\\033[1;36m╰─\\033[0m\""
+  },
+  "enabledPlugins": {
+    "swift-lsp@claude-plugins-official": true,
+    "compound-engineering@every-marketplace": true,
+    "notion-workspace-plugin@notion-plugin-marketplace": true
+  },
+  "skipDangerousModePermissionPrompt": true
+}
