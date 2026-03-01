@@ -14,29 +14,59 @@ Unified configuration for AI coding agents. One central location for slash comma
 
 ## Installation
 
+### Full machine setup (new machine)
+
 ```bash
 git clone https://github.com/carmandale/agent-config.git ~/.agent-config
 cd ~/.agent-config
-./install.sh
+./scripts/setup.sh
 ```
+
+`setup.sh` orchestrates everything: Homebrew packages, shell config baselines, secrets directory, symlinks, Claude hooks build, and agent config bootstrap. Safe to run multiple times.
+
+### Quick update (existing machine)
+
+```bash
+cd ~/.agent-config
+git pull
+./install.sh                    # Symlinks only
+./scripts/bootstrap.sh apply    # Agent configs only
+./scripts/bootstrap.sh check    # Verify everything
+```
+
+### What setup.sh does
+
+1. **Homebrew** — installs packages from `Brewfile` (required + recommended)
+2. **Shell config** — applies `~/.zshenv` (PATH, secrets) and `~/.zshrc` (interactive baseline), creates `~/.secrets/` for API keys
+3. **Symlinks** — runs `install.sh` (commands, instructions, skills to all agents)
+4. **Claude hooks** — builds TypeScript hooks if source exists (settings.json depends on 28 hook files)
+5. **Agent configs** — runs `bootstrap.sh apply` (codex, claude, pi baselines)
+6. **Verification** — runs `bootstrap.sh check` to confirm everything resolves
+
+### Known gap: hooks not yet tracked
+
+Claude hooks source (`~/.claude/hooks/`) is not yet in this repo. On a fresh machine, `setup.sh` warns and tells you to rsync from an existing machine. This breaks the "one clone, one setup" promise. Tracked in bead `.agent-config-6on` / spec `004-hooks-in-repo`.
 
 ## Structure
 
 ```
 ~/.agent-config/
 ├── commands/                 # Shared slash commands (27+)
-│   ├── handoff.md           # End-of-session handoff
-│   ├── checkpoint.md        # Mid-session context compression
-│   ├── commit.md            # Smart commit workflow
-│   ├── debug.md             # Structured debugging
-│   ├── sweep.md             # Code cleanup pass
-│   ├── triage.md            # Issue triage
-│   └── ...
+├── configs/
+│   ├── claude/               # Claude Code settings.json baseline
+│   ├── codex/                # Codex config.toml, config.json, rules, policy
+│   ├── pi/                   # Pi agents, mcporter, extensions
+│   └── shell/                # zshenv, zshrc, secrets-template.env
 ├── instructions/
-│   └── AGENTS.md            # Unified global instructions
-├── tools-bin/
-│   └── agent-config-parity  # Cross-machine parity + version sync utility
-├── install.sh               # Creates symlinks
+│   └── AGENTS.md             # Unified global instructions
+├── scripts/
+│   ├── setup.sh              # Full machine setup orchestrator
+│   └── bootstrap.sh          # Agent config check/apply/status
+├── skills/                   # Unified skills (253+)
+├── specs/                    # Planning artifacts (shaping, plans)
+├── tools-bin/                # CLI utilities
+├── Brewfile                  # Homebrew packages (required + recommended)
+├── install.sh                # Creates symlinks
 └── README.md
 ```
 
@@ -266,12 +296,19 @@ cd ~/.agent-config
 
 ## What Is Outside `.agent-config`
 
-These are not fully contained in this repo and can still break parity:
+Managed by bootstrap (baselines tracked in `configs/`):
+- `~/.claude/settings.json`, `~/.codex/config.*`, `~/.pi/agent/agents/`, extensions, mcporter
+- `~/.zshenv`, `~/.zshrc` (shell baselines)
 
-- Agent-local settings files (`~/.claude/settings.json`, `~/.codex/config.*`, `~/.pi/agent/config.json`, `~/.config/opencode/config.*`)
-- Compound/plugin-generated directories in agent homes (for example under `~/.pi/agent/compound-engineering`, `~/.config/opencode/compound-engineering`, `~/.factory/`)
-- Toolchain versions (`git`, `bash`, `bun/bunx`, `node`, `bd`, `rg`)
-- Auth state and credentials (environment variables, keychain entries, logged-in sessions)
+**Not yet tracked** (breaks "one clone" promise):
+- `~/.claude/hooks/` — TypeScript hooks that settings.json depends on (spec `004-hooks-in-repo`)
+
+Machine-specific (intentionally not tracked):
+- `~/.zshrc.local` — per-machine aliases, conda, pnpm, app paths
+- `~/.secrets/agent-keys.env` — API keys (template tracked, values not)
+- Agent CLI installations (claude, codex, pi, openclaw)
+- Toolchain versions (`git`, `node`, `bun`, `bd`, `rg`)
+- Auth state and credentials (keychain entries, logged-in sessions)
 
 Run `~/.agent-config/tools-bin/agent-config-parity report` to see these surfaces explicitly.
 

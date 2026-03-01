@@ -11,6 +11,7 @@
 | 2026-02-22 | User | Wording allowed agents to infer bead linkage starts at implementation, not spec creation | State as hard gate: "No bead, no spec", require bead ID in `spec.md` at creation time, and add override in pre-flight checklist |
 | 2026-02-26 | User | Agents stopped on unrelated working-tree changes with generic safety pause | Only pause for unexpected changes in files in the active edit scope; unrelated dirty files are non-blocking |
 | 2026-02-28 | Self | Non-interactive SSH sessions on mini still resolved Apple `/usr/bin/git` and `/bin/bash` despite `.zshenv` edits | For zsh login SSH sessions, set Homebrew PATH precedence in `~/.zprofile` (path_helper runs later) and re-verify with `command -v` |
+| 2026-03-01 | User | Deployed settings.json to Mini via bootstrap but never checked that the 28 hook files it references existed there. Declared "done" after shallow checks (file content match + syntax). Mini sessions broken on every hook. | Never verify a config file in isolation. Always verify its DEPENDENCIES resolve on the target. For settings.json: parse hook paths and confirm each file exists. More broadly: if a tracked config references external files, those files must also be tracked or the setup is incomplete. One clone + one setup = everything works, no exceptions. |
 
 ## User Preferences
 - Uses `~/.agent-config` as central distribution hub for all agents (pi-agent, codex, opencode, claude code)
@@ -49,6 +50,7 @@
 - Modifying installPath without removing cached files - duplicates remain
 - Proposing solutions before understanding complete architecture
 - Assuming README install behavior is fully current without checking `install.sh` and `install-all.sh` directly
+- Checking config file content matches baseline without verifying what that config DEPENDS ON (e.g., settings.json → hooks). Shallow verification creates false confidence.
 
 ## Domain Notes
 - **Claude Code plugins** provide: skills/, commands/, agents/, CLAUDE.md, .claude-plugin/
