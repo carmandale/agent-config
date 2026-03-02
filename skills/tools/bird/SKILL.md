@@ -18,7 +18,34 @@ Posting (confirm with user first)
 - `bird tweet "text"`
 - `bird reply <id-or-url> "text"`
 
-Auth sources
-- Browser cookies (default: Firefox/Chrome)
-- Sweetistics API: set `SWEETISTICS_API_KEY` or use `--engine sweetistics`
-- Check sources: `bird check`
+Auth sources (in priority order)
+1. **Env vars** — `AUTH_TOKEN` + `CT0` (most reliable for agents)
+2. **Browser cookies** — auto-read from Chrome/Firefox if logged into x.com
+3. Check what's available: `bird check`
+
+## Setting up auth tokens (one-time)
+
+Get tokens from your browser after logging into x.com:
+1. Open Chrome/Firefox → x.com → log in
+2. DevTools (F12) → Application → Cookies → https://x.com
+3. Copy `auth_token` value → set as `AUTH_TOKEN`
+4. Copy `ct0` value → set as `CT0`
+
+```bash
+# Add to ~/.zshrc or ~/.zshenv:
+export AUTH_TOKEN="your_auth_token_here"
+export CT0="your_ct0_here"
+```
+
+Then `source ~/.zshrc` and `bird whoami` to verify.
+
+Config file: `~/.config/bird/config.json5`
+
+## Fallback: x-cli (cookie-based Python)
+
+If bird fails, use the openclaw x-cli skill:
+```bash
+# Install: npx playbooks add skill openclaw/skills --skill x-cli
+python scripts/x_read.py tweet <url>
+python scripts/x_search.py "query" --count 10
+```
