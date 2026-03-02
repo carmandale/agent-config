@@ -2,7 +2,7 @@
 # Brewfile - Machine-level packages for agent-config
 #
 # Usage:
-#   brew bundle --file=Brewfile --no-lock
+#   brew bundle --file=Brewfile
 #
 # Tiered: Required tools are referenced by skills/commands,
 # Recommended tools enhance the dev experience.
@@ -37,7 +37,8 @@ brew "zsh-completions"           # zsh plugin — additional completions
 tap "steipete/tap"
 tap "oven-sh/bun"
 
-brew "steipete/tap/bird"         # bird — X/Twitter CLI (bird skill)
+# bird was removed from steipete/tap — install via: cargo install bird-cli
+# brew "steipete/tap/bird"       # bird — X/Twitter CLI (bird skill)
 brew "steipete/tap/peekaboo"     # peekaboo — macOS UI automation (peekaboo skill)
 brew "steipete/tap/sag"          # sag — ElevenLabs TTS CLI (sag skill)
 brew "oven-sh/bun/bun"           # bun — fast JS runtime + package manager

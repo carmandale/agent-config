@@ -87,7 +87,7 @@ else
 
   if [[ -f "$REPO_ROOT/Brewfile" ]]; then
     log_info "Installing packages from Brewfile..."
-    if brew bundle --file="$REPO_ROOT/Brewfile" --no-lock; then
+    if brew bundle --file="$REPO_ROOT/Brewfile"; then
       log_ok "Brew bundle complete"
     else
       log_warn "Some brew packages failed to install (non-fatal)"
