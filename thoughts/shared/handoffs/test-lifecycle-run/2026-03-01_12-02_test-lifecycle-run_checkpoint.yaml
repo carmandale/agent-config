@@ -1,0 +1,17 @@
+---
+schema_version: "1.0.0"
+mode: checkpoint
+date: 2026-03-01T12:02:03.660Z
+session: "test-lifecycle-run"
+outcome: "SUCCEEDED"
+---
+
+goal: "Test spaces in path"
+now: "Validating path handling"
+
+# Optional fields (YAML)
+# done_this_session:, next:, blockers:, questions:, decisions:, findings:, worked:, failed:, files:, test:, git:
+git:
+  branch: "main"
+  commit: "73810503c2b9f1eec8059ead031259e8fd32b90e"
+  remote: "https://github.com/carmandale/agent-config.git"
