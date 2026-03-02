@@ -168,51 +168,7 @@ else
 fi
 
 #==============================================================================
-# Step 4: Claude hooks (dependencies of settings.json)
-#==============================================================================
-log_step "Claude Hooks"
-
-HOOKS_DIR="$HOME/.claude/hooks"
-if [[ -f "$HOOKS_DIR/package.json" && -d "$HOOKS_DIR/src" ]]; then
-  # Source exists — build it
-  if [[ ! -d "$HOOKS_DIR/dist" ]] || [[ -z "$(ls -A "$HOOKS_DIR/dist" 2>/dev/null)" ]]; then
-    log_info "Building hooks (dist/ missing or empty)..."
-    NEEDS_BUILD=true
-  else
-    # Check if any src file is newer than dist
-    local newest_src newest_dist
-    newest_src=$(find "$HOOKS_DIR/src" -name '*.ts' -newer "$HOOKS_DIR/dist" 2>/dev/null | head -1)
-    if [[ -n "$newest_src" ]]; then
-      log_info "Rebuilding hooks (source newer than dist)..."
-      NEEDS_BUILD=true
-    else
-      log_ok "Hooks dist/ up to date"
-      NEEDS_BUILD=false
-    fi
-  fi
-
-  if [[ "$NEEDS_BUILD" == "true" ]]; then
-    # Ensure node_modules exist
-    if [[ ! -d "$HOOKS_DIR/node_modules" ]]; then
-      log_info "Installing hook dependencies..."
-      (cd "$HOOKS_DIR" && npm install --no-audit --no-fund 2>&1 | tail -1)
-    fi
-    # Build
-    if (cd "$HOOKS_DIR" && npm run build 2>&1 | tail -3); then
-      log_ok "Hooks built: $(ls -1 "$HOOKS_DIR/dist"/*.mjs 2>/dev/null | wc -l | tr -d ' ') .mjs files"
-    else
-      log_err "Hook build failed"
-      WARNINGS+=("Claude hooks build failed — run 'cd ~/.claude/hooks && npm install && npm run build' manually")
-    fi
-  fi
-else
-  log_warn "No hooks source at ~/.claude/hooks/ — settings.json hooks will fail"
-  log_info "Copy hooks from another machine: rsync -az source:~/.claude/hooks/ ~/.claude/hooks/"
-  MANUAL_STEPS+=("Deploy Claude hooks to ~/.claude/hooks/ and run 'npm install && npm run build'")
-fi
-
-#==============================================================================
-# Step 5: Agent bootstrap configs
+# Step 4: Agent bootstrap configs (includes hooks deploy + build)
 #==============================================================================
 if [[ "$SKIP_AGENTS" == "true" ]]; then
   log_info "Skipping agent bootstrap (--skip-agents)"
@@ -228,7 +184,7 @@ else
 fi
 
 #==============================================================================
-# Step 6: Verify
+# Step 5: Verify
 #==============================================================================
 log_step "Verification"
 
@@ -247,7 +203,7 @@ COMMAND_COUNT=$(ls -1 "$REPO_ROOT/commands"/*.md 2>/dev/null | wc -l | tr -d ' '
 log_info "Skills: $SKILL_COUNT | Commands: $COMMAND_COUNT"
 
 #==============================================================================
-# Step 7: Summary
+# Step 6: Summary
 #==============================================================================
 log_step "Setup Complete"
 

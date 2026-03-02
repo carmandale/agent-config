@@ -273,6 +273,50 @@ do_apply() {
   apply_file "$CONFIGS/claude/settings.json" "$HOME/.claude/settings.json"
 
   echo ""
+  echo "─── Claude Hooks ───"
+  local hooks_src="$CONFIGS/claude/hooks"
+  local hooks_dest="$HOME/.claude/hooks"
+  if [[ -d "$hooks_src/src" && -f "$hooks_src/package.json" ]]; then
+    # Sync source files (excluding build artifacts)
+    mkdir -p "$hooks_dest"
+    rsync -a \
+      --exclude='node_modules' \
+      --exclude='dist' \
+      --exclude='.tldr' \
+      --exclude='.DS_Store' \
+      --delete \
+      "$hooks_src/" "$hooks_dest/"
+    log_ok "Applied: ~/.claude/hooks/ (source synced)"
+
+    # Install deps if needed
+    if [[ ! -d "$hooks_dest/node_modules" ]]; then
+      log_info "Installing hook dependencies..."
+      (cd "$hooks_dest" && npm install --no-audit --no-fund 2>&1 | tail -1)
+    fi
+
+    # Build if dist is missing or stale
+    local needs_build=false
+    if [[ ! -d "$hooks_dest/dist" ]] || [[ -z "$(ls -A "$hooks_dest/dist" 2>/dev/null)" ]]; then
+      needs_build=true
+    elif [[ -n "$(find "$hooks_dest/src" -name '*.ts' -newer "$hooks_dest/dist" 2>/dev/null | head -1)" ]]; then
+      needs_build=true
+    fi
+
+    if [[ "$needs_build" == "true" ]]; then
+      log_info "Building hooks..."
+      if (cd "$hooks_dest" && npm run build 2>&1 | tail -1); then
+        log_ok "Built: $(ls -1 "$hooks_dest/dist"/*.mjs 2>/dev/null | wc -l | tr -d ' ') .mjs files"
+      else
+        log_err "Hook build failed — run 'cd ~/.claude/hooks && npm install && npm run build' manually"
+      fi
+    else
+      log_ok "Hooks dist/ up to date"
+    fi
+  else
+    log_warn "No hooks baseline in configs/claude/hooks/ — skipping"
+  fi
+
+  echo ""
   echo "─── Pi Agent ───"
   apply_dir "$CONFIGS/pi/agents" "$HOME/.pi/agent/agents"
   apply_file "$CONFIGS/pi/mcporter.json" "$HOME/.pi/agent/compound-engineering/mcporter.json"
