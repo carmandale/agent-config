@@ -105,6 +105,9 @@ function main() {
     // hooks/claude/gitnexus-hook.cjs → dist/cli/index.js
     const cliPath = path.resolve(__dirname, '..', '..', 'dist', 'cli', 'index.js');
 
+    // Skip if GitNexus CLI is not installed
+    if (!fs.existsSync(cliPath)) return;
+
     // augment CLI writes result to stderr (KuzuDB's native module captures
     // stdout fd at OS level, making it unusable in subprocess contexts).
     const { spawnSync } = require('child_process');
