@@ -4,7 +4,7 @@ Unified configuration hub for AI coding agents. One central location that all ag
 
 ## What This Repo Is
 
-This is **the source of truth** for agent configuration across Pi, Claude Code, Codex, and other agents. Changes here propagate to all agents automatically via symlinks.
+This is **the source of truth** for agent configuration across Pi, Claude Code, Codex, Gemini, and other agents. Changes here propagate to all agents automatically via symlinks.
 
 ## Directory Structure
 
@@ -42,7 +42,7 @@ The `install.sh` script creates these symlinks:
 | `~/.pi/agent/skills` | `~/.agent-config/skills` |
 | `~/.pi/agent/AGENTS.md` | `~/.agent-config/instructions/AGENTS.md` |
 | `~/.pi/agent/commands` | `~/.agent-config/commands` |
-| `~/.codex/skills` | `~/.agent-config/skills` |
+| `~/.agents/skills` | `~/.agent-config/skills` |
 
 ## Skills System
 

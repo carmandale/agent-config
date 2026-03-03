@@ -159,8 +159,8 @@ if [[ -d "$SKILLS_DIR" ]]; then
     # Claude Code
     create_symlink "$SKILLS_DIR" "$HOME/.claude/skills"
     
-    # Codex
-    create_symlink "$SKILLS_DIR" "$HOME/.codex/skills"
+    # Codex (uses ~/.agents/skills, not ~/.codex/skills)
+    create_symlink "$SKILLS_DIR" "$HOME/.agents/skills"
     
     # Pi Agent (both locations for compatibility)
     create_symlink "$SKILLS_DIR" "$HOME/.config/agent-skills"

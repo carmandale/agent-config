@@ -9,6 +9,7 @@ Unified configuration for AI coding agents. One central location for slash comma
 | **Pi** (pi-coding-agent) | `~/.pi/agent/commands/` | `~/.pi/agent/AGENTS.md` |
 | **Claude Code** | `~/.claude/commands/` | `~/.claude/CLAUDE.md` |
 | **Codex** (OpenAI) | `~/.codex/prompts/` | `~/.codex/AGENTS.md` |
+| **Gemini** (Google) | `~/.gemini/prompts/` | `~/.gemini/GEMINI.md` |
 | **Droid** (Factory) | `~/.factory/commands/` | `~/.factory/droids/` |
 | **OpenCode** | `~/.config/opencode/commands/` | Project-level only |
 
@@ -292,6 +293,7 @@ cd ~/.agent-config
 - **Pi**: Restart the agent session
 - **Claude Code**: Instructions load per-session
 - **Codex**: Restart codex
+- **Gemini**: Restart gemini
 - **Droid**: Custom droids load from `~/.factory/droids/`
 
 ## What Is Outside `.agent-config`
@@ -306,7 +308,7 @@ Managed by bootstrap (baselines tracked in `configs/`):
 Machine-specific (intentionally not tracked):
 - `~/.zshrc.local` — per-machine aliases, conda, pnpm, app paths
 - `~/.secrets/agent-keys.env` — API keys (template tracked, values not)
-- Agent CLI installations (claude, codex, pi, openclaw)
+- Agent CLI installations (claude, codex, gemini, pi, openclaw)
 - Toolchain versions (`git`, `node`, `bun`, `bd`, `rg`)
 - Auth state and credentials (keychain entries, logged-in sessions)
 

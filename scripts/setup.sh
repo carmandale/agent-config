@@ -225,7 +225,7 @@ if [[ ${#MANUAL_STEPS[@]} -gt 0 ]]; then
 fi
 
 echo "Agent CLIs (installed separately):"
-for cli in claude codex pi openclaw; do
+for cli in claude codex gemini pi openclaw; do
   if command -v "$cli" >/dev/null 2>&1; then
     log_ok "$cli found"
   else
