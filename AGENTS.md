@@ -15,12 +15,12 @@ This is **the source of truth** for agent configuration across Pi, Claude Code, 
 │   ├── review/              # Analyzes/reviews code or content (~21)
 │   ├── workflows/           # Orchestrates multi-step dev processes (~54)
 │   ├── meta/                # Agent behavior rules, patterns (~42)
-│   ├── domain/              # Technology-specific knowledge (~60)
+│   ├── domain/              # Technology-specific knowledge (~62)
 │   │   ├── swift/           # Apple/Swift platform
 │   │   ├── compound/        # Vendored compound plugin set
 │   │   ├── ralph/           # Ralph orchestrator
 │   │   ├── shaping/         # Shaping methodology (submodules)
-│   │   └── ...              # agentica, gitnexus, math, notion, other
+│   │   └── ...              # agentica, design, gitnexus, math, notion, other
 │   └── [name] -> [category]/[name]  # Top-level symlinks for discovery
 ├── commands/                # Slash commands (shared across agents)
 ├── instructions/
@@ -41,8 +41,13 @@ The `install.sh` script creates these symlinks:
 | `~/.claude/commands` | `~/.agent-config/commands` |
 | `~/.pi/agent/skills` | `~/.agent-config/skills` |
 | `~/.pi/agent/AGENTS.md` | `~/.agent-config/instructions/AGENTS.md` |
-| `~/.pi/agent/commands` | `~/.agent-config/commands` |
+| `~/.pi/agent/prompts` | `~/.agent-config/commands` |
 | `~/.agents/skills` | `~/.agent-config/skills` |
+| `~/.config/agent-skills` | `~/.agent-config/skills` |
+| `~/.config/opencode/commands` | `~/.agent-config/commands` |
+| `~/.codex/prompts` | `~/.agent-config/commands` |
+| `~/.codex/AGENTS.md` | `~/.agent-config/instructions/AGENTS.md` |
+| `~/.gemini/GEMINI.md` | `~/.agent-config/instructions/AGENTS.md` |
 
 ## Skills System
 

@@ -6,10 +6,10 @@ Unified configuration for AI coding agents. One central location for slash comma
 
 | Agent | Commands | Instructions |
 |-------|----------|--------------|
-| **Pi** (pi-coding-agent) | `~/.pi/agent/commands/` | `~/.pi/agent/AGENTS.md` |
+| **Pi** (pi-coding-agent) | `~/.pi/agent/prompts/` | `~/.pi/agent/AGENTS.md` |
 | **Claude Code** | `~/.claude/commands/` | `~/.claude/CLAUDE.md` |
 | **Codex** (OpenAI) | `~/.codex/prompts/` | `~/.codex/AGENTS.md` |
-| **Gemini** (Google) | `~/.gemini/prompts/` | `~/.gemini/GEMINI.md` |
+| **Gemini** (Google) | TOML format (manual) | `~/.gemini/GEMINI.md` |
 | **Droid** (Factory) | `~/.factory/commands/` | `~/.factory/droids/` |
 | **OpenCode** | `~/.config/opencode/commands/` | Project-level only |
 
@@ -40,34 +40,36 @@ git pull
 1. **Homebrew** — installs packages from `Brewfile` (required + recommended)
 2. **Shell config** — applies `~/.zshenv` (PATH, secrets) and `~/.zshrc` (interactive baseline), creates `~/.secrets/` for API keys
 3. **Symlinks** — runs `install.sh` (commands, instructions, skills to all agents)
-4. **Claude hooks** — builds TypeScript hooks if source exists (settings.json depends on 28 hook files)
+4. **Claude hooks** — deploys hook source from `configs/claude/hooks/`, installs deps, builds TypeScript → `.mjs` (settings.json depends on ~28 hook files)
 5. **Agent configs** — runs `bootstrap.sh apply` (codex, claude, pi baselines)
 6. **Verification** — runs `bootstrap.sh check` to confirm everything resolves
-
-### Known gap: hooks not yet tracked
-
-Claude hooks source (`~/.claude/hooks/`) is not yet in this repo. On a fresh machine, `setup.sh` warns and tells you to rsync from an existing machine. This breaks the "one clone, one setup" promise. Tracked in bead `.agent-config-6on` / spec `004-hooks-in-repo`.
 
 ## Structure
 
 ```
 ~/.agent-config/
-├── commands/                 # Shared slash commands (27+)
+├── commands/                 # Shared slash commands (46+)
 ├── configs/
-│   ├── claude/               # Claude Code settings.json baseline
+│   ├── claude/               # Claude Code settings.json + hooks source
 │   ├── codex/                # Codex config.toml, config.json, rules, policy
 │   ├── pi/                   # Pi agents, mcporter, extensions
 │   └── shell/                # zshenv, zshrc, secrets-template.env
+├── docs/                     # Additional documentation (gj-tool, cupertino, etc.)
 ├── instructions/
 │   └── AGENTS.md             # Unified global instructions
 ├── scripts/
 │   ├── setup.sh              # Full machine setup orchestrator
-│   └── bootstrap.sh          # Agent config check/apply/status
-├── skills/                   # Unified skills (253+)
+│   ├── bootstrap.sh          # Agent config check/apply/status
+│   ├── vendor-sync.sh        # Sync vendored skill repos
+│   └── verify-hooks.sh       # Verify hook file integrity
+├── skills/                   # Unified skills (300+)
 ├── specs/                    # Planning artifacts (shaping, plans)
-├── tools-bin/                # CLI utilities
+├── tests/                    # Test scripts
+├── thoughts/                 # Shared thoughts and handoffs
+├── tools-bin/                # CLI utilities (agent-config-parity)
 ├── Brewfile                  # Homebrew packages (required + recommended)
 ├── install.sh                # Creates symlinks
+├── install-all.sh            # Full install: symlinks + compound-engineering
 └── README.md
 ```
 
@@ -76,7 +78,7 @@ Claude hooks source (`~/.claude/hooks/`) is not yet in this repo. On a fresh mac
 The `install.sh` script creates symlinks from each agent's config location to this central repository:
 
 ```
-~/.pi/agent/commands     → ~/.agent-config/commands
+~/.pi/agent/prompts      → ~/.agent-config/commands
 ~/.claude/commands       → ~/.agent-config/commands
 ~/.codex/prompts         → ~/.agent-config/commands
 ~/.config/opencode/commands → ~/.agent-config/commands
@@ -84,9 +86,10 @@ The `install.sh` script creates symlinks from each agent's config location to th
 ~/.pi/agent/AGENTS.md    → ~/.agent-config/instructions/AGENTS.md
 ~/.claude/CLAUDE.md      → ~/.agent-config/instructions/AGENTS.md
 ~/.codex/AGENTS.md       → ~/.agent-config/instructions/AGENTS.md
+~/.gemini/GEMINI.md      → ~/.agent-config/instructions/AGENTS.md
 
 ~/.claude/skills         → ~/.agent-config/skills
-~/.codex/skills          → ~/.agent-config/skills
+~/.agents/skills         → ~/.agent-config/skills  (Codex)
 ~/.config/agent-skills   → ~/.agent-config/skills
 ~/.pi/agent/skills       → ~/.agent-config/skills
 ```
@@ -278,7 +281,7 @@ Focus on:
 ### Commands not showing up
 ```bash
 # Verify symlinks exist and point correctly
-ls -la ~/.pi/agent/commands
+ls -la ~/.pi/agent/prompts
 ls -la ~/.claude/commands
 ls -la ~/.codex/prompts
 ```
@@ -299,11 +302,8 @@ cd ~/.agent-config
 ## What Is Outside `.agent-config`
 
 Managed by bootstrap (baselines tracked in `configs/`):
-- `~/.claude/settings.json`, `~/.codex/config.*`, `~/.pi/agent/agents/`, extensions, mcporter
+- `~/.claude/settings.json`, `~/.claude/hooks/` (TypeScript source + build), `~/.codex/config.*`, `~/.pi/agent/agents/`, extensions, mcporter
 - `~/.zshenv`, `~/.zshrc` (shell baselines)
-
-**Not yet tracked** (breaks "one clone" promise):
-- `~/.claude/hooks/` — TypeScript hooks that settings.json depends on (spec `004-hooks-in-repo`)
 
 Machine-specific (intentionally not tracked):
 - `~/.zshrc.local` — per-machine aliases, conda, pnpm, app paths
@@ -328,12 +328,12 @@ Skills are unified across all agents, organized by function:
 ├── review/         # Analyzes/reviews code or content (21)
 ├── workflows/      # Orchestrates multi-step dev processes (54)
 ├── meta/           # Agent behavior rules, patterns (42)
-├── domain/         # Technology-specific knowledge (60)
+├── domain/         # Technology-specific knowledge (62)
 │   ├── swift/      # Apple/Swift platform
 │   ├── compound/   # Vendored compound plugin set
 │   ├── ralph/      # Ralph orchestrator
 │   ├── shaping/    # Shaping methodology (submodules)
-│   └── ...         # agentica, gitnexus, math, notion, other
+│   └── ...         # agentica, design, gitnexus, math, notion, other
 └── <name> -> <category>/<name>  # Discovery symlinks
 ```
 
@@ -343,8 +343,7 @@ All agents point to the same unified location:
 
 ```
 ~/.claude/skills        → ~/.agent-config/skills
-~/.codex/skills         → ~/.agent-config/skills
-~/.factory/droids       → ~/.agent-config/skills (custom droids)
+~/.agents/skills        → ~/.agent-config/skills  (Codex)
 ~/.config/agent-skills  → ~/.agent-config/skills
 ~/.pi/agent/skills      → ~/.agent-config/skills
 ```

@@ -196,15 +196,18 @@ do_check() {
   echo ""
   echo "─── Symlinks (from install.sh) ───"
   for link_target in \
-    "$HOME/.claude/skills:$REPO_ROOT/skills" \
-    "$HOME/.claude/commands:$REPO_ROOT/commands" \
-    "$HOME/.claude/CLAUDE.md:$REPO_ROOT/instructions/AGENTS.md" \
-    "$HOME/.codex/skills:$REPO_ROOT/skills" \
-    "$HOME/.codex/prompts:$REPO_ROOT/commands" \
-    "$HOME/.codex/AGENTS.md:$REPO_ROOT/instructions/AGENTS.md" \
-    "$HOME/.pi/agent/skills:$REPO_ROOT/skills" \
     "$HOME/.pi/agent/prompts:$REPO_ROOT/commands" \
     "$HOME/.pi/agent/AGENTS.md:$REPO_ROOT/instructions/AGENTS.md" \
+    "$HOME/.pi/agent/skills:$REPO_ROOT/skills" \
+    "$HOME/.claude/commands:$REPO_ROOT/commands" \
+    "$HOME/.claude/CLAUDE.md:$REPO_ROOT/instructions/AGENTS.md" \
+    "$HOME/.claude/skills:$REPO_ROOT/skills" \
+    "$HOME/.codex/prompts:$REPO_ROOT/commands" \
+    "$HOME/.codex/AGENTS.md:$REPO_ROOT/instructions/AGENTS.md" \
+    "$HOME/.gemini/GEMINI.md:$REPO_ROOT/instructions/AGENTS.md" \
+    "$HOME/.config/opencode/commands:$REPO_ROOT/commands" \
+    "$HOME/.agents/skills:$REPO_ROOT/skills" \
+    "$HOME/.config/agent-skills:$REPO_ROOT/skills" \
   ; do
     local link="${link_target%%:*}"
     local target="${link_target##*:}"
