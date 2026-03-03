@@ -132,6 +132,31 @@ apply_dir() {
   done
 }
 
+# Remove files from dest that no longer exist in baseline (scoped to a glob pattern)
+# Args: baseline_dir dest_dir glob_pattern
+prune_stale_files() {
+  local baseline_dir="$1"
+  local dest_dir="$2"
+  local pattern="$3"
+
+  if [[ ! -d "$dest_dir" ]]; then return; fi
+
+  for f in "$dest_dir"/$pattern; do
+    [[ -f "$f" ]] || continue
+    local name=$(basename "$f")
+    if [[ ! -f "$baseline_dir/$name" ]]; then
+      local label="${f/#$HOME/~}"
+      if command -v trash &>/dev/null; then
+        trash "$f"
+        log_info "Pruned (trashed): $label"
+      else
+        mv "$f" "$HOME/.Trash/$name.pruned.$(date +%Y%m%d-%H%M%S)" 2>/dev/null || rm "$f"
+        log_info "Pruned: $label"
+      fi
+    fi
+  done
+}
+
 #==============================================================================
 # Check mode
 #==============================================================================
@@ -324,6 +349,8 @@ do_apply() {
   apply_dir "$CONFIGS/pi/agents" "$HOME/.pi/agent/agents"
   apply_file "$CONFIGS/pi/mcporter.json" "$HOME/.pi/agent/compound-engineering/mcporter.json"
   apply_dir "$CONFIGS/pi/extensions" "$HOME/.pi/agent/extensions"
+  # Prune stale extension files no longer in baseline (e.g., removed think-align-act.ts)
+  prune_stale_files "$CONFIGS/pi/extensions" "$HOME/.pi/agent/extensions" "*.ts"
 
   echo ""
   log_ok "Baseline configs applied. Run './scripts/bootstrap.sh check' to verify."
