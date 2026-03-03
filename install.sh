@@ -118,6 +118,16 @@ create_symlink "$AGENTS_MD" "$HOME/.codex/AGENTS.md"
 echo ""
 
 #==============================================================================
+# Gemini (Google)
+#==============================================================================
+echo "─── Gemini ───"
+create_symlink "$AGENTS_MD" "$HOME/.gemini/GEMINI.md"
+# Gemini commands use TOML format, not Markdown — cannot symlink commands/
+# Gemini skills use ~/.agents/skills/ (handled in unified skills section below)
+log_info "Gemini commands require TOML format — manual conversion needed"
+echo ""
+
+#==============================================================================
 # OpenCode
 #==============================================================================
 echo "─── OpenCode ───"
@@ -159,7 +169,7 @@ if [[ -d "$SKILLS_DIR" ]]; then
     # Claude Code
     create_symlink "$SKILLS_DIR" "$HOME/.claude/skills"
     
-    # Codex (uses ~/.agents/skills, not ~/.codex/skills)
+    # Codex + Gemini (both discover skills from ~/.agents/skills)
     create_symlink "$SKILLS_DIR" "$HOME/.agents/skills"
     
     # Pi Agent (both locations for compatibility)

@@ -89,7 +89,7 @@ The `install.sh` script creates symlinks from each agent's config location to th
 ~/.gemini/GEMINI.md      → ~/.agent-config/instructions/AGENTS.md
 
 ~/.claude/skills         → ~/.agent-config/skills
-~/.agents/skills         → ~/.agent-config/skills  (Codex)
+~/.agents/skills         → ~/.agent-config/skills  (Codex + Gemini)
 ~/.config/agent-skills   → ~/.agent-config/skills
 ~/.pi/agent/skills       → ~/.agent-config/skills
 ```
@@ -343,7 +343,7 @@ All agents point to the same unified location:
 
 ```
 ~/.claude/skills        → ~/.agent-config/skills
-~/.agents/skills        → ~/.agent-config/skills  (Codex)
+~/.agents/skills        → ~/.agent-config/skills  (Codex + Gemini)
 ~/.config/agent-skills  → ~/.agent-config/skills
 ~/.pi/agent/skills      → ~/.agent-config/skills
 ```
