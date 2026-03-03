@@ -122,9 +122,13 @@ echo ""
 #==============================================================================
 echo "─── Gemini ───"
 create_symlink "$AGENTS_MD" "$HOME/.gemini/GEMINI.md"
-# Gemini commands use TOML format, not Markdown — cannot symlink commands/
 # Gemini skills use ~/.agents/skills/ (handled in unified skills section below)
-log_info "Gemini commands require TOML format — manual conversion needed"
+# Convert MD commands to Gemini TOML format
+if [[ -x "$SCRIPT_DIR/scripts/convert-commands-gemini.sh" ]]; then
+    "$SCRIPT_DIR/scripts/convert-commands-gemini.sh" "$COMMANDS_DIR" "$HOME/.gemini/commands"
+else
+    log_info "Gemini command converter not found — skipping"
+fi
 echo ""
 
 #==============================================================================
