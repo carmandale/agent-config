@@ -95,6 +95,8 @@ fi
 
 #==============================================================================
 # Pi Agent
+# NOTE: Pi natively scans ~/.agents/skills/ (created in Unified Skills below),
+# so we do NOT create ~/.pi/agent/skills — that would duplicate discovery.
 #==============================================================================
 echo "─── Pi Agent ───"
 create_symlink "$COMMANDS_DIR" "$HOME/.pi/agent/prompts"
@@ -176,9 +178,11 @@ if [[ -d "$SKILLS_DIR" ]]; then
     # Codex + Gemini (both discover skills from ~/.agents/skills)
     create_symlink "$SKILLS_DIR" "$HOME/.agents/skills"
     
-    # Pi Agent (both locations for compatibility)
+    # Pi Agent: Pi discovers from ~/.agents/skills (created above) natively,
+    # so we only create ~/.config/agent-skills as an additional alias.
+    # Do NOT create ~/.pi/agent/skills — it points to the same dir as
+    # ~/.agents/skills and causes pi to scan everything twice.
     create_symlink "$SKILLS_DIR" "$HOME/.config/agent-skills"
-    create_symlink "$SKILLS_DIR" "$HOME/.pi/agent/skills"
     
     echo ""
     log_info "Skills unified: $(find "$SKILLS_DIR" -mindepth 2 -maxdepth 2 -type d | wc -l | tr -d ' ') skills across $(ls -1 "$SKILLS_DIR" | wc -l | tr -d ' ') categories"
