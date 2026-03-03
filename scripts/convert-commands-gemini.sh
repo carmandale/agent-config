@@ -52,16 +52,25 @@ while IFS= read -r -d '' md_file; do
     body=""
 
     if [[ "$content" == ---* ]]; then
-        # Extract frontmatter block (between first and second ---)
-        frontmatter="$(echo "$content" | sed -n '/^---$/,/^---$/p' | sed '1d;$d')"
-        # Extract body (everything after second ---)
-        body="$(echo "$content" | sed '1,/^---$/!d; 1,/^---$/d' | sed '1,/^---$/d')"
-        # If the above sed didn't work (body empty), try awk
-        if [[ -z "$body" ]]; then
-            body="$(echo "$content" | awk 'BEGIN{n=0} /^---$/{n++; next} n>=2{print}')"
-        fi
-        # Extract description from frontmatter
-        description="$(echo "$frontmatter" | grep -E '^description:' | sed 's/^description:[[:space:]]*//' | sed 's/^["'"'"']//' | sed 's/["'"'"']$//')" || true
+        # Extract ONLY the first frontmatter block and body using awk
+        frontmatter="$(echo "$content" | awk '
+            BEGIN { n=0 }
+            /^---$/ { n++; next }
+            n==1 { print }
+            n>=2 { exit }
+        ')"
+        body="$(echo "$content" | awk '
+            BEGIN { n=0 }
+            /^---$/ { n++; next }
+            n>=2 { print }
+        ')"
+        # Extract description from frontmatter (first match only)
+        description="$(echo "$frontmatter" | awk -F': ' '/^description:/{print substr($0, index($0,": ")+2); exit}')" || true
+        # Strip surrounding quotes if present
+        description="${description#\"}"
+        description="${description%\"}"
+        description="${description#\'}"
+        description="${description%\'}"
     else
         # No frontmatter — entire file is the prompt body
         body="$content"
@@ -77,10 +86,12 @@ while IFS= read -r -d '' md_file; do
         continue
     fi
 
-    # Escape triple quotes in body (edge case)
-    body="${body//\"\"\"/\"\"\\\"}"
+    # Escape triple single-quotes in body (edge case for literal strings)
+    body="${body//\'\'\'/\'\'\\\'}"
 
     # Write TOML file
+    # Use TOML literal strings (''') for the prompt to avoid backslash escaping
+    # issues. Literal strings treat \ as literal characters.
     {
         echo "# Auto-generated from commands/$rel_path — do not hand-edit"
         echo "# Source: ~/.agent-config/commands/$rel_path"
@@ -90,9 +101,9 @@ while IFS= read -r -d '' md_file; do
             escaped_desc="${description//\"/\\\"}"
             echo "description = \"$escaped_desc\""
         fi
-        echo "prompt = \"\"\""
+        echo "prompt = '''"
         echo "$body"
-        echo "\"\"\""
+        echo "'''"
     } > "$toml_path"
 
     ((converted++)) || true
