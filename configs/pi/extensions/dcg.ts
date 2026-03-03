@@ -1,8 +1,11 @@
 /**
  * dcg (Destructive Command Guard) extension for pi
  *
- * Intercepts bash tool calls and runs them through dcg to block
- * destructive commands like `git reset --hard`, `rm -rf`, etc.
+ * Two layers of protection:
+ * 1. rm → trash rewrite: Blocks rm commands and tells the agent to use
+ *    `trash` instead (files go to Trash, recoverable).
+ * 2. dcg passthrough: Pipes commands through dcg to block destructive
+ *    operations like `git reset --hard`, `git push --force`, etc.
  *
  * Install dcg first:
  *   curl -fsSL "https://raw.githubusercontent.com/Dicklesworthstone/destructive_command_guard/master/install.sh?$(date +%s)" | bash -s -- --easy-mode
@@ -22,6 +25,15 @@ export default function (pi: ExtensionAPI) {
     // dcg not found - will warn on first blocked attempt
   }
 
+  // Check if trash is available
+  let trashAvailable = false;
+  try {
+    execSync("which trash", { encoding: "utf-8", stdio: "pipe" });
+    trashAvailable = true;
+  } catch {
+    // trash not found - will fall back to mv ~/.Trash/
+  }
+
   pi.on("tool_call", async (event, ctx) => {
     // Only intercept bash tool calls
     if (!isToolCallEventType("bash", event)) {
@@ -31,12 +43,47 @@ export default function (pi: ExtensionAPI) {
     const command = event.input.command;
     if (!command) return;
 
-    // Quick check - dcg only cares about commands containing these
-    // This avoids spawning a process for every command
-    const quickRejectPatterns = ["git", "rm", "docker", "kubectl", "aws", "gcloud", "terraform"];
-    const mightBeDestructive = quickRejectPatterns.some((p) => command.includes(p));
+    // ─────────────────────────────────────────────────────────────
+    // Layer 1: rm → trash rewrite
+    // ─────────────────────────────────────────────────────────────
+    // Match rm at the start of a command (with optional sudo prefix)
+    const rmMatch = command.match(/^(?:sudo\s+)?rm\s+(.*)/s);
+    if (rmMatch) {
+      const args = rmMatch[1]!;
+
+      // Allow rm on temp directories (safe cleanup)
+      const isTempDir =
+        /(?:^|\s)\/tmp\//.test(args) ||
+        /(?:^|\s)\/var\/tmp\//.test(args) ||
+        /\$TMPDIR/.test(args) ||
+        /\$\{TMPDIR\}/.test(args);
+
+      if (!isTempDir) {
+        // Extract paths by stripping flags (anything starting with -)
+        const paths = args
+          .split(/\s+/)
+          .filter((a) => !a.startsWith("-") && a.length > 0)
+          .join(" ");
+
+        const safeCommand = trashAvailable
+          ? `trash ${paths}`
+          : `mv ${paths} ~/.Trash/`;
+
+        return {
+          block: true,
+          reason: `Use \`${safeCommand}\` instead of \`rm\`. Files go to Trash and can be recovered.\n\nOriginal: ${command}`,
+        };
+      }
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Layer 2: dcg passthrough for other destructive commands
+    // ─────────────────────────────────────────────────────────────
+    // Quick check - only spawn dcg for commands that might match its patterns
+    const dcgKeywords = ["git", "docker", "kubectl", "aws", "gcloud", "terraform"];
+    const mightBeDestructive = dcgKeywords.some((p) => command.includes(p));
     if (!mightBeDestructive) {
-      return; // Allow - no need to check dcg
+      return; // Allow - nothing to check
     }
 
     if (!dcgAvailable) {
@@ -60,62 +107,19 @@ export default function (pi: ExtensionAPI) {
       const result = execSync(`echo '${hookInput.replace(/'/g, "'\\''")}' | dcg`, {
         encoding: "utf-8",
         stdio: ["pipe", "pipe", "pipe"],
-        timeout: 5000, // 5 second timeout
+        timeout: 5000,
       });
 
       // If we get here with output, the command was blocked
       if (result && result.trim()) {
-        try {
-          const denial = JSON.parse(result);
-          const reason =
-            denial?.hookSpecificOutput?.permissionDecisionReason ||
-            denial?.reason ||
-            "Command blocked by dcg";
-
-          // Extract just the key info for a cleaner message
-          const lines = reason.split("\n").filter((l: string) => l.trim());
-          const reasonLine = lines.find((l: string) => l.startsWith("Reason:")) || lines[0];
-
-          return {
-            block: true,
-            reason: `🛡️ dcg blocked: ${reasonLine?.replace("Reason:", "").trim() || "Destructive command detected"}\n\nRun 'dcg explain "${command}"' for details.`,
-          };
-        } catch {
-          // JSON parse failed but we got output - still block
-          return {
-            block: true,
-            reason: `🛡️ dcg blocked this command. Run 'dcg explain "${command}"' for details.`,
-          };
-        }
+        return parseDcgDenial(result, command);
       }
       // Empty output = allowed
     } catch (error: unknown) {
-      // execSync throws if the command exits non-zero or times out
-      // For dcg, exit 0 with no output = allowed
-      // Any error here means we should check if there was stdout
       const execError = error as { stdout?: string; stderr?: string; status?: number };
 
       if (execError.stdout && execError.stdout.trim()) {
-        try {
-          const denial = JSON.parse(execError.stdout);
-          const reason =
-            denial?.hookSpecificOutput?.permissionDecisionReason ||
-            denial?.reason ||
-            "Command blocked by dcg";
-
-          const lines = reason.split("\n").filter((l: string) => l.trim());
-          const reasonLine = lines.find((l: string) => l.startsWith("Reason:")) || lines[0];
-
-          return {
-            block: true,
-            reason: `🛡️ dcg blocked: ${reasonLine?.replace("Reason:", "").trim() || "Destructive command detected"}\n\nRun 'dcg explain "${command}"' for details.`,
-          };
-        } catch {
-          return {
-            block: true,
-            reason: `🛡️ dcg blocked this command. Run 'dcg explain "${command}"' for details.`,
-          };
-        }
+        return parseDcgDenial(execError.stdout, command);
       }
       // No stdout = dcg allowed it or errored (fail-open)
     }
@@ -137,17 +141,16 @@ export default function (pi: ExtensionAPI) {
       }
 
       if (!args || args.trim() === "") {
-        // Show dcg version
         try {
           const version = execSync("dcg --version", { encoding: "utf-8" });
-          ctx.ui.notify(`dcg is active\n${version}`, "success");
+          const trashStatus = trashAvailable ? "trash: available" : "trash: not found (using mv ~/.Trash/)";
+          ctx.ui.notify(`dcg is active\n${version}\n${trashStatus}`, "success");
         } catch {
           ctx.ui.notify("dcg is installed but version check failed", "warning");
         }
         return;
       }
 
-      // Run dcg explain on the provided command
       try {
         const result = execSync(`dcg explain "${args.replace(/"/g, '\\"')}"`, {
           encoding: "utf-8",
@@ -160,4 +163,28 @@ export default function (pi: ExtensionAPI) {
       }
     },
   });
+}
+
+/** Parse dcg JSON denial output into a block response */
+function parseDcgDenial(output: string, command: string) {
+  try {
+    const denial = JSON.parse(output);
+    const reason =
+      denial?.hookSpecificOutput?.permissionDecisionReason ||
+      denial?.reason ||
+      "Command blocked by dcg";
+
+    const lines = reason.split("\n").filter((l: string) => l.trim());
+    const reasonLine = lines.find((l: string) => l.startsWith("Reason:")) || lines[0];
+
+    return {
+      block: true,
+      reason: `dcg blocked: ${reasonLine?.replace("Reason:", "").trim() || "Destructive command detected"}\n\nRun 'dcg explain "${command}"' for details.`,
+    };
+  } catch {
+    return {
+      block: true,
+      reason: `dcg blocked this command. Run 'dcg explain "${command}"' for details.`,
+    };
+  }
 }
