@@ -46,8 +46,9 @@ export default function (pi: ExtensionAPI) {
     // ─────────────────────────────────────────────────────────────
     // Layer 1: rm → trash rewrite
     // ─────────────────────────────────────────────────────────────
-    // Match rm at the start of a command (with optional sudo prefix)
-    const rmMatch = command.match(/^(?:sudo\s+)?rm\s+(.*)/s);
+    // Match rm at the start of any line in a (possibly multi-line) command.
+    // The /m flag makes ^ match start-of-line, not just start-of-string.
+    const rmMatch = command.match(/^(?:sudo\s+)?rm\s+(.*)/m);
     if (rmMatch) {
       const args = rmMatch[1]!;
 
@@ -80,7 +81,7 @@ export default function (pi: ExtensionAPI) {
     // Layer 2: dcg passthrough for other destructive commands
     // ─────────────────────────────────────────────────────────────
     // Quick check - only spawn dcg for commands that might match its patterns
-    const dcgKeywords = ["git", "docker", "kubectl", "aws", "gcloud", "terraform"];
+    const dcgKeywords = ["git", "rm", "docker", "kubectl", "aws", "gcloud", "terraform"];
     const mightBeDestructive = dcgKeywords.some((p) => command.includes(p));
     if (!mightBeDestructive) {
       return; // Allow - nothing to check
