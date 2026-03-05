@@ -74,7 +74,13 @@ VENDOR_PATH[visual-explainer]="."
 VENDOR_DEST[visual-explainer]="skills/workflows/visual-explainer"
 VENDOR_COMMIT[visual-explainer]="none"
 
-ALL_VENDORS=(compound compound-commands surf xcode-26 remotion-best-practices find-skills visual-explainer)
+# gj-tool — from ~/dev/gj-tool (local dev repo, canonical build tool)
+VENDOR_SOURCE[gj-tool]="local:~/dev/gj-tool/skill"
+VENDOR_PATH[gj-tool]="."
+VENDOR_DEST[gj-tool]="skills/tools/gj-tool"
+VENDOR_COMMIT[gj-tool]="none"
+
+ALL_VENDORS=(compound compound-commands surf xcode-26 remotion-best-practices find-skills visual-explainer gj-tool)
 
 #==============================================================================
 # Sync function
