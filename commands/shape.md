@@ -27,6 +27,10 @@ Shaping means:
 
 All of these. Not some of these.
 
+## Shaping is never autonomous
+
+Shaping requires the user in the conversation — asking real questions, getting real answers, negotiating requirements together. It cannot be delegated to a subagent or run in the background. If the user isn't present and participating, it's not shaping.
+
 ## How this ends
 
 When shaping is done — shape selected, fit check passes, we both feel good about it — tell me to run `/issue` to create the bead and spec. The spec will be built on the foundation shaping produced. Don't create the spec yourself, don't create a bead, don't transition into planning mode. Shaping shapes. That's it.

@@ -236,10 +236,17 @@ If the plan was loaded from a spec directory (Step 2, option 1), update every ar
 
 If yes to any, disclose it: "Note: I took a shortcut on [X] — here's what a proper revision would look like: [...]"
 
-**Cleanup** — remove temp files:
+**Save the review transcript** — this is the proof that Codex actually ran. Copy it to the spec directory as a permanent, committed artifact:
+
 ```bash
+# Save to spec directory (if reviewing a spec)
+cp /tmp/codex-review-${REVIEW_ID}.md specs/<NNN>-<slug>/codex-review.md
+
+# Clean up temp files
 rm -f /tmp/claude-plan-${REVIEW_ID}.md /tmp/codex-review-${REVIEW_ID}.md
 ```
+
+The `codex-review.md` file in the spec directory is the receipt. It contains Codex's actual words, session ID, verdict, and round-by-round feedback. Commit it with the spec. If this file doesn't exist, the review didn't happen.
 
 ## Loop Summary
 

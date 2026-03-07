@@ -74,3 +74,16 @@ Agents will sometimes "perform" a workflow — producing plausible-looking artif
 **Interactive over autonomous.** Commands that require real human input at multiple points are naturally theater-resistant — the agent can't fake a conversation. Fire-and-forget commands are where theater thrives. When designing workflows, prefer interactive checkpoints over autonomous end-to-end execution for critical phases.
 
 **Spot-check with "prove it."** After an agent produces findings, pick one at random and ask it to walk you through the code. Agents that did real work can do this. Agents that faked it can't. This is cheap and devastatingly effective.
+
+## Anchor Trust in Artifacts, Not Words
+
+The strongest anti-theater measure isn't better prompt language — it's requiring **mechanical proof that an external process actually ran.** Agent claims are unfalsifiable. File artifacts from external tools are not.
+
+The principle: every critical verification gate should produce a non-fakeable artifact that gets committed to the repo.
+
+- **Codex review** → save the session transcript (`codex-review.md`) in the spec directory. Contains Codex's actual words, session ID, verdict. If the file doesn't exist, the review didn't happen.
+- **Bead creation** → `bd create` changes `.beads/` state. The bead exists or it doesn't.
+- **Shaping** → the user's presence in the conversation is the proof. Shaping is never autonomous, never delegated. If the user wasn't there, it didn't happen.
+- **Implementation** → git commits exist in the log or they don't.
+
+When designing commands and workflows: prefer external tool artifacts over agent self-reporting. The question isn't "did the agent say it did the thing" — it's "does the artifact exist."
