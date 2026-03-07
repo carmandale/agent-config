@@ -60,6 +60,7 @@ Short, punchy, ~25 lines. Models on `/audit-agents` (18 lines) — the most adve
 - **Body:** Points agent at the adversarial review skill path and says "read it completely, follow it, apply it to $ARGUMENTS"
 - **Target resolution:** If argument is a spec directory path, read the spec/plan/implementation. If argument is a quote/claim, investigate it. If no argument, apply to current conversation context.
 - **Anti-skip:** "DO NOT paraphrase the skill. DO NOT skip the 'What I Verified' section. If your output doesn't contain concrete evidence, you did it wrong."
+- **Security note:** If the target contains secrets, credentials, or sensitive paths, redact them in the review output. The challenge is about logic and design, not about exposing sensitive data.
 
 ### D3: `/codex-review` Adversarial Gate Section (MODIFY)
 
@@ -70,14 +71,19 @@ Short, punchy, ~25 lines. Models on `/audit-agents` (18 lines) — the most adve
 
 ```
 ADVERSARIAL GATE — answer these BEFORE giving your verdict:
-7. What did you verify by reading the actual implementation (not just the plan)? Cite specific files and lines.
-8. What is the riskiest assumption this plan makes? Did you test it?
-9. Where does the plan's scope differ from the spec's scope? What changed that wasn't in the spec?
+7. Identify the 3 riskiest assumptions this plan makes. For each, did you verify it against the source code context?
+8. What would a skeptical senior engineer's first objection be?
+9. What does this plan NOT address that a production system would need?
+10. Where does the plan's scope differ from the spec's scope? What changed, expanded, or was dropped?
 ```
 
-This is ~4 lines added to the Codex prompt. Separate from the focus list — different heading, different framing. The focus list asks "is anything missing?" The adversarial gate asks "what could be wrong?"
+This is ~5 lines added to the Codex prompt. Separate from the focus list — different heading, different framing. The focus list asks "is anything missing?" The adversarial gate asks "what could be wrong?" Note: the wording says "source code context" not "implementation" — because `/codex-review` runs before implementation exists. Codex reviews specs and plans against the existing codebase, not against implementation artifacts.
 
-**Also modify Step 4** (Read Codex's Response & Branch on Verdict): After reading Codex's response, check that the adversarial gate questions were answered with specifics. If Codex gave a `VERDICT: APPROVED` but the adversarial gate answers are vague or missing, note this to the user: "Codex approved but didn't provide specific verification evidence for the adversarial gate questions."
+**Also modify Step 4** (Read Codex's Response & Branch on Verdict): After reading Codex's response, check that the adversarial gate questions were answered with specifics. If Codex gave a `VERDICT: APPROVED` but the adversarial gate answers are vague, missing, or don't cite specific files/lines, **treat it as `VERDICT: REVISE`** and re-submit with: "Your adversarial gate answers lack specifics. Cite the actual files and lines you examined. Re-review with concrete evidence." Do not let a rubber-stamp approval through the gate.
+
+**Fallback for non-line-verifiable items:** Some assumptions are architectural or process-level and can't be verified against a specific file:line. In those cases, Codex should state: "Not directly verifiable from source context — here's why: [reasoning]." That's acceptable. What's not acceptable is silence or "looks good."
+
+**No-findings contract in the Codex prompt:** Add to the adversarial gate block: "If you found no issues with the plan, explicitly state what you verified and how — do not just say APPROVED. Show your work: which files you read, which assumptions you tested, what you counted."
 
 ### D4: `/implement` Navigator Adversarial Framing (MODIFY)
 
@@ -93,9 +99,13 @@ The navigator's job is NOT to confirm the driver's work passes. It's to find whe
 - Include at least one concrete verification in each review: a count, a grep, a file check, a diff
 
 "Did you test?" is not validation. "You ran 21 tests but the plan specified changes to 3 files — show me the coverage" is validation.
+
+If the navigator found no issues with a step, they must say what they checked: "I diffed the PR against the plan, verified test coverage for the changed files, and found no gaps. Here's the diff summary: [...]"
 ```
 
 ~8 lines. Inserted as a new subsection after the existing "Implementation is never solo" section, before "How to collaborate with another agent."
+
+**Also include an explicit skill reference:** "For the full adversarial review protocol, read: `/Users/dalecarman/.agents/skills/review/adversarial-review/SKILL.md`" — this gives the navigator the depth of the skill when they need it, while keeping the inline framing short.
 
 ### D5: Anti-Rubber-Stamp Paragraph in `/shape` and `/plan` (MODIFY)
 
@@ -110,7 +120,9 @@ The navigator's job is NOT to confirm the driver's work passes. It's to find whe
 If you are the second agent in this session, your job is to find problems — not to agree. You must include at least one concrete verification in your challenge: a count, a diff, a grep result, a file check. "Looks good" without evidence of what you actually examined is not acceptable. Two agents agreeing without friction is not collaboration — it's groupthink with extra steps.
 ```
 
-~5 lines each. Inserted as a new subsection between "never solo" and "How to collaborate with another agent."
+The paragraph must also include the no-findings contract: "If you found no problems, explicitly state what you verified and how — 'I tried to break this and couldn't. Here's what I checked: [list with evidence].' Silence is not approval."
+
+~7 lines each. Inserted as a new subsection between "never solo" and "How to collaborate with another agent."
 
 ### D6: Napkin Update
 

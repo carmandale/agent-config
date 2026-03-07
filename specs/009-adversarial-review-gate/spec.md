@@ -122,7 +122,8 @@ The command invokes the adversarial review skill, forces a re-read of the releva
 All four two-agent commands (`/shape`, `/plan`, `/codex-review`, `/implement`) must include explicit anti-rubber-stamp framing for the second participant. Currently, two agents can agree with each other and produce artifacts that look collaborative but aren't adversarial. The second participant in every two-agent gate must be explicitly told:
 
 - Your job is to find problems, not to agree
-- You must raise at least one substantive concern or explicitly state "I tried to find problems and couldn't — here's what I checked"
+- You must include at least one concrete verification (a count, a diff, a grep result, a file check) that demonstrates you actually examined the work, not just the plan/spec
+- If you found no problems, explicitly state what you checked and how: "I tried to break this and couldn't — here's what I verified: [list with evidence]"
 - "Looks good to me" without evidence of what you checked is not acceptable
 
 This is the difference between a two-agent gate and an adversarial two-agent gate.

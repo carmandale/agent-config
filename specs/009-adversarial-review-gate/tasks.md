@@ -32,8 +32,11 @@ bead: .agent-config-44i
 - [ ] Body: instruct agent to read the adversarial review skill completely and apply to `$ARGUMENTS`
 - [ ] Target resolution logic: spec directory → read artifacts; quoted claim → investigate; no arg → current context
 - [ ] Anti-skip line: "DO NOT paraphrase the skill. If your output doesn't contain concrete evidence, you did it wrong."
+- [ ] Security redaction note: if target contains secrets/credentials, redact in review output
 - [ ] Keep it under 30 lines — model on `/audit-agents` tone
 - [ ] Verify: `cat commands/challenge.md | wc -l` (target: <30)
+- [ ] Verify all 3 target modes are documented: spec directory path, quoted claim, no argument (current context)
+- [ ] Read the final command and confirm it references the skill path, has anti-skip language, redaction note, and target resolution
 
 ## Task 3: Add adversarial gate to `/codex-review` Codex prompt
 
@@ -41,11 +44,14 @@ bead: .agent-config-44i
 **Files:** `commands/codex-review.md`
 **Dependencies:** None
 
-- [ ] In Step 3 Codex prompt: after item 6 ("Security"), add `ADVERSARIAL GATE` block with 3 questions:
-  - What did you verify by reading actual implementation? Cite files/lines.
-  - What is the riskiest assumption? Did you test it?
+- [ ] In Step 3 Codex prompt: after item 6 ("Security"), add `ADVERSARIAL GATE` block with 4 questions:
+  - Identify the 3 riskiest assumptions. Verify each against source code context.
+  - What would a skeptical senior engineer's first objection be?
+  - What does this plan NOT address that a production system would need?
   - Where does plan scope differ from spec scope?
-- [ ] In Step 4 (Read Response): add check that adversarial gate was answered with specifics. If approved but vague, note it to user.
+- [ ] Wording must say "source code context" not "implementation" (pre-implementation stage)
+- [ ] Add no-findings contract to adversarial gate block: "If you found no issues, state what you verified and how — show your work"
+- [ ] In Step 4 (Read Response): if approved but adversarial gate answers are vague/missing, treat as VERDICT: REVISE and force re-review with specifics
 - [ ] Do NOT expand the existing 6-item Focus list — keep it separate
 - [ ] Verify: `grep -c "ADVERSARIAL GATE" commands/codex-review.md` → 1
 
@@ -58,7 +64,8 @@ bead: .agent-config-44i
 - [ ] Add "The navigator is an adversary, not an ally" subsection after "Implementation is never solo" section (after line ~33)
 - [ ] Include: read actual code not test output, diff PR not commit message, include concrete verification
 - [ ] Include the calibration example: "'Did you test?' is not validation. 'You ran 21 tests but the plan specified changes to 3 files — show me the coverage' is validation."
-- [ ] Keep addition to ~8 lines
+- [ ] Include explicit skill reference: "For the full adversarial review protocol, read: `<skill path>`"
+- [ ] Keep addition to ~10 lines
 - [ ] Verify: command still reads coherently end-to-end (no awkward breaks)
 
 ## Task 5: Add anti-rubber-stamp paragraph to `/shape` and `/plan`
@@ -70,7 +77,8 @@ bead: .agent-config-44i
 - [ ] In `commands/shape.md`: add "The second participant is an adversary, not a yes-person" subsection after transcript paragraph, before "How to collaborate" section
 - [ ] In `commands/plan.md`: add identical subsection in same position
 - [ ] Text: requires concrete verification (count, diff, grep, file check), "Looks good" without evidence is not acceptable, groupthink warning
-- [ ] Keep addition to ~5 lines each
+- [ ] Include no-findings contract: "If you found no problems, state what you verified and how"
+- [ ] Keep addition to ~7 lines each
 - [ ] Verify: both commands still read coherently end-to-end
 
 ## Task 6: Update napkin
@@ -83,9 +91,24 @@ bead: .agent-config-44i
 - [ ] Reference spec 009 and the RedEagle incident
 - [ ] Verify: `grep "adversarial" .claude/napkin.md`
 
-## Task 7: Commit and verify
+## Task 7: Proof pass — validate protocol against known incident
 
-**Dependencies:** Tasks 1-6
+**Dependencies:** Tasks 1-5
+**Files:** `specs/009-adversarial-review-gate/proof-pass.md` (created during verification)
+
+- [ ] Apply the adversarial review skill to the RedEagle incident and write a brief verification note in the spec directory (`specs/009-adversarial-review-gate/proof-pass.md`) showing:
+  - Point 1 (re-read artifacts): Would have caught flake-skip.conf escalation by reading the actual file ← cite the exact protocol line
+  - Point 2 (verify assumptions): Would have caught R1 stale claim by testing the filter ← cite the exact protocol line
+  - Point 3 (count/quantify): Would have caught 74 suppressed methods (11.8%) ← cite the exact protocol line
+  - For each point: would the protocol have triggered this investigation, or is it too vague?
+- [ ] Review the "What I Verified" good-vs-bad example: is it specific enough to calibrate an agent?
+- [ ] Read each modified command end-to-end: does the adversarial framing flow naturally or feel bolted-on?
+- [ ] Verify the codex-review adversarial gate wording says "source code context" not "implementation" (pre-implementation stage)
+- [ ] Verify each gate text includes the no-findings contract ("If you found no problems, state what you verified and how")
+
+## Task 8: Commit and verify
+
+**Dependencies:** Tasks 1-7
 
 - [ ] `git add` all new/modified files
 - [ ] Commit: `feat: adversarial review gate — skill, /challenge command, workflow gate updates`
@@ -100,8 +123,9 @@ bead: .agent-config-44i
 Tasks 1, 3, 4, 5 have no dependencies on each other and could be done in parallel.
 Task 2 depends on Task 1 (needs skill path to reference).
 Task 6 depends on Tasks 1-5 (records the pattern).
-Task 7 depends on all.
+Task 7 depends on Tasks 1-5 (proof pass).
+Task 8 depends on all.
 
-**Recommended serial order:** 1 → 2 → 3 → 4 → 5 → 6 → 7
+**Recommended serial order:** 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8
 
-This order builds the core artifact first (skill), then the command that references it, then the structural modifications to existing commands, then the napkin update, then commit.
+This order builds the core artifact first (skill), then the command that references it, then the structural modifications to existing commands, then the napkin update, then proof pass, then commit.
