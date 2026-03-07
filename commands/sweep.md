@@ -8,6 +8,8 @@ I want you to sort of randomly explore the code files in this project, choosing 
 
 Once you understand the purpose of the code in the larger context of the workflows, I want you to do a super careful, methodical, and critical check with "fresh eyes" to find any obvious bugs, problems, errors, issues, silly mistakes, etc. Don't just check boxes — actually look. If something feels off, chase it. Trace it to the root cause (per §2.5 of AGENTS.md — this is mandatory, not optional).
 
+Every finding must include the specific file path, line numbers, and the actual code involved. No vague claims like "there might be error handling issues." Show me the exact code that's wrong and explain exactly why it's wrong. If you can't point to specific lines, you didn't actually find anything.
+
 Then systematically and meticulously and intelligently create a numbered spec/plan/tasks to correct them. Be sure to comply with ALL rules in AGENTS.md and ensure that any code you write or revise conforms to the best practices referenced in the AGENTS.md file.
 
 Only create the spec, plan, and tasks in the appropriate `./specs/` folder as a new numbered spec. Create a bead for the work and add the bead ID to the spec frontmatter.

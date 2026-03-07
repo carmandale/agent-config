@@ -62,3 +62,15 @@ When a command references a skill, agents often read the description and wing it
 2. **Name the specific failure mode.** "DO NOT paraphrase or improvise your own version. If you find yourself [doing the shortcut], STOP — you skipped [the real thing]."
 
 3. **Don't rely on artifact gating** where the agent checks its own work against a checklist. The agent is both executor and gatekeeper — it'll produce artifacts that technically satisfy the checklist without having done the real work. The human is the best gatekeeper.
+
+## Preventing Process Theater
+
+Agents will sometimes "perform" a workflow — producing plausible-looking artifacts without having done the actual work. This is especially common with complex skills (shaping, deep review) where the output format is known but the work is hard. Theater happens because it's cheaper to reverse-engineer the deliverables from the format than to go through the process.
+
+**Require specific citations.** Every finding, claim, or decision must reference specific file paths, line numbers, and actual code. Vague claims ("there might be issues in the networking layer") are the signature of theater. Specific citations ("line 47 of transport.swift has an off-by-one") force the agent to have actually read the code. Add this requirement to any command that produces findings or analysis.
+
+**Cross-model verification.** The agent that did the work should never be the only agent that judges the work. Use a different model (e.g., codex-review) to verify critical outputs. Different models have different biases and won't rubber-stamp each other's theater.
+
+**Interactive over autonomous.** Commands that require real human input at multiple points are naturally theater-resistant — the agent can't fake a conversation. Fire-and-forget commands are where theater thrives. When designing workflows, prefer interactive checkpoints over autonomous end-to-end execution for critical phases.
+
+**Spot-check with "prove it."** After an agent produces findings, pick one at random and ask it to walk you through the code. Agents that did real work can do this. Agents that faked it can't. This is cheap and devastatingly effective.

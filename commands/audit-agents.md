@@ -6,6 +6,8 @@ Turn your attention to reviewing the code written by your fellow agents and chec
 
 Carefully diagnose their underlying root causes using first-principles analysis (per §2.5 of AGENTS.md — mandatory). Don't propose bandaid fixes. If you can't identify the root cause, say so.
 
+Every finding must cite the specific file, line numbers, and actual code. No vague claims. If you can't point to the exact lines that are wrong and explain exactly why, you didn't find a real issue.
+
 Don't restrict yourself to the latest commits, cast a wider net and go super deep! Look at the actual code, not just the diffs. Trace execution flows. Check that things actually work end to end, not just in isolation.
 
 For issues where the root cause is clear and the fix is safe — fix them. Verify the build. Document what you changed and why.
