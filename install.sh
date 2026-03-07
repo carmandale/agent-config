@@ -188,3 +188,32 @@ if [[ -d "$SKILLS_DIR" ]]; then
     log_info "Skills unified: $(find "$SKILLS_DIR" -mindepth 2 -maxdepth 2 -type d | wc -l | tr -d ' ') skills across $(ls -1 "$SKILLS_DIR" | wc -l | tr -d ' ') categories"
     echo ""
 fi
+
+#==============================================================================
+# Git Hooks (auto-sync on commit)
+#==============================================================================
+HOOKS_DIR="$SCRIPT_DIR/hooks"
+GIT_HOOKS_DIR="$SCRIPT_DIR/.git/hooks"
+
+if [[ -d "$HOOKS_DIR" ]] && [[ -d "$GIT_HOOKS_DIR" ]]; then
+    echo "─── Git Hooks ───"
+    for hook in "$HOOKS_DIR"/*; do
+        if [[ -f "$hook" ]]; then
+            hook_name="$(basename "$hook")"
+            # Preserve existing beads hooks — append, don't clobber
+            if [[ -f "$GIT_HOOKS_DIR/$hook_name" ]] && grep -q "bd.*hook" "$GIT_HOOKS_DIR/$hook_name" 2>/dev/null; then
+                # Beads hook exists — check if ours is already appended
+                if ! grep -q "agent-config" "$GIT_HOOKS_DIR/$hook_name" 2>/dev/null; then
+                    log_warn "Existing beads $hook_name hook — skipping (install manually from hooks/$hook_name)"
+                else
+                    log_success "$hook_name hook already installed"
+                fi
+            else
+                cp "$hook" "$GIT_HOOKS_DIR/$hook_name"
+                chmod +x "$GIT_HOOKS_DIR/$hook_name"
+                log_success "Installed $hook_name hook"
+            fi
+        fi
+    done
+    echo ""
+fi
