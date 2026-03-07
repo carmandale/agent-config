@@ -4,7 +4,13 @@
 # Fires after receiving a push. Runs install + Gemini convert.
 #==============================================================================
 
-REPO_DIR="$(cd "$(git rev-parse --git-dir)/.." && pwd)"
+# Unset GIT_DIR — it is set by git during hook execution and confuses
+# scripts that expect to run from the working tree.
+unset GIT_DIR
+unset GIT_WORK_TREE
+
+REPO_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
+cd "$REPO_DIR"
 
 info()  { echo -e "\033[0;34m▸ agent-config (mini-ts):\033[0m $1" >&2; }
 ok()    { echo -e "\033[0;32m✓ agent-config (mini-ts):\033[0m $1" >&2; }
