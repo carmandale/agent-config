@@ -1,0 +1,64 @@
+---
+name: prompt-craft
+description: Write effective slash commands, skills, and prompts for AI coding agents. Use when creating or editing commands in commands/, writing SKILL.md files, or crafting prompts that agents will execute. Prevents the common mistake of over-structuring prompts into process documents that kill agent performance.
+---
+
+# Prompt Craft
+
+How to write slash commands, skills, and prompts that actually work — learned the hard way across thousands of sessions.
+
+## The Core Insight
+
+There are two attention pathways in LLMs:
+
+1. **System prompt / injected context** — content loaded before the conversation starts. The agent has it, but treats it like wallpaper. Low attention weight. It "technically read it" the way you technically read the safety card on your 500th flight.
+
+2. **Explicit tool-call results** — content that arrives because the user or command asked for it. High attention weight. The agent processes it as "this matters right now."
+
+This means: telling an agent to "read this file" produces dramatically better compliance than having the same content pre-loaded in its context. The content is identical — the salience is completely different.
+
+When writing commands and skills, exploit this gap deliberately. Force explicit reads of critical files rather than assuming the agent absorbed injected instructions.
+
+## Rules for Writing Commands
+
+**Write like a person talking, not like a process document.** The agent should feel like it's receiving direct, urgent instructions from a human — not executing a specification.
+
+**Keep emotional intensifiers.** Words like "super careful," "go deep," "meticulously" are not fluff — they increase attention weight on the behavior you want. Sanitizing them into clinical language reduces compliance.
+
+**Use open-ended language.** "bugs, problems, errors, issues, silly mistakes, etc." keeps the search space open. Categorized taxonomies ("Logic errors, Security issues, Reliability problems...") close it. The agent checks boxes in your list instead of actually looking. The "etc." is doing real work.
+
+**No output templates.** Don't specify report formats with markdown tables and headers. The agent will spend tokens conforming to your template instead of thinking deeply. Let it decide how to report based on what it finds.
+
+**Deliberate repetition is a feature.** Stating a critical rule at both the start and end of a command creates behavioral brackets. Don't "clean it up" to say it once. The repetition increases compliance.
+
+**Keep commands short.** The user's original prompts that work are single paragraphs. Every header, sub-bullet, and code block you add dilutes the signal. If the command is longer than the prompt it replaces, you probably over-structured it.
+
+**Preserve casual phrasing.** "Sort of randomly explore" gives the agent permission to wander without a plan. "Systematically investigate using a randomized sampling approach" constrains the same behavior into a method. The casualness is the feature.
+
+## Anti-Patterns That Kill Agent Performance
+
+**Step-by-step process headers.** "Step 1: ... Step 2: ... Step 3: ..." turns investigators into form-fillers. The agent executes the checklist instead of thinking. Use steps only when the output is concrete artifact creation (like creating specific files in a specific format), not for open-ended exploration or review.
+
+**Pre-specified categories of things to find.** Naming what to look for narrows the search space. The agent scans for items in your list instead of discovering things with genuinely fresh eyes.
+
+**Bash scaffolding for things the agent knows how to do.** Adding code blocks for `mkdir -p` and `git log` is hand-holding that adds tokens without adding value and subtly tells the agent "just follow these commands" instead of "think and act."
+
+**Output format templates.** Markdown report structures with `## Summary`, tables, and placeholder fields are token sinks that consume effort on formatting instead of investigation.
+
+**Stripping the voice.** If the user's original prompt has urgency, directness, and personality — keep it. Don't refactor it into neutral technical documentation. The voice carries behavioral weight.
+
+## When Structure IS Appropriate
+
+Structure is correct when you're defining non-negotiable artifact formats — "create exactly these files in exactly this layout." The `/issue` command legitimately needs numbered steps and a directory tree because the output is a specific set of files. The `/sweep` command does NOT need numbered steps because the output is whatever the agent finds.
+
+The test: **Is this command defining what to create, or what to discover?** Creation benefits from structure. Discovery is harmed by it.
+
+## Forcing Skill Execution
+
+When a command references a skill, agents often read the description and wing it instead of following the actual protocol. To prevent this:
+
+1. **Point to the literal file path.** Not "use the shaping skill" but "Read the file at /full/path/to/SKILL.md completely. Follow its protocol exactly."
+
+2. **Name the specific failure mode.** "DO NOT paraphrase or improvise your own version. If you find yourself [doing the shortcut], STOP — you skipped [the real thing]."
+
+3. **Don't rely on artifact gating** where the agent checks its own work against a checklist. The agent is both executor and gatekeeper — it'll produce artifacts that technically satisfy the checklist without having done the real work. The human is the best gatekeeper.

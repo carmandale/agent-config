@@ -12,6 +12,18 @@
 | 2026-02-26 | User | Agents stopped on unrelated working-tree changes with generic safety pause | Only pause for unexpected changes in files in the active edit scope; unrelated dirty files are non-blocking |
 | 2026-02-28 | Self | Non-interactive SSH sessions on mini still resolved Apple `/usr/bin/git` and `/bin/bash` despite `.zshenv` edits | For zsh login SSH sessions, set Homebrew PATH precedence in `~/.zprofile` (path_helper runs later) and re-verify with `command -v` |
 | 2026-03-01 | User | Deployed settings.json to Mini via bootstrap but never checked that the 28 hook files it references existed there. Declared "done" after shallow checks (file content match + syntax). Mini sessions broken on every hook. | Never verify a config file in isolation. Always verify its DEPENDENCIES resolve on the target. For settings.json: parse hook paths and confirm each file exists. More broadly: if a tracked config references external files, those files must also be tracked or the setup is incomplete. One clone + one setup = everything works, no exceptions. |
+| 2026-03-03 | User | Wrongly claimed Codex has no native skill system; slapped bandaid symlink instead of fixing install.sh | Read the actual docs/source before making claims about tool capabilities. Fix root causes in the canonical scripts, not one-off symlinks. |
+| 2026-03-03 | Self | install.sh was creating skills symlink at `~/.codex/skills` but Codex uses `~/.agents/skills` | Codex + Gemini both discover skills from `~/.agents/skills/`, not their own home dirs |
+| 2026-03-03 | Self | TOML converter used basic strings (`"""`) which treat `\` as escape chars — broke commands with regex/globs | Use TOML literal strings (`'''`) for prompt field — backslashes are literal |
+| 2026-03-03 | Self | sed frontmatter parser matched ALL `---` pairs in a file, not just the first | Use awk with a counter for reliable first-block-only frontmatter extraction |
+
+## Prompt & Command Craft (Highest Priority)
+1. **[2026-03-07] Over-structuring commands kills agent performance**
+   Do instead: Write commands like a person talking — conversational, emotionally weighted, short. No step-by-step headers for exploratory tasks, no output templates, no bash scaffolding for things the agent knows. Keep intensifiers ("super careful", "go deep"), open-ended language ("etc."), and deliberate repetition. Structure is only correct for artifact creation (specific files in specific formats), never for discovery/review.
+2. **[2026-03-07] "Use the skill" ≠ the agent actually following the skill**
+   Do instead: Point to the literal file path and say "read this file completely and follow it exactly." Name the specific shortcut failure mode. Never rely on the agent self-checking artifact compliance.
+3. **[2026-03-07] Forced file reads beat injected context**
+   Do instead: When compliance with a file matters (AGENTS.md, SKILL.md, etc.), explicitly instruct the agent to read it via tool call. System prompt content gets wallpaper treatment; tool-call results get high attention.
 
 ## User Preferences
 - Uses `~/.agent-config` as central distribution hub for all agents (pi-agent, codex, opencode, claude code)
@@ -65,3 +77,14 @@
 - In this repo, core architecture is a thin orchestration layer: `install.sh` wires canonical content (`commands/`, `instructions/`, `skills/`) into all agent homes via directory-level symlinks, while `tools-bin/` and `commands/` provide execution surfaces.
 - Succeeded: Added shaping skills via ~/.agent-config shared skill root so Claude/Codex/Pi/opencode automatically pick them up.
 - Caveat: shaping hook configured only in ~/.claude/settings.json (other agents don't have Claude-style hooks in this environment).
+- **Skill discovery paths by agent:**
+  - Claude Code: `~/.claude/skills/`
+  - Pi: `~/.pi/agent/skills/`
+  - Codex + Gemini: `~/.agents/skills/` (shared)
+- **Gemini CLI config architecture:**
+  - Instructions: `~/.gemini/GEMINI.md` (supports `context.fileName` override in settings.json)
+  - Skills: `~/.agents/skills/` (shared with Codex)
+  - Commands: `~/.gemini/commands/*.toml` (TOML format, NOT Markdown — requires conversion)
+  - Commands use `prompt = '''...'''` (literal strings) and optional `description = "..."`
+- **Mini SSH**: `ssh mini-ts` (user `chipcarman`, host `chips-mac-mini`)
+- **Mini update procedure**: `ssh mini-ts "cd ~/.agent-config && git pull --ff-only && ./install.sh"`
