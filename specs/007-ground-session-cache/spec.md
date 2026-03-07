@@ -1,3 +1,6 @@
+<!-- Codex Review: APPROVED after 3 rounds | model: gpt-5.3-codex | date: 2026-03-07 -->
+<!-- Status: UNCHANGED -->
+<!-- Revisions: none — spec requirements confirmed covered by revised plan -->
 ---
 title: "/ground session-awareness and tiered caching"
 date: 2026-03-07
