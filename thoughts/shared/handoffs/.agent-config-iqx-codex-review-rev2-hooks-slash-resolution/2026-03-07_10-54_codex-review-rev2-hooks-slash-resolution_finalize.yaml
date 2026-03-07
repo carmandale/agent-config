@@ -1,0 +1,57 @@
+---
+schema_version: "1.0.0"
+mode: finalize
+date: 2026-03-07T10:54:32.338Z
+session: ".agent-config-iqx-codex-review-rev2-hooks-slash-resolution"
+outcome: "SUCCEEDED"
+primary_bead: ".agent-config-iqx"
+---
+
+goal: "Fix /codex-review 65% self-approval failure, add post-commit automation for all agents, fix slash command resolution in Pi"
+now: "All changes committed, pushed, and synced to mini-ts. codex-review at rev 2, post-commit hook installed locally and on mini-ts, AGENTS.md updated with §9 slash command resolution."
+
+final_solutions:
+  - "HARD CONSTRAINT block + anti-patterns + atomic revise+resubmit step eliminates 65% self-approval failure"
+  - "Spec+plan review (not tasks) gives Codex requirements context to check plan against"
+  - "Writeback stamps all spec files with review headers (status, revisions, date)"
+  - "Spec argument resolution: /codex-review <spec-id> auto-finds specs/<id>/"
+  - "Post-commit hook: Gemini TOML regen + symlink verification + hygiene checks"
+  - "Dual-push origin + post-receive hook: mini-ts syncs deterministically on git push"
+  - "§9 AGENTS.md: agents resolve /command-name by reading .md files, not running bash"
+
+final_decisions:
+  - "Review spec+plan, NOT tasks — tasks are derivative and dilute the review"
+  - "Post-receive on mini-ts (not post-commit background SSH) — deterministic, no race"
+  - "Honesty check after approval — catches shortcuts the loop itself can't"
+  - "Revision tracking in frontmatter (revision: 2, revision_date: 2026-03-07)"
+
+artifacts_produced:
+  - "commands/codex-review.md (rev 1 → rev 2)"
+  - "hooks/post-commit (local: Gemini, symlinks, hygiene)"
+  - "hooks/post-receive-remote (mini-ts: install + Gemini convert)"
+  - "install.sh (updated: installs git hooks)"
+  - "instructions/AGENTS.md (added §9 slash command resolution)"
+
+done_this_session:
+  - "Rewrote /codex-review command from rev 1 to rev 2"
+  - "Used CASS to analyze 15 historical codex-review sessions"
+  - "Created post-commit hook with Gemini TOML regen, symlink checks, hygiene"
+  - "Set up dual-push to mini-ts with post-receive hook"
+  - "Added §9 slash command resolution to AGENTS.md"
+  - "All commits pushed and verified in sync across local, GitHub, mini-ts"
+
+findings:
+  - "CASS showed user was compensating with 'do not consider approved until...' in 4/15 sessions"
+  - "Agent glossed over revisions in af994b61 — user caught it with 'did you take shortcuts?'"
+  - "User accused agent of faking reviews in 92ce6d9b — turned out it was real"
+  - "Pi agent can't resolve slash commands from ask_user_question responses — UI-layer only"
+
+git:
+  branch: "main"
+  commits:
+    - "5329002 feat(codex-review): revision 2"
+    - "d719e16 feat: add post-commit hook for auto-sync"
+    - "56a525c fix: move mini-ts sync from post-commit to git push"
+    - "a9408bb fix: unset GIT_DIR in mini-ts post-receive hook"
+    - "722e1fe feat(AGENTS.md): add §9 slash command resolution"
+  remote: "https://github.com/carmandale/agent-config.git"
