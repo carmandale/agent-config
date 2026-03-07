@@ -1,90 +1,19 @@
 ---
-description: Codebase sweep - fix type errors, dead code, lint issues in parallel
+description: Deep code exploration and bug hunting — randomly investigate code files, trace execution flows, find issues, then create a numbered spec with plan and tasks
 ---
 
-You are a cleanup agent. Sweep the codebase for common issues and spawn parallel agents to fix them.
+Strictly adhere to the `specs/` artifact rules defined in README.md.
 
-**HARD LIMITS:**
-- Maximum 5 parallel agents per sweep (ask user before spawning more)
-- Skip files with >10 issues (needs manual review, don't try to fix)
-- ALWAYS show issue summary to user BEFORE spawning agents
-- If user says "stop" or cancels, immediately halt all work
+I want you to sort of randomly explore the code files in this project, choosing code files to deeply investigate and understand and trace their functionality and execution flows through the related code files which they import or which they are imported by. Don't gravitate toward the obvious entry points — dig into the plumbing, the glue code, the error handling, the stuff nobody looks at. That's where bugs live.
 
-## Step 1: Run Diagnostics
+Once you understand the purpose of the code in the larger context of the workflows, I want you to do a super careful, methodical, and critical check with "fresh eyes" to find any obvious bugs, problems, errors, issues, silly mistakes, etc. Don't just check boxes — actually look. If something feels off, chase it. Trace it to the root cause (per §2.5 of AGENTS.md — this is mandatory, not optional).
 
-Run these in parallel to identify issues:
+Then systematically and meticulously and intelligently create a numbered spec/plan/tasks to correct them. Be sure to comply with ALL rules in AGENTS.md and ensure that any code you write or revise conforms to the best practices referenced in the AGENTS.md file.
 
-```bash
-# Type errors
-pnpm exec tsc --noEmit 2>&1 | head -100
+Only create the spec, plan, and tasks in the appropriate `./specs/` folder as a new numbered spec. Create a bead for the work and add the bead ID to the spec frontmatter.
 
-# Lint issues (if available)
-pnpm run lint 2>&1 | head -100 || true
+Do NOT implement any fixes. Wait for explicit approval before implementing.
 
-# Find console.logs in src (excluding tests)
-rg "console\.(log|debug|info)" src --glob '!**/*.test.*' --glob '!**/__tests__/**' -l || true
+Strictly adhere to the `specs/` artifact rules defined in README.md, including creating a bead for the work.
 
-# Find 'any' type annotations
-rg ": any" src --glob '*.ts' --glob '*.tsx' -l || true
-
-# Find TODO/FIXME comments older context
-rg "TODO|FIXME|HACK|XXX" src -l || true
-
-# Unused exports (if ts-prune available)
-npx ts-prune 2>/dev/null | head -50 || true
-```
-
-## Step 2: Categorize and Prioritize
-
-Group issues by:
-1. **Type errors** - must fix, blocks build
-2. **Lint errors** - should fix, code quality
-3. **Console.logs** - quick wins, remove stray logs
-4. **Any casts** - tech debt, fix if straightforward
-5. **TODOs** - review, file as beads if still relevant
-
-## Step 3: Spawn Parallel Fixers
-
-**PARALLELIZATION RULES:**
-- Group by file - one agent per file
-- Type errors first (blocking)
-- Skip files with >10 issues (needs manual review)
-
-```
-Task(
-  subagent_type="general",
-  description="Sweep: fix <file>",
-  prompt="Fix the following issues in <file>:
-  - [list of specific issues]
-  
-  Run tsc --noEmit after to verify fix.
-  Commit with message: 'fix: sweep cleanup in <file>'"
-)
-```
-
-Spawn all file-fix agents in a SINGLE message.
-
-## Step 4: Handle Unfixable Issues
-
-For issues that can't be auto-fixed:
-- File as beads with `bd create "..." -t bug -p 2`
-- Add to technical debt tracking
-
-## Step 5: Report
-
-```markdown
-## Sweep Complete
-
-### Fixed
-- [N] type errors across [M] files
-- [N] console.logs removed
-- [N] lint issues resolved
-
-### Filed as Beads
-- [bead-id]: [issue description]
-
-### Skipped (needs manual review)
-- [file]: [reason]
-```
-
-Then sync: `bd sync && git push`
+$ARGUMENTS
