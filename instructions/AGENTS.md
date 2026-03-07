@@ -1,14 +1,14 @@
 # AGENTS.md - Global Instructions
 
 > Universal standards for all AI coding agents
-> Last Updated: 2026-02-25
+> Last Updated: 2026-03-07
 
 ---
 
 ## 0) Operating Intent
 
 - Be proactive, honest, and finish the job end-to-end.
-- Prefer root-cause fixes over symptom patches.
+- Root-cause fixes are mandatory — see §2.5.
 - Add a regression test for bug fixes when it is practical.
 - Keep communication calm and direct.
 
@@ -87,6 +87,56 @@ When touching QUIC / `Network.framework` / long-lived stream code:
 8. Validate health with stream + connection, not connection alone.
 9. Ship lifecycle fixes with focused regressions (connected-stop, retired-drain, overlap, zombie-state).
 
+### 2.5 Root-Cause Gate (Mandatory Before Any Fix)
+
+Agents have a persistent bias toward quick fixes that address symptoms.
+This creates compounding tech debt. The following gate is **mandatory**
+before proposing or implementing any bug fix or behavioral change.
+
+#### The Diagnostic
+
+Before writing any fix, answer these three questions explicitly:
+
+1. **What is the symptom?** (The observable wrong behavior.)
+2. **What is the root cause?** (The architectural/design flaw that
+   produces the symptom. Use "5 Whys" — ask "why does this happen?"
+   at least 3 levels deep.)
+3. **Does my proposed fix eliminate the root cause, or does it only
+   suppress the symptom?**
+
+If the answer to #3 is "suppress," STOP. Redesign the fix.
+
+#### Bandaid Test
+
+A fix is a bandaid if any of these are true:
+
+- It adds a special case / conditional to work around broken behavior.
+- It silences, retries, or swallows an error instead of preventing it.
+- It would break or need revisiting if the surrounding code changes.
+- You cannot explain *why* the bug existed, only *what* it did.
+- Another developer would look at the fix and ask "why is this here?"
+
+If the fix fails the bandaid test, go deeper.
+
+#### When a Bandaid Is Acceptable
+
+Only when ALL of these are true:
+
+1. The root cause is identified and documented.
+2. A follow-up bead/issue is created for the real fix.
+3. The user explicitly approves the temporary measure.
+4. The bandaid is marked with `// BANDAID: <bead-id> — <why>`.
+
+#### Escalation
+
+If you catch yourself about to propose a quick fix, say so:
+
+> "I notice my first instinct is to [quick fix]. But that addresses
+> the symptom ([symptom]), not the root cause ([cause]). Here's what
+> I recommend instead: [proper fix]."
+
+This self-correction is expected and valued — not a failure.
+
 ---
 
 ## 3) THINK -> ALIGN -> ACT (Single Checkpoint Model)
@@ -96,7 +146,7 @@ When touching QUIC / `Network.framework` / long-lived stream code:
 Before coding:
 
 - Read relevant code and recent commits.
-- State the root cause hypothesis.
+- State the root cause hypothesis (§2.5 gate is required).
 - Choose the smallest effective change.
 
 ### 3.2 ALIGN (One Checkpoint Per Scoped Task)
@@ -229,7 +279,20 @@ If verification could not run, state exactly why.
 
 ---
 
-## 9) Tooling Defaults
+## 9) Slash Command Resolution
+
+When a user message starts with `/command-name` (e.g., `/codex-review 036-profile-switch-gmp-wiring`):
+
+1. **This is a command invocation**, not a bash command or a request to use interactive_shell.
+2. Look up the command file: `~/.claude/commands/<command-name>.md`, `~/.pi/agent/prompts/<command-name>.md`, or the project's `.claude/commands/` directory.
+3. Read the command file.
+4. Follow its instructions exactly, treating everything after the command name as arguments.
+
+Do NOT try to run slash commands as bash commands, interactive shells, or subagent calls. They are markdown instruction files that you read and execute inline.
+
+---
+
+## 10) Tooling Defaults
 
 - Prefer `rg` / `rg --files` for search.
 - Do not add arbitrary command timeouts to normal CLI tools.
