@@ -33,6 +33,14 @@ Shaping requires two participants — either the user and an agent, or two agent
 
 When shaping autonomously (two agents, no user), save the full conversation to `shaping-transcript.md` in the spec directory when done. That file is the proof that real shaping happened. No transcript = no shaping.
 
+## How to collaborate with another agent
+
+Read this file completely and follow it exactly:
+
+`/Users/dalecarman/.agent-config/docs/agent-collaboration.md`
+
+That file has the exact process for messaging another agent via pi_messenger. Do NOT invent your own approach — no subagent, no interactive_shell, no bash spawning. Read the file.
+
 ## Log it
 
 If a spec directory exists for this work, append lines to `log.md` in it (create the file if it doesn't exist). Log at start and completion. Format:

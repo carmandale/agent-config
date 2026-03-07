@@ -17,6 +17,16 @@
 | 2026-03-03 | Self | TOML converter used basic strings (`"""`) which treat `\` as escape chars — broke commands with regex/globs | Use TOML literal strings (`'''`) for prompt field — backslashes are literal |
 | 2026-03-03 | Self | sed frontmatter parser matched ALL `---` pairs in a file, not just the first | Use awk with a counter for reliable first-block-only frontmatter extraction |
 
+## Agent Collaboration (Critical)
+1. **[2026-03-07] Agents will try subagent, interactive_shell, or bash to spawn collaborators — they MUST be told to use pi_messenger**
+   Do instead: Every command with a two-agent gate must include explicit pi_messenger instructions with exact tool call syntax. Agents don't infer the right mechanism — they invent wrong ones. Name the wrong tools explicitly ("do NOT use subagent, interactive_shell, or bash") and give the exact right tool call.
+2. **[2026-03-07] "Two participants required" is not specific enough**
+   Do instead: Tell the agent: (1) run pi_messenger list, (2) send a message to the named collaborator, (3) wait for reply via steering prompt, (4) if nobody is on the mesh, ask the user to start one. Do not proceed solo.
+3. **[2026-03-07] Agents skip workflow gates under forward momentum**
+   Do instead: JadeGrove skipped /codex-review and went straight from /plan to /implement. Even the agent that wrote the workflow commands will skip gates when excited about progress. Gates must be enforced structurally, not relied on by memory.
+4. **[2026-03-07] Message budget (default 10) is too low for real collaboration**
+   Fixed: ~/.pi/agent/pi-messenger.json now has chatty: 100. The spawn/dismiss feature (spec 008) will properly exempt collaborators from budget entirely.
+
 ## Prompt & Command Craft (Highest Priority)
 1. **[2026-03-07] Over-structuring commands kills agent performance**
    Do instead: Write commands like a person talking — conversational, emotionally weighted, short. No step-by-step headers for exploratory tasks, no output templates, no bash scaffolding for things the agent knows. Keep intensifiers ("super careful", "go deep"), open-ended language ("etc."), and deliberate repetition. Structure is only correct for artifact creation (specific files in specific formats), never for discovery/review.

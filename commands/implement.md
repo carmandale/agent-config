@@ -32,6 +32,14 @@ Implementation requires two participants — either the user and an agent, or tw
 
 When implementing autonomously (two agents, no user), one agent drives (writes code, runs tests, commits) and the other navigates (validates against plan, checks quality, catches drift). The git commits and PR are the proof artifacts — but the two-agent interaction is what makes them honest.
 
+## How to collaborate with another agent
+
+Read this file completely and follow it exactly:
+
+`/Users/dalecarman/.agent-config/docs/agent-collaboration.md`
+
+That file has the exact process for messaging another agent via pi_messenger. Do NOT invent your own approach — no subagent, no interactive_shell, no bash spawning. Read the file.
+
 ## Log it
 
 Append lines to `log.md` in the spec directory (create if needed). Log at start and completion. Format:
