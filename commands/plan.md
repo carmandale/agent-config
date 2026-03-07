@@ -1,0 +1,42 @@
+---
+description: Build a real implementation plan using two agents and the workflows-plan skill — research the codebase, propose a plan, stress-test it
+---
+
+Build the implementation plan for the specified spec. This is a two-agent session — one agent researches and proposes, the other stress-tests and validates. Neither agent works alone.
+
+**Target:** $ARGUMENTS
+
+## What you must do
+
+Read the workflows-plan skill file completely — every line:
+
+`/Users/dalecarman/.agents/skills/workflows/workflows-plan/SKILL.md`
+
+That skill has the real protocol — idea refinement, parallel research agents, codebase investigation, pattern analysis, detail levels. Don't wing your own version of planning. Read it and follow it.
+
+Start by reading `spec.md` in the target spec directory. That's your problem definition — the requirements and acceptance criteria that `/issue` or `/shape` already established. Your job is to figure out HOW to solve it, not to redefine WHAT to solve. If shaping was done, the selected shape and fit check are your starting constraints — don't re-derive what's already decided.
+
+## The specific failure mode you must avoid
+
+DO NOT skip the codebase research. DO NOT write a plan from vibes and general knowledge. DO NOT produce a task list without understanding the existing patterns, architecture, and blast radius of the changes. If your plan doesn't reference specific files, functions, or patterns you found in the codebase, you skipped research. Go back and read the skill file again.
+
+## Planning is never solo
+
+Planning requires two participants — either the user and an agent, or two agents working together. One agent planning with itself is not planning. The back-and-forth is the whole point — one agent digs into the codebase, researches patterns, and proposes the approach. The other challenges it: blast radius? Missing steps? Simpler alternative? What breaks? What's the risk? Honest scrutiny only happens with a second perspective that can push back.
+
+When planning autonomously (two agents, no user), save the full conversation to `planning-transcript.md` in the spec directory when done. That file is the proof that real planning happened with two perspectives. No transcript = no planning.
+
+## What you produce
+
+Two files in the spec directory:
+
+- `plan.md` — implementation approach, architecture decisions, requirement-to-change traceability, the "how"
+- `tasks.md` — ordered checkable task list with dependencies, the "do this"
+
+Both files get YAML frontmatter with title, date, and bead ID from the spec.
+
+## How this ends
+
+When the plan is done — both agents agree it's solid, research is grounded, tasks are concrete — tell me to run `/codex-review <spec>` for an independent review, or `/implement <spec>` if it's straightforward enough to skip review.
+
+$ARGUMENTS
