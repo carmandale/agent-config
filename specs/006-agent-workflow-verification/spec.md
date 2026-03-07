@@ -1,3 +1,6 @@
+<!-- Codex Review: APPROVED after 3 rounds | model: gpt-5.3-codex | date: 2026-03-07 -->
+<!-- Status: UNCHANGED -->
+<!-- Revisions: none — spec is user intent, plan revisions conform to spec -->
 ---
 title: "Agent workflow verification: artifact contracts + help-workflow"
 date: 2026-03-07
