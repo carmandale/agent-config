@@ -69,29 +69,10 @@ else
 fi
 
 #==============================================================================
-# 3. Sync mini-ts (async — don't block the commit)
-#    Pulls latest, runs install.sh + Gemini conversion on the remote.
+# 3. Hygiene checks
 #==============================================================================
-sync_remote() {
-    local host="$1"
-    if ssh -o ConnectTimeout=3 "$host" "true" 2>/dev/null; then
-        ssh "$host" "cd ~/.agent-config && git pull --ff-only 2>/dev/null && bash scripts/convert-commands-gemini.sh >/dev/null 2>&1 && bash install.sh >/dev/null 2>&1" 2>/dev/null
-        if [[ $? -eq 0 ]]; then
-            ok "$host synced"
-        else
-            warn "$host sync failed — SSH in and run: cd ~/.agent-config && git pull && bash install.sh"
-        fi
-    else
-        warn "$host unreachable — will sync on next push"
-    fi
-}
-
-# Run remote sync in background so commit isn't blocked
-sync_remote "mini-ts" &
-
-#==============================================================================
-# 4. Hygiene checks
-#==============================================================================
+# Note: mini-ts sync is handled by git push (dual push URL + post-receive hook).
+# No need to sync here — it happens automatically when you push.
 
 # Check for .md commands missing frontmatter (agent discovery depends on it)
 for f in "$COMMANDS_DIR"/*.md; do
