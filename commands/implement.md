@@ -6,6 +6,12 @@ Implement the specified plan. Read the full spec, plan, and tasks end to end and
 
 **Target:** $ARGUMENTS
 
+## Before anything else
+
+Check that the target spec directory has `spec.md`, `plan.md`, and `tasks.md`, and that `spec.md` has a `bead:` in its YAML frontmatter. If any are missing, stop. Tell the user what's missing — typically `/issue` for the bead+spec, `/plan` for the plan+tasks. Do not create them yourself. Do not proceed without them.
+
+## Alignment gate
+
 Before writing any code, check alignment with our North Star, Apple best practices, AGENTS.md rules, and the existing architecture. If you don't agree with the plan — if it's misaligned, overengineered, fighting the codebase, or just wrong — you must stop and tell me why and what you suggest would be better. Do NOT implement a plan you believe is wrong.
 
 ## What you must do

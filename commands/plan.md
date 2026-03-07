@@ -6,6 +6,10 @@ Build the implementation plan for the specified spec. This is a two-agent sessio
 
 **Target:** $ARGUMENTS
 
+## Before anything else
+
+Check that the target spec directory has a `spec.md` with a `bead:` in its YAML frontmatter. If there's no spec.md, or no bead, stop. Tell the user to run `/issue` first — the bead and numbered spec directory are non-negotiable tracking infrastructure. Do not create them yourself. Do not proceed without them.
+
 ## What you must do
 
 Read the workflows-plan skill file completely — every line:
@@ -22,7 +26,15 @@ DO NOT skip the codebase research. DO NOT write a plan from vibes and general kn
 
 ## Planning is never solo
 
-Planning requires two participants — either the user and an agent, or two agents working together. One agent planning with itself is not planning. The back-and-forth is the whole point — one agent digs into the codebase, researches patterns, and proposes the approach. The other challenges it: blast radius? Missing steps? Simpler alternative? What breaks? What's the risk? Honest scrutiny only happens with a second perspective that can push back.
+Planning requires two participants — either the user and an agent, or two agents working together. One agent planning with itself is not planning.
+
+**Engage the second agent BEFORE writing anything.** The failure mode is: one agent does all the research, writes the entire plan, then sends it to the other agent for review. That's a review, not collaborative planning. Instead:
+
+1. Do your codebase research — read relevant code, understand the architecture, find insertion points.
+2. **Before writing plan.md**, share your findings with the second agent: "Here's what I found. Here's what I think the approach should be. What am I missing? What's the blast radius I'm not seeing?"
+3. The second agent challenges, adds their perspective, raises risks, suggests alternatives.
+4. **Then** write the plan together, incorporating both perspectives.
+5. Not "here's the finished plan, review it."
 
 When planning autonomously (two agents, no user), save the full conversation to `planning-transcript.md` in the spec directory when done. That file is the proof that real planning happened with two perspectives. No transcript = no planning.
 
