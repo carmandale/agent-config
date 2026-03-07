@@ -38,7 +38,7 @@ bead: <bead-id>
 
 - The `specs/` directory structure is sacred. Do not invent alternative formats. No PRDs, no loose plan files, no docs/plans/ directories. It's `specs/<NNN>-<slug>/` with spec.md, plan.md, tasks.md. Period.
 - The bead ID must appear in every file's frontmatter. No spec without a bead (§5.2 of AGENTS.md).
-- If shaping was done first (look for a shaping doc in the conversation or in `specs/`), use its selected shape, requirements, and fit check as the foundation. Don't re-derive what shaping already decided.
+- If shaping was done first (look for a shaping doc in the conversation, or a `shaping-transcript.md` in the spec directory), use its selected shape, requirements, and fit check as the foundation. Don't re-derive what shaping already decided. If there's a transcript, move it into the spec directory.
 - If no shaping was done and the problem is complex or ambiguous, say so: "This might benefit from `/shape` first — want to do that, or should I proceed with what we have?"
 
 $ARGUMENTS

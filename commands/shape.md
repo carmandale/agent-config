@@ -27,9 +27,11 @@ Shaping means:
 
 All of these. Not some of these.
 
-## Shaping is never autonomous
+## Shaping is never solo
 
-Shaping requires the user in the conversation — asking real questions, getting real answers, negotiating requirements together. It cannot be delegated to a subagent or run in the background. If the user isn't present and participating, it's not shaping.
+Shaping requires two participants — either the user and an agent, or two agents working together. One agent shaping with itself is not shaping. The back-and-forth is the whole point — requirements get challenged, shapes get pressure-tested, fit checks get honest scrutiny. That only happens with a second perspective that can push back.
+
+When shaping autonomously (two agents, no user), save the full conversation to `shaping-transcript.md` in the spec directory when done. That file is the proof that real shaping happened. No transcript = no shaping.
 
 ## How this ends
 

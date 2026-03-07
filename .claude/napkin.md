@@ -24,6 +24,8 @@
    Do instead: Point to the literal file path and say "read this file completely and follow it exactly." Name the specific shortcut failure mode. Never rely on the agent self-checking artifact compliance.
 3. **[2026-03-07] Forced file reads beat injected context**
    Do instead: When compliance with a file matters (AGENTS.md, SKILL.md, etc.), explicitly instruct the agent to read it via tool call. System prompt content gets wallpaper treatment; tool-call results get high attention.
+4. **[2026-03-07] Anchor trust in file existence, not agent words**
+   Do instead: Every critical gate (codex review, shaping, bead creation) must produce a file artifact in the spec directory. Verification = `ls specs/*/codex-review.md`. No file = didn't happen. Shaping is never solo (one agent with itself) but CAN be two agents autonomously — save transcript to `shaping-transcript.md`.
 
 ## User Preferences
 - Uses `~/.agent-config` as central distribution hub for all agents (pi-agent, codex, opencode, claude code)

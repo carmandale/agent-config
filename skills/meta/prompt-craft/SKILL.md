@@ -83,7 +83,20 @@ The principle: every critical verification gate should produce a non-fakeable ar
 
 - **Codex review** → save the session transcript (`codex-review.md`) in the spec directory. Contains Codex's actual words, session ID, verdict. If the file doesn't exist, the review didn't happen.
 - **Bead creation** → `bd create` changes `.beads/` state. The bead exists or it doesn't.
-- **Shaping** → the user's presence in the conversation is the proof. Shaping is never autonomous, never delegated. If the user wasn't there, it didn't happen.
+- **Shaping** → requires two participants (user + agent, or agent + agent). One agent solo is theater. Save two-agent transcripts to `shaping-transcript.md` in the spec directory. If the user was present, their presence is the proof. If autonomous, the transcript is the proof.
 - **Implementation** → git commits exist in the log or they don't.
 
 When designing commands and workflows: prefer external tool artifacts over agent self-reporting. The question isn't "did the agent say it did the thing" — it's "does the artifact exist."
+
+A fully verified spec directory is its own dashboard:
+
+```
+specs/<NNN>-<slug>/
+  spec.md                  ← spec exists
+  plan.md                  ← plan exists
+  tasks.md                 ← tasks exist
+  shaping-transcript.md    ← real shaping happened (two participants)
+  codex-review.md          ← codex actually ran
+```
+
+No file = didn't happen. Glanceable across projects with `ls specs/*/codex-review.md`. Design for file-existence checks, not reading file contents.
