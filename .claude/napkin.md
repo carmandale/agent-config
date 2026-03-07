@@ -29,6 +29,13 @@
 5. **[2026-03-07] Anchor trust in file existence, not agent words**
    Do instead: Every critical gate (codex review, shaping, bead creation) must produce a file artifact in the spec directory. Verification = `ls specs/*/codex-review.md`. No file = didn't happen. Shaping is never solo (one agent with itself) but CAN be two agents autonomously — save transcript to `shaping-transcript.md`.
 
+6. **[2026-03-07] Two-agent gates enforce skill compliance**
+   Do instead: `/shape`, `/plan`, `/codex-review`, and `/implement` all require two participants. The second perspective is what prevents corner-cutting. One agent doing everything then sending to another for review is NOT collaborative — engage the second agent BEFORE writing artifacts.
+7. **[2026-03-07] Bead + numbered spec is non-negotiable tracking**
+   Do instead: Every piece of tracked work gets a bead and a `specs/NNN-slug/` directory via `/issue`. `/plan` and `/implement` refuse to proceed without them. `/issue` can happen before or after `/shape`, but it MUST happen.
+8. **[2026-03-07] Audit log in spec directory**
+   Do instead: Every workflow command appends to `log.md` in the spec directory: timestamp, mesh name, harness/model, command, event. `cat specs/*/log.md` is the cross-project activity feed.
+
 ## User Preferences
 - Uses `~/.agent-config` as central distribution hub for all agents (pi-agent, codex, opencode, claude code)
 - Prefers symlinks to repo for instant `git pull` updates over native plugin systems

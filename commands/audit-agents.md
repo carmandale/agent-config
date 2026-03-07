@@ -12,7 +12,7 @@ Don't restrict yourself to the latest commits, cast a wider net and go super dee
 
 For issues where the root cause is clear and the fix is safe — fix them. Verify the build. Document what you changed and why.
 
-For issues that are risky or ambiguous — document them, flag them for human review, and do NOT implement.
+For issues that are risky or ambiguous — document them, flag them for human review, and do NOT implement. If findings warrant a tracked spec, run `/issue` to create one, then `/codex-review <spec>` for review. If fixes were direct and verified, commit and you're done.
 
 Be sure to comply with ALL rules in AGENTS.md and ensure that any code you write or revise conforms to the best practices referenced in the AGENTS.md file.
 

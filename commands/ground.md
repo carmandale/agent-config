@@ -54,6 +54,6 @@ Once complete, output a brief grounding summary:
 **Active constraints**: [any non-obvious rules from AGENTS.md or project config that are especially relevant here]
 ```
 
-Then ask: "What are we working on?"
+Then ask: "What are we working on?" For new work, you'd typically start with `/shape` to explore the problem or `/issue` to create a tracked spec. For bug hunting, try `/sweep`. For reviewing agent-written code, try `/audit-agents`.
 
 $ARGUMENTS

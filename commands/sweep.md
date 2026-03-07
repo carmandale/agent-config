@@ -14,7 +14,7 @@ Then systematically and meticulously and intelligently create a numbered spec/pl
 
 Only create the spec, plan, and tasks in the appropriate `./specs/` folder as a new numbered spec. Create a bead for the work and add the bead ID to the spec frontmatter.
 
-Do NOT implement any fixes. Wait for explicit approval before implementing.
+Do NOT implement any fixes. Wait for explicit approval before implementing. Once approved, you'd typically run `/codex-review <spec>` for an independent review of the plan, then `/implement <spec>` to build it.
 
 Strictly adhere to the `specs/` artifact rules defined in README.md, including creating a bead for the work.
 

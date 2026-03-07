@@ -109,32 +109,83 @@ This means you can have:
 - **Global AGENTS.md**: Core standards, never-do rules, preferred workflows
 - **Repo AGENTS.md**: Project architecture, specific conventions, tooling
 
-## Session Workflow
+## Workflow Commands
 
-The core workflow for tracked, traceable work sessions:
+The core workflow for tracked, spec-driven work. Each command suggests the next step. All commands are individually usable — no mandatory pipeline.
 
 ```
-/focus <bead-id>           # Start: load context, mark in-progress
+/ground                        # Orient: read instructions, investigate codebase
     ↓
-  ... do work ...
-    ↓
-/checkpoint                # Optional: mid-session save
-    ↓
-  ... more work ...
-    ↓
-/handoff                   # End: summarize, commit, requires bead
+/shape <problem>               # Discover: explore problem + solution space (2 agents)
+    ↓                            produces: shaping-transcript.md
+/issue <description>           # Define: create bead + spec.md
+    ↓                            produces: specs/NNN-slug/spec.md
+/plan <spec>                   # Plan: build plan.md + tasks.md (2 agents)
+    ↓                            produces: plan.md, tasks.md, planning-transcript.md
+/codex-review <spec>           # Gate: Codex reviews plan iteratively (2 agents)
+    ↓                            produces: codex-review.md
+/implement <spec>              # Build: execute plan with quality gates (2 agents)
+                                 produces: git commits + PR
 ```
 
-### Key Rules
+**Entry points vary.** Clear problem → `/issue` first. Vague idea → `/shape` first. Bug hunting → `/sweep`. Code review → `/audit-agents`. The workflow adapts to how you start.
 
-- **`/handoff` requires a bead** - hard stop if no active bead (traceability)
-- **`/handoff` writes** `.handoff/YYYY-MM-DD-HHMM-{bead-id}.md` - tracked & committed
-- **`/checkpoint` writes** `.checkpoint/YYYY-MM-DD-HHMM.md` - tracked & committed
-- **`/focus` marks bead in-progress** and loads relevant context
+### Two-Agent Gates
 
-## Key Commands
+Four commands require two participants (user + agent, or two agents). This is the enforcement mechanism — a second perspective prevents corner-cutting:
 
-### Session Management
+| Command | Skill forced | Two-agent dynamic |
+|---------|-------------|-------------------|
+| `/shape` | shaping SKILL.md | Explore problem ↔ challenge assumptions |
+| `/plan` | workflows-plan SKILL.md | Research & propose ↔ stress-test |
+| `/codex-review` | (self-contained) | Claude orchestrates ↔ Codex reviews |
+| `/implement` | workflows-work SKILL.md | Implement ↔ validate each step |
+
+### Spec Directory
+
+Every piece of tracked work lives in `specs/NNN-slug/`:
+
+```
+specs/003-gj-unit-swift-testing/
+├── spec.md                    # What and why (bead in frontmatter)
+├── plan.md                    # How (architecture decisions, insertion points)
+├── tasks.md                   # Do this (ordered checkable list)
+├── shaping-transcript.md      # Proof: two-agent shaping happened
+├── planning-transcript.md     # Proof: two-agent planning happened
+├── codex-review.md            # Proof: Codex actually reviewed
+└── log.md                     # Audit trail: who ran what, when, with what model
+```
+
+File existence is the dashboard. `ls specs/*/log.md` across projects shows what's happening.
+
+### Audit Log
+
+Every workflow command appends to `log.md` in the spec directory:
+
+```
+YYYY-MM-DD HH:MM | ZenPhoenix | pi/claude-opus-4-6     | /shape        | started with RedEagle
+YYYY-MM-DD HH:MM | ZenPhoenix | pi/claude-opus-4-6     | /issue        | bead .gj-tool-xyz — spec.md
+YYYY-MM-DD HH:MM | —          | codex/gpt-5.3-codex    | /codex-review | round 3 — VERDICT: APPROVED
+```
+
+Mesh name (pi_messenger identity) if available, `—` if not. Harness/model always mandatory.
+
+### Pre-checks
+
+Commands enforce prerequisites:
+- `/plan` refuses without `spec.md` + bead frontmatter → tells you to run `/issue`
+- `/implement` refuses without `spec.md` + `plan.md` + `tasks.md` + bead → tells you what's missing
+
+### Discovery & Bug Hunting
+
+| Command | Description | Suggests next |
+|---------|-------------|---------------|
+| `/ground` | Orient: read instructions, investigate codebase | `/shape`, `/issue`, `/sweep`, or `/audit-agents` |
+| `/sweep` | Random code exploration → bug hunting → spec creation | `/codex-review <spec>` then `/implement <spec>` |
+| `/audit-agents` | Skeptical review of agent-written code, fix in-place | `/issue` if spec warranted, or commit |
+
+## Session Management
+
 | Command | Description |
 |---------|-------------|
 | `/focus <bead>` | **Start** session - load context, mark bead in-progress |
@@ -143,29 +194,18 @@ The core workflow for tracked, traceable work sessions:
 | `/standup` | Quick status update |
 | `/retro` | Session retrospective |
 
-### Development Workflows
+## Other Commands
+
 | Command | Description |
 |---------|-------------|
 | `/commit` | Smart commit with conventional format |
 | `/debug` | Structured debugging workflow |
-| `/sweep` | Code cleanup pass |
 | `/fix-all` | Fix all lint/type errors |
 | `/iterate` | Iterative refinement loop |
-
-### Planning & Triage
-| Command | Description |
-|---------|-------------|
 | `/triage` | Issue triage and prioritization |
-| `/estimate` | Time estimation for tasks |
 | `/repo-dive` | Deep dive into unfamiliar repo |
-
-### Team & Parallel Work
-| Command | Description |
-|---------|-------------|
 | `/parallel` | Spawn parallel workstreams |
 | `/swarm` | Coordinate multiple agents |
-| `/swarm-status` | Check swarm progress |
-| `/swarm-collect` | Gather swarm results |
 
 ## Customization
 

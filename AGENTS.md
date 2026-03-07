@@ -93,7 +93,33 @@ Functional taxonomy with a sequential decision rule for placement:
 
 Top-level symlinks (e.g., `skills/bird -> tools/bird`) enable discovery.
 
-## Commands
+## Workflow Commands
+
+The core workflow for tracked, spec-driven work. Each command suggests the next step with the specific command and spec path. All commands are individually usable — no mandatory pipeline.
+
+```
+/ground → /shape (2 agents) → /issue → /plan (2 agents) → /codex-review (2 agents) → /implement (2 agents)
+ orient     discover            define     plan               gate                       build
+```
+
+| Command | What it does | Produces | Suggests next |
+|---------|-------------|----------|---------------|
+| `/ground` | Orient: read instructions, investigate codebase | — | `/shape`, `/issue`, `/sweep`, `/audit-agents` |
+| `/shape <problem>` | Explore problem + solution space (2 agents, forced skill read) | `shaping-transcript.md` | `/issue` |
+| `/issue <description>` | Create bead + `spec.md` in `specs/NNN-slug/` | `spec.md` with bead | `/plan <spec>` or `/shape` |
+| `/plan <spec>` | Build plan + tasks (2 agents, forced skill read) | `plan.md`, `tasks.md`, `planning-transcript.md` | `/codex-review <spec>` or `/implement <spec>` |
+| `/codex-review <spec>` | Codex reviews plan iteratively (2 agents) | `codex-review.md` | `/implement <spec>` |
+| `/implement <spec>` | Execute plan with quality gates (2 agents, forced skill read) | git commits + PR | — |
+| `/sweep` | Random code exploration → bug hunting → spec | `specs/NNN-slug/` with bead | `/codex-review <spec>` → `/implement <spec>` |
+| `/audit-agents` | Skeptical review of agent code, fix in-place | direct fixes | `/issue` if spec warranted, or commit |
+
+**Two-agent gates:** `/shape`, `/plan`, `/codex-review`, and `/implement` require two participants. One agent working alone is not sufficient — the second perspective is what forces skill protocols to be followed.
+
+**Pre-checks:** `/plan` refuses without `spec.md` + bead. `/implement` refuses without `spec.md` + `plan.md` + `tasks.md` + bead. Commands tell you exactly what's missing and which command to run.
+
+**Audit log:** Every workflow command appends to `log.md` in the spec directory with timestamp, mesh identity, harness/model, command, and event.
+
+## Commands (General)
 
 Slash commands in `commands/` are markdown files with optional YAML frontmatter:
 
