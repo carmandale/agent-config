@@ -24,7 +24,9 @@
    Do instead: Point to the literal file path and say "read this file completely and follow it exactly." Name the specific shortcut failure mode. Never rely on the agent self-checking artifact compliance.
 3. **[2026-03-07] Forced file reads beat injected context**
    Do instead: When compliance with a file matters (AGENTS.md, SKILL.md, etc.), explicitly instruct the agent to read it via tool call. System prompt content gets wallpaper treatment; tool-call results get high attention.
-4. **[2026-03-07] Anchor trust in file existence, not agent words**
+4. **[2026-03-07] Actually run the skill — don't wing your own version**
+   Do instead: When a command says "use the workflows-plan skill" or any skill, READ the actual SKILL.md file and follow its protocol. You will be tempted to skip this because you "know how to do it." That's the exact failure mode. The skill exists because winging it produces shallow results on hard problems.
+5. **[2026-03-07] Anchor trust in file existence, not agent words**
    Do instead: Every critical gate (codex review, shaping, bead creation) must produce a file artifact in the spec directory. Verification = `ls specs/*/codex-review.md`. No file = didn't happen. Shaping is never solo (one agent with itself) but CAN be two agents autonomously — save transcript to `shaping-transcript.md`.
 
 ## User Preferences
