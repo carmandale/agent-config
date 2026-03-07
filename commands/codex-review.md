@@ -268,3 +268,13 @@ Max 5 rounds. Each round preserves Codex's conversation context via session resu
 6. Show the user each round's feedback and revisions so they can follow along.
 7. If Codex CLI is not installed or fails, inform the user and suggest `npm install -g @openai/codex`.
 8. If a revision contradicts the user's explicit requirements, skip that revision and note it for the user.
+
+## Log it
+
+Append lines to `log.md` in the spec directory (create if needed). Log each round and the final verdict. Format:
+
+```
+YYYY-MM-DD HH:MM | <mesh-name or "—"> | <harness>/<model> | /codex-review | round N — VERDICT: <REVISE|APPROVED>
+```
+
+The Codex agent's identity goes in its own log line if you know it (e.g., `codex/gpt-5.3-codex`). Your identity (the Claude side orchestrating) goes in yours.

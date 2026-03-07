@@ -40,4 +40,14 @@ bead: <bead-id>
 - If no shaping was done and the problem is complex or ambiguous, say so: "This might benefit from `/shape` first — want to do that, or should I proceed with what we have?"
 - Do not create plan.md or tasks.md — that's `/plan`'s job with a two-agent session.
 
+## Log it
+
+Append a line to `log.md` in the spec directory (create the file if it doesn't exist). Format:
+
+```
+YYYY-MM-DD HH:MM | <mesh-name or "—"> | <harness>/<model> | /issue | bead <id> — spec.md created
+```
+
+Harness is what's running you (pi, claude-code, codex, gemini, etc.). Model is your current model (claude-opus-4-6, gpt-5.3-codex, etc.). Mesh name is your pi_messenger identity if you've joined the mesh, or `—` if not.
+
 $ARGUMENTS

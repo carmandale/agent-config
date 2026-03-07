@@ -32,6 +32,17 @@ Implementation requires two participants — either the user and an agent, or tw
 
 When implementing autonomously (two agents, no user), one agent drives (writes code, runs tests, commits) and the other navigates (validates against plan, checks quality, catches drift). The git commits and PR are the proof artifacts — but the two-agent interaction is what makes them honest.
 
+## Log it
+
+Append lines to `log.md` in the spec directory (create if needed). Log at start and completion. Format:
+
+```
+YYYY-MM-DD HH:MM | <mesh-name or "—"> | <harness>/<model> | /implement | started with <other participant>
+YYYY-MM-DD HH:MM | <mesh-name or "—"> | <harness>/<model> | /implement | completed — N commits
+```
+
+Harness is what's running you (pi, claude-code, codex, gemini, etc.). Model is your current model. Mesh name is your pi_messenger identity if joined, or `—` if not.
+
 ## How this ends
 
 Be sure to comply with ALL rules in AGENTS.md and ensure that any code you write or revise conforms to the best practices referenced in the AGENTS.md file. When all tasks are checked off, tests pass, and the PR is up — you're done.

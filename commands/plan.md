@@ -47,6 +47,17 @@ Two files in the spec directory:
 
 Both files get YAML frontmatter with title, date, and bead ID from the spec.
 
+## Log it
+
+Append lines to `log.md` in the spec directory (create if needed). Log at start and completion. Format:
+
+```
+YYYY-MM-DD HH:MM | <mesh-name or "—"> | <harness>/<model> | /plan | started with <other participant>
+YYYY-MM-DD HH:MM | <mesh-name or "—"> | <harness>/<model> | /plan | completed — plan.md + tasks.md
+```
+
+Harness is what's running you (pi, claude-code, codex, gemini, etc.). Model is your current model. Mesh name is your pi_messenger identity if joined, or `—` if not.
+
 ## How this ends
 
 When the plan is done — both agents agree it's solid, research is grounded, tasks are concrete — tell me to run `/codex-review <spec>` for an independent review, or `/implement <spec>` if it's straightforward enough to skip review.

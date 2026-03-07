@@ -33,6 +33,17 @@ Shaping requires two participants — either the user and an agent, or two agent
 
 When shaping autonomously (two agents, no user), save the full conversation to `shaping-transcript.md` in the spec directory when done. That file is the proof that real shaping happened. No transcript = no shaping.
 
+## Log it
+
+If a spec directory exists for this work, append lines to `log.md` in it (create the file if it doesn't exist). Log at start and completion. Format:
+
+```
+YYYY-MM-DD HH:MM | <mesh-name or "—"> | <harness>/<model> | /shape | started with <other participant>
+YYYY-MM-DD HH:MM | <mesh-name or "—"> | <harness>/<model> | /shape | completed — shaping-transcript.md
+```
+
+Harness is what's running you (pi, claude-code, codex, gemini, etc.). Model is your current model. Mesh name is your pi_messenger identity if joined, or `—` if not.
+
 ## How this ends
 
 When shaping is done — shape selected, fit check passes, we both feel good about it — tell me to run `/issue` to create the bead and spec. The spec will be built on the foundation shaping produced. Don't create the spec yourself, don't create a bead, don't transition into planning mode. Shaping shapes. That's it.
