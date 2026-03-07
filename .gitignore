@@ -2,3 +2,5 @@
 *.backup.*
 .aligner/
 .claude/settings.local.json
+.claude/ground-cache
+.claude/ground-cache.tmp
