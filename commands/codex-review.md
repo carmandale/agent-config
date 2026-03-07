@@ -1,12 +1,38 @@
 ---
 name: codex-review
 description: Send the current plan to OpenAI Codex CLI for iterative review. Claude and Codex go back-and-forth until Codex approves the plan.
+revision: 2
+revision_date: 2026-03-07
 user_invocable: true
 ---
 
 # Codex Plan Review (Iterative)
 
 Send the current implementation plan to OpenAI Codex for review. Claude revises the plan based on Codex's feedback and re-submits until Codex approves. Max 5 rounds.
+
+---
+
+## HARD CONSTRAINT — Read This First
+
+**Only Codex can approve the plan.** The loop ends ONLY when Codex's response contains `VERDICT: APPROVED` — or when 5 rounds are exhausted.
+
+Claude making revisions is NOT approval. Claude believing the revisions are sufficient is NOT approval. The revised plan MUST be sent back to Codex every time.
+
+**Anti-pattern (DO NOT DO THIS):**
+> ❌ Read Codex feedback → revise plan → tell user "the plan is now approved" or "the concerns have been addressed"
+
+**Correct pattern:**
+> ✅ Read Codex feedback → revise plan → send revised plan back to Codex → read Codex's new verdict
+
+If you catch yourself about to tell the user the plan is approved without Codex's `VERDICT: APPROVED` in the current round's output, STOP — you are skipping the re-submission step.
+
+**Anti-pattern #2 — Shallow revisions (DO NOT DO THIS):**
+> ❌ Codex says "missing error handling for X" → add a comment "// TODO: handle X errors" or a vague sentence "error handling will be added"
+
+**Correct revision pattern:**
+> ✅ Codex says "missing error handling for X" → add the actual error handling logic, code paths, and recovery strategy to the plan
+
+Revisions must be substantive. If Codex raised a specific technical concern, the revision must contain a specific technical solution — not a hand-wave, TODO, or acknowledgment that the issue exists.
 
 ---
 
@@ -29,14 +55,39 @@ REVIEW_ID=$(uuidgen | tr '[:upper:]' '[:lower:]' | head -c 8)
 
 Use this for all temp file paths: `/tmp/claude-plan-${REVIEW_ID}.md` and `/tmp/codex-review-${REVIEW_ID}.md`.
 
-### Step 2: Capture the Plan
+### Step 2: Locate and Capture the Plan
 
-Write the current plan to the session-scoped temporary file. The plan is whatever implementation plan exists in the current conversation context (from plan mode, or a plan discussed in chat).
+**What to review:** The **spec** (intent/requirements) and the **plan** (implementation strategy). NOT tasks — they're derivative and dilute the review.
 
-1. Write the full plan content to `/tmp/claude-plan-${REVIEW_ID}.md`
-2. If there is no plan in the current context, ask the user what they want reviewed
+Resolve the plan to review using this priority:
 
-### Step 3: Initial Review (Round 1)
+1. **If arguments were provided** (e.g., `/codex-review 036-profile-switch-gmp-wiring`):
+   - Search for a matching spec directory: `specs/<arg>/` or `specs/*<arg>*/`
+   - Read `spec.md` (or `shaping.md`) for the requirements/problem definition
+   - Read `plan.md` for the implementation strategy
+   - Do NOT include `tasks.md` — task breakdown is project management, not what Codex reviews
+   - If the directory doesn't exist, tell the user and list available specs via `ls specs/`
+
+2. **If no arguments but a plan exists in the current conversation context** (from plan mode, shaping, or prior discussion):
+   - Use that plan directly
+
+3. **If neither** — ask the user what they want reviewed
+
+Write the combined content to `/tmp/claude-plan-${REVIEW_ID}.md` structured as:
+
+```markdown
+# Spec (Requirements)
+[Contents of spec.md — the problem, constraints, acceptance criteria]
+
+# Plan (Implementation)
+[Contents of plan.md — the proposed solution, code changes, architecture]
+```
+
+This gives Codex both the *what* and the *how*, so it can verify the plan actually fulfills the spec — not just check internal consistency.
+
+Include relevant source code context if the plan references specific files — Codex reviews are better when it can cross-reference against the actual codebase.
+
+### Step 3: Submit to Codex (Round 1)
 
 Run Codex CLI in non-interactive mode to review the plan:
 
@@ -45,12 +96,15 @@ codex exec \
   -m gpt-5.3-codex \
   -s read-only \
   -o /tmp/codex-review-${REVIEW_ID}.md \
-  "Review the implementation plan in /tmp/claude-plan-${REVIEW_ID}.md. Focus on:
-1. Correctness - Will this plan achieve the stated goals?
-2. Risks - What could go wrong? Edge cases? Data loss?
-3. Missing steps - Is anything forgotten?
-4. Alternatives - Is there a simpler or better approach?
-5. Security - Any security concerns?
+  "Review the spec and implementation plan in /tmp/claude-plan-${REVIEW_ID}.md. The file contains two sections: the Spec (requirements/problem definition) and the Plan (proposed implementation).
+
+Review the plan AGAINST the spec. Focus on:
+1. Completeness - Does the plan address every requirement in the spec?
+2. Correctness - Will this plan actually achieve the stated goals?
+3. Risks - What could go wrong? Edge cases? Data loss?
+4. Missing steps - Is anything forgotten between spec and plan?
+5. Alternatives - Is there a simpler or better approach?
+6. Security - Any security concerns?
 
 Be specific and actionable. If the plan is solid and ready to implement, end your review with exactly: VERDICT: APPROVED
 
@@ -64,9 +118,11 @@ If changes are needed, end with exactly: VERDICT: REVISE"
 - Use `-s read-only` so Codex can read the codebase for context but cannot modify anything.
 - Use `-o` to capture the output to a file for reliable reading.
 
-### Step 4: Read Review & Check Verdict
+Then go to **Step 4**.
 
-1. Read `/tmp/codex-review-${REVIEW_ID}.md`
+### Step 4: Read Codex's Response & Branch on Verdict
+
+1. Read `/tmp/codex-review-${REVIEW_ID}.md` (or stdout for resumed sessions)
 2. Present Codex's review to the user:
 
 ```
@@ -75,29 +131,35 @@ If changes are needed, end with exactly: VERDICT: REVISE"
 [Codex's feedback here]
 ```
 
-3. Check the verdict:
-   - If **VERDICT: APPROVED** → go to Step 7 (Done)
-   - If **VERDICT: REVISE** → go to Step 5 (Revise & Re-submit)
-   - If no clear verdict but feedback is all positive / no actionable items → treat as approved
-   - If max rounds (5) reached → go to Step 7 with a note that max rounds hit
+3. **Check for the literal string `VERDICT: APPROVED` in Codex's response:**
+   - **Present** → go to Step 6 (Done)
+   - **Absent** (including `VERDICT: REVISE`, unclear verdict, or no verdict) → go to Step 5
+   - **Max rounds (5) reached** → go to Step 6 with a note that max rounds hit
 
-### Step 5: Revise the Plan
+**There is no other way to reach Step 6 (Done) besides Codex's explicit approval or exhausting 5 rounds.**
 
-Based on Codex's feedback:
+### Step 5: Revise Plan AND Re-submit to Codex (Atomic Step)
 
-1. **Revise the plan** — address each issue Codex raised. Update the plan content in the conversation context and rewrite `/tmp/claude-plan-${REVIEW_ID}.md` with the revised version.
-2. **Briefly summarize** what you changed for the user:
+This step has two parts that MUST both execute. Do not stop after part A.
+
+**Part A — Revise the plan:**
+
+Based on Codex's feedback, revise the plan. Update the plan content in the conversation context and rewrite `/tmp/claude-plan-${REVIEW_ID}.md` with the revised version.
+
+Briefly summarize what you changed for the user:
 
 ```
 ### Revisions (Round N)
 - [What was changed and why, one bullet per Codex issue addressed]
 ```
 
-3. Inform the user what's happening: "Sending revised plan back to Codex for re-review..."
+If a revision contradicts the user's explicit requirements, skip that revision and note it for the user.
 
-### Step 6: Re-submit to Codex (Rounds 2-5)
+**Part B — Immediately re-submit to Codex:**
 
-Resume the existing Codex session so it has full context of the prior review:
+Do this now. Do not present the revisions as final. Do not ask the user if they want to continue. Do not say the plan is approved.
+
+Resume the existing Codex session:
 
 ```bash
 codex exec resume ${CODEX_SESSION_ID} \
@@ -112,18 +174,19 @@ If more changes are needed, end with: VERDICT: REVISE" 2>&1 | tail -80
 
 **Note:** `codex exec resume` does NOT support `-o` flag. Capture output from stdout instead (pipe through `tail` to skip startup lines). Read the Codex response directly from the command output.
 
-Then go back to **Step 4** (Read Review & Check Verdict).
+**If `resume ${CODEX_SESSION_ID}` fails** (e.g., session expired), fall back to a fresh `codex exec` call with context about the prior rounds included in the prompt.
 
-**Important:** If `resume ${CODEX_SESSION_ID}` fails (e.g., session expired), fall back to a fresh `codex exec` call with context about the prior rounds included in the prompt.
+After Codex responds, go back to **Step 4**.
 
-### Step 7: Present Final Result
+### Step 6: Present Final Result & Cleanup
 
 Once approved (or max rounds reached):
 
+**If Codex approved:**
 ```
 ## Codex Review — Final (model: gpt-5.3-codex)
 
-**Status:** ✅ Approved after N round(s)
+**Status:** ✅ Approved by Codex after N round(s)
 
 [Final Codex feedback / approval message]
 
@@ -131,23 +194,49 @@ Once approved (or max rounds reached):
 **The plan has been reviewed and approved by Codex. Ready for your approval to implement.**
 ```
 
-If max rounds were reached without approval:
-
+**If max rounds reached without approval:**
 ```
 ## Codex Review — Final (model: gpt-5.3-codex)
 
-**Status:** ⚠️ Max rounds (5) reached — not fully approved
+**Status:** ⚠️ Max rounds (5) reached — not fully approved by Codex
 
 **Remaining concerns:**
-[List unresolved issues from last review]
+[List unresolved issues from last Codex review]
 
 ---
 **Codex still has concerns. Review the remaining items and decide whether to proceed or continue refining.**
 ```
 
-### Step 8: Cleanup
+**Writeback — update ALL spec files on disk:**
 
-Remove the session-scoped temporary files:
+If the plan was loaded from a spec directory (Step 2, option 1), update every artifact with a review header and any revisions. When someone opens any file in the spec directory, they should immediately know: was this reviewed, was it revised, and when.
+
+**Header format** — add to the top of each file:
+
+```markdown
+<!-- Codex Review: APPROVED after N rounds | model: gpt-5.3-codex | date: YYYY-MM-DD -->
+<!-- Status: [REVISED | UNCHANGED] -->
+<!-- Revisions: [brief list of what changed, or "none"] -->
+```
+
+**File-by-file:**
+
+1. **`plan.md`** — Overwrite with the Codex-approved version. Add header with `Status: REVISED` and list the key revisions made across all rounds.
+
+2. **`tasks.md`** — If it exists, reconcile to match the revised plan. Old tasks may reference steps, code changes, or approaches that were revised during review. Read the current `tasks.md` to preserve its format and structure, then update task content to align with the approved plan. If a task no longer applies, remove it. If the plan added new work, add new tasks. Add header with `Status: REVISED` if tasks changed, or `Status: RECONCILED` if only re-aligned to match the revised plan.
+
+3. **`spec.md`** (or `shaping.md`) — Do NOT modify content unless a Codex finding revealed an actual spec ambiguity that was clarified during revision. Add header with `Status: UNCHANGED` (or `Status: REVISED` if an ambiguity was clarified, with the revision noted). The spec is the user's intent — plan revisions should conform to the spec, not the other way around.
+
+**The files on disk must match what was approved.** Every file in the spec directory should tell the same story: reviewed, approved, and current.
+
+**Post-approval honesty check** — before presenting to the user, ask yourself:
+- Did I water down any revision to get Codex to approve faster?
+- Did I add vague language ("will be handled", "as needed") instead of concrete solutions?
+- Did I skip or gloss over any Codex finding across all rounds?
+
+If yes to any, disclose it: "Note: I took a shortcut on [X] — here's what a proper revision would look like: [...]"
+
+**Cleanup** — remove temp files:
 ```bash
 rm -f /tmp/claude-plan-${REVIEW_ID}.md /tmp/codex-review-${REVIEW_ID}.md
 ```
@@ -155,19 +244,20 @@ rm -f /tmp/claude-plan-${REVIEW_ID}.md /tmp/codex-review-${REVIEW_ID}.md
 ## Loop Summary
 
 ```
-Round 1: Claude sends plan → Codex reviews → REVISE?
-Round 2: Claude revises → Codex re-reviews (resume session) → REVISE?
-Round 3: Claude revises → Codex re-reviews (resume session) → APPROVED ✅
+Round 1: Claude sends plan → Codex reviews → VERDICT: REVISE
+Round 2: Claude revises + sends back → Codex re-reviews → VERDICT: REVISE
+Round 3: Claude revises + sends back → Codex re-reviews → VERDICT: APPROVED ✅
 ```
 
 Max 5 rounds. Each round preserves Codex's conversation context via session resume.
 
 ## Rules
 
-- Claude **actively revises the plan** based on Codex feedback between rounds — this is NOT just passing messages, Claude should make real improvements
-- Default model is `gpt-5.3-codex`. Accept model override from the user's arguments (e.g., `/codex-review o4-mini`)
-- Always use read-only sandbox mode — Codex should never write files
-- Max 5 review rounds to prevent infinite loops
-- Show the user each round's feedback and revisions so they can follow along
-- If Codex CLI is not installed or fails, inform the user and suggest `npm install -g @openai/codex`
-- If a revision contradicts the user's explicit requirements, skip that revision and note it for the user
+1. **ONLY Codex can approve.** Claude NEVER declares the plan approved. The string `VERDICT: APPROVED` must appear in Codex's output for that round.
+2. **Revise + re-submit is one atomic step.** Never revise without re-submitting. Never present revisions as the final result.
+3. Default model is `gpt-5.3-codex`. Accept model override from the user's arguments (e.g., `/codex-review o4-mini`).
+4. Always use read-only sandbox mode — Codex should never write files.
+5. Max 5 review rounds to prevent infinite loops.
+6. Show the user each round's feedback and revisions so they can follow along.
+7. If Codex CLI is not installed or fails, inform the user and suggest `npm install -g @openai/codex`.
+8. If a revision contradicts the user's explicit requirements, skip that revision and note it for the user.
