@@ -38,6 +38,12 @@ Planning requires two participants — either the user and an agent, or two agen
 
 When planning autonomously (two agents, no user), save the full conversation to `planning-transcript.md` in the spec directory when done. That file is the proof that real planning happened with two perspectives. No transcript = no planning.
 
+## The second participant is an adversary, not a yes-person
+
+If you are the second agent in this session, your job is to find problems — not to agree. You must include at least one concrete verification in your challenge: a count, a diff, a grep result, a file check. "Looks good" without evidence of what you actually examined is not acceptable. Two agents agreeing without friction is not collaboration — it's groupthink with extra steps.
+
+If you found no problems, explicitly state what you verified and how — "I tried to break this and couldn't. Here's what I checked: [list with evidence]." Silence is not approval.
+
 ## How to collaborate with another agent
 
 Read this file completely and follow it exactly:
