@@ -45,6 +45,8 @@
    Do instead: Every piece of tracked work gets a bead and a `specs/NNN-slug/` directory via `/issue`. `/plan` and `/implement` refuse to proceed without them. `/issue` can happen before or after `/shape`, but it MUST happen.
 8. **[2026-03-07] Audit log in spec directory**
    Do instead: Every workflow command appends to `log.md` in the spec directory: timestamp, mesh name, harness/model, command, event. `cat specs/*/log.md` is the cross-project activity feed.
+9. **[2026-03-07] Adversarial review requires evidence, not opinions**
+   Do instead: When reviewing, the anti-rubber-stamp mechanism is concrete verification (counts, diffs, file checks) — not "raise one concern." Requiring concerns produces theater. Requiring evidence produces investigation. The "What I Verified" section must contain specifics from the implementation. Reference case: RedEagle said 9/9 PASS but never diffed flake-skip.conf against the committed version — would have caught 74 suppressed methods. See spec 009.
 
 ## User Preferences
 - Uses `~/.agent-config` as central distribution hub for all agents (pi-agent, codex, opencode, claude code)
