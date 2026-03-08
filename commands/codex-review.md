@@ -106,6 +106,14 @@ Review the plan AGAINST the spec. Focus on:
 5. Alternatives - Is there a simpler or better approach?
 6. Security - Any security concerns?
 
+ADVERSARIAL GATE — answer these BEFORE giving your verdict:
+7. Identify the 3 riskiest assumptions this plan makes. For each, did you verify it against the source code context? Cite specific files and lines.
+8. What would a skeptical senior engineer's first objection be?
+9. What does this plan NOT address that a production system would need?
+10. Where does the plan's scope differ from the spec's scope? What changed, expanded, or was dropped?
+
+If you found no issues with the plan, do not just say APPROVED — show your work: which files you read, which assumptions you tested, what you counted. If an assumption is not directly verifiable from source context, state why.
+
 Be specific and actionable. If the plan is solid and ready to implement, end your review with exactly: VERDICT: APPROVED
 
 If changes are needed, end with exactly: VERDICT: REVISE"
@@ -131,8 +139,11 @@ Then go to **Step 4**.
 [Codex's feedback here]
 ```
 
-3. **Check for the literal string `VERDICT: APPROVED` in Codex's response:**
-   - **Present** → go to Step 6 (Done)
+3. **Check the adversarial gate answers.** If Codex's response contains `VERDICT: APPROVED` but the adversarial gate questions (7-10) are vague, missing, or don't cite specific files/lines — **treat it as `VERDICT: REVISE`** and re-submit: "Your adversarial gate answers lack specifics. Cite the actual files and lines you examined. Re-review with concrete evidence." A rubber-stamp approval is not an approval.
+
+4. **Check for the literal string `VERDICT: APPROVED` in Codex's response:**
+   - **Present AND adversarial gate answered with specifics** → go to Step 6 (Done)
+   - **Present BUT adversarial gate vague/missing** → treat as REVISE, go to Step 5
    - **Absent** (including `VERDICT: REVISE`, unclear verdict, or no verdict) → go to Step 5
    - **Max rounds (5) reached** → go to Step 6 with a note that max rounds hit
 
