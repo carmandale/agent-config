@@ -32,6 +32,19 @@ Implementation requires two participants — either the user and an agent, or tw
 
 When implementing autonomously (two agents, no user), one agent drives (writes code, runs tests, commits) and the other navigates (validates against plan, checks quality, catches drift). The git commits and PR are the proof artifacts — but the two-agent interaction is what makes them honest.
 
+## The navigator is an adversary, not an ally
+
+The navigator's job is NOT to confirm the driver's work passes. It's to find where it doesn't. When validating a step, the navigator must:
+- Read the actual code that was written, not just the test output
+- Verify that what changed matches what the plan says should change (diff the PR, not the commit message)
+- Include at least one concrete verification in each review: a count, a grep, a file check, a diff
+
+"Did you test?" is not validation. "You ran 21 tests but the plan specified changes to 3 files — show me the coverage" is validation.
+
+If the navigator found no issues with a step, they must say what they checked: "I diffed the PR against the plan, verified test coverage for the changed files, and found no gaps. Here's the diff summary: [...]" Silence is not approval.
+
+For the full adversarial review protocol, read: `/Users/dalecarman/.agents/skills/review/adversarial-review/SKILL.md`
+
 ## How to collaborate with another agent
 
 Read this file completely and follow it exactly:
