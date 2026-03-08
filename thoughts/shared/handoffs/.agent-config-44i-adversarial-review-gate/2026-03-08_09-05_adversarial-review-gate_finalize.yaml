@@ -1,0 +1,87 @@
+---
+schema_version: "1.0.0"
+mode: finalize
+date: 2026-03-08T09:05:07.068Z
+session: ".agent-config-44i-adversarial-review-gate"
+outcome: "SUCCEEDED"
+primary_bead: ".agent-config-44i"
+---
+
+goal: "Make adversarial review structural in agent workflows — skill, /challenge command, workflow gate updates"
+now: "All 8 tasks complete. Skill created, command created, 4 commands modified, napkin updated, proof pass verified against RedEagle incident. Bead closed."
+
+done_this_session:
+  - "Created adversarial review skill (skills/review/adversarial-review/SKILL.md, 78 lines)"
+  - "Created /challenge command (commands/challenge.md, 17 lines)"
+  - "Added ADVERSARIAL GATE to /codex-review Codex prompt (4 questions + vague-approval enforcement)"
+  - "Added navigator adversarial framing to /implement (13 lines)"
+  - "Added anti-rubber-stamp paragraph to /shape and /plan (7 lines each)"
+  - "Updated napkin with rule 9 (evidence over opinions)"
+  - "Proof pass: validated protocol catches all 3 RedEagle incident problems"
+  - "Spec 009: full lifecycle — /issue → /plan (with BrightHawk) → /codex-review (4 rounds) → /implement"
+
+final_solutions:
+  - "Evidence over opinions: anti-rubber-stamp mechanism is concrete verification (counts, diffs, file checks) not 'raise one concern.' BrightHawk challenged the original 'must raise concern' rule as theater-producing."
+  - "Structural where it matters: adversarial framing baked into workflow command text (IS the agent's prompt). Standalone skill/command are opt-in extras."
+  - "Separate adversarial gate in codex-review: don't dilute existing 6-item focus list. BrightHawk caught the focus-dilution risk."
+  - "'What I Verified' output format: makes rubber-stamping detectable after the fact."
+  - "Incident-grounded examples: good-vs-bad evidence from RedEagle incident gives agents a calibration point."
+
+final_decisions:
+  - "Dropped 'must raise at least one concern' → replaced with evidence requirement (BrightHawk challenge)"
+  - "4 adversarial gate questions in codex-review, not expanded focus list (BrightHawk challenge)"
+  - "Vague Codex approvals treated as REVISE (Codex review round 1)"
+  - "'Source code context' not 'implementation' in codex-review wording (Codex review round 1)"
+  - "No-findings contract: 'If you found no problems, state what you verified' propagated to all gates (Codex review rounds 2-3)"
+  - "Proof pass produces artifact, not just mental verification (Codex review round 2)"
+
+artifacts_produced:
+  - "specs/009-adversarial-review-gate/spec.md"
+  - "specs/009-adversarial-review-gate/plan.md"
+  - "specs/009-adversarial-review-gate/tasks.md"
+  - "specs/009-adversarial-review-gate/planning-transcript.md"
+  - "specs/009-adversarial-review-gate/codex-review.md"
+  - "specs/009-adversarial-review-gate/proof-pass.md"
+  - "specs/009-adversarial-review-gate/log.md"
+  - "skills/review/adversarial-review/SKILL.md"
+  - "commands/challenge.md"
+
+files:
+  created:
+    - "skills/review/adversarial-review/SKILL.md"
+    - "skills/adversarial-review (symlink)"
+    - "commands/challenge.md"
+    - "specs/009-adversarial-review-gate/spec.md"
+    - "specs/009-adversarial-review-gate/plan.md"
+    - "specs/009-adversarial-review-gate/tasks.md"
+    - "specs/009-adversarial-review-gate/planning-transcript.md"
+    - "specs/009-adversarial-review-gate/codex-review.md"
+    - "specs/009-adversarial-review-gate/proof-pass.md"
+    - "specs/009-adversarial-review-gate/log.md"
+  modified:
+    - "commands/codex-review.md"
+    - "commands/implement.md"
+    - "commands/shape.md"
+    - "commands/plan.md"
+    - ".claude/napkin.md"
+
+next:
+  - "Monitor whether adversarial framing actually changes review quality in practice"
+  - "Consider shared reusable adversarial paragraph snippet to reduce drift across future commands (Codex suggestion)"
+  - "Future: automated enforcement/telemetry for review quality (acknowledged out of scope)"
+
+git:
+  branch: "main"
+  commits:
+    - "9ddfacca - spec: 009 adversarial review gate"
+    - "c319c5d2 - plan: 009 with BrightHawk transcript"
+    - "11c7e99d - spec: 009 codex-reviewed — APPROVED after 4 rounds"
+    - "eb0d0f0d - feat: adversarial review skill"
+    - "dc2e66fb - feat: /challenge command"
+    - "753b2ba4 - feat: adversarial gate in /codex-review"
+    - "9aabb3de - feat: navigator adversarial framing in /implement"
+    - "34007234 - feat: anti-rubber-stamp in /shape and /plan"
+    - "4c74463f - napkin: rule 9"
+    - "006bb7db - verify: proof pass"
+    - "23718888 - done: all 8 tasks complete"
+  remote: "https://github.com/carmandale/agent-config.git"

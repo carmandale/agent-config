@@ -10,7 +10,7 @@ date: 2026-03-07
 
 ## Phase 1: Rewrite ground.md
 
-- [ ] **Task 1.1**: Write the new `commands/ground.md` with 3-tier caching logic
+- [x] **Task 1.1**: Write the new `commands/ground.md` with 3-tier caching logic
   - Preserve existing frontmatter (description field)
   - **Tier 1**: Check for agent-authored `<!-- ground:complete:v1 -->` sentinel in conversation (NOT any mention — only assistant-role grounding output). Announce skip.
   - **Tier 2**: Read `.claude/ground-cache`, validate format (all required keys, separator, non-empty summary with all 5 Grounded fields). Compute 6 hashes + HEAD. Compare. If fresh: load summary, run delta (git log -5, git status, handoffs), reconstruct full `## Grounded` block with delta section, rewrite cache (atomic tmp+mv), emit sentinel, announce light ground.
@@ -24,7 +24,7 @@ date: 2026-03-07
   - **Corruption fallback**: Missing keys, no separator, empty summary, missing Grounded fields, read errors → ignore cache, run Tier 3.
   - **Atomic writes**: `.claude/ground-cache.tmp` then `mv` to `.claude/ground-cache`.
 
-- [ ] **Task 1.2**: Add `.claude/ground-cache` and `.claude/ground-cache.tmp` to `.gitignore`
+- [x] **Task 1.2**: Add `.claude/ground-cache` and `.claude/ground-cache.tmp` to `.gitignore`
   - Cache is per-machine state — must not be committed
 
 ## Phase 2: Validate via /codex-review (DONE)
@@ -72,6 +72,6 @@ date: 2026-03-07
 
 ## Phase 4: Close
 
-- [ ] **Task 4.1**: Commit all changes
-- [ ] **Task 4.2**: Update log.md with implementation record
+- [x] **Task 4.1**: Commit all changes (002c87be, aa8de0ac)
+- [x] **Task 4.2**: Update log.md with implementation record
 - [ ] **Task 4.3**: Close bead `.agent-config-cml`
