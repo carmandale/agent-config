@@ -1,0 +1,59 @@
+---
+schema_version: "1.0.0"
+mode: finalize
+date: 2026-03-09T09:17:53.702Z
+session: ".agent-config-99d-spec-005-gj-tool-skill-collision-completion"
+outcome: "SUCCEEDED"
+primary_bead: ".agent-config-99d"
+---
+
+goal: "Complete spec 005: eliminate gj-tool skill collision on Pi startup by ensuring the fix commit reaches all active branches and agent-config's vendored copy stays current"
+now: "Fix complete. Cherry-picked 9815a9d to main and feat/unit. Vendor-synced skill. Cleaned direct-install. All 9 verification checks pass. Bead created and closed."
+
+final_solutions:
+  - "Cherry-pick (not merge) isolated fix commits to main immediately — don't leave them stranded on feature branches"
+  - "vendor-sync.sh gj-tool keeps agent-config's copy in sync with gj-tool repo source"
+  - "gj-tool install.sh now cleans up legacy skill locations instead of installing them"
+
+final_decisions:
+  - "Cherry-pick over merge: 9815a9d was 1 of 15 commits on feat/resolve; merge would pull unrelated work into main"
+  - "Retroactive bead creation: spec 005 had bead: TBD — created .agent-config-99d to maintain tracking integrity"
+
+done_this_session:
+  - "Cherry-picked 9815a9d to gj-tool main (c84f744) and feat/unit (4c55d41)"
+  - "Ran vendor-sync.sh gj-tool — updated SKILL.md from 5965 to 7045 bytes (added gj unit docs)"
+  - "Cleaned direct-install at ~/.pi/agent/skills/gj-tool/"
+  - "Created bead .agent-config-99d, linked to spec, closed with evidence"
+  - "Pushed all changes to both repos"
+  - "Updated napkin with stranded cherry-pick lesson"
+
+findings:
+  - "Root cause: fix was on feat/resolve-status-avpstreamkit-checker, never merged to main or feat/unit-swift-testing-lifecycle"
+  - "Every install.sh run from the active branch (which lacked the fix) recreated the collision"
+  - "agent-config's vendored copy was also stale — 1080 bytes behind (missing gj unit section)"
+  - "Previous agent marked all 6 tasks complete without verifying fix survived branch context"
+
+artifacts_produced:
+  - "specs/005-gj-tool-skill-collision/spec.md (bead linked)"
+  - "skills/tools/gj-tool/SKILL.md (vendor-synced)"
+  - ".claude/napkin.md (lesson added)"
+
+test:
+  - "9 verification checks: direct-install removed, canonical file exists, symlink resolves, agent discovery works, content in sync, install.sh clean, legacy cleanup present, fix on main, fix on feat/unit"
+
+files:
+  - "~/.agent-config/skills/tools/gj-tool/SKILL.md"
+  - "~/.agent-config/specs/005-gj-tool-skill-collision/spec.md"
+  - "~/.agent-config/.claude/napkin.md"
+  - "~/dev/gj-tool/install.sh (both branches)"
+
+git:
+  branch: "main"
+  commits:
+    - "1bcc8b04 vendor-sync: update gj-tool skill"
+    - "1c1f52f9 chore: close spec 005 — bead .agent-config-99d"
+    - "adb77380 napkin: stranded cherry-pick lesson"
+  gj_tool_commits:
+    - "c84f744 cherry-pick fix to main"
+    - "4c55d41 cherry-pick fix to feat/unit"
+  remote: "https://github.com/carmandale/agent-config.git"
