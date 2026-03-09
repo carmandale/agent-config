@@ -40,6 +40,10 @@ gj ui home <app>          # Press Digital Crown (visionOS)
 # Testing
 gj test P0                # E2E connection tests
 gj test --list            # List available tests
+gj unit <app>             # Run unit tests (XCTest + Swift Testing)
+gj unit <app> --filter "Target/TestClass"  # Run specific tests
+gj unit <app> --timeout 300  # Override global timeout (default: 600s)
+gj unit <app> --verbose   # Full output + per-test table
 
 # Management
 gj stop <app>             # Stop log streaming
@@ -94,6 +98,20 @@ print("📊 Download speed: \(speed)MB/s")  // Visible via gj logs
 
 ---
 
+## Unit Tests (gj unit)
+
+`gj unit` runs unit tests with framework-agnostic result reporting (XCTest + Swift Testing) via xcresult bundle parsing.
+
+**Key features:**
+- **Result bundles**: Structured pass/fail/skip counts from `.xcresult` — no log grep
+- **Dual timeout**: Per-test (`GJ_TEST_TIMEOUT`, default 120s, 0=disabled) + global safety net (`GJ_TEST_GLOBAL_TIMEOUT`, default 600s, or `--timeout N`)
+- **Zero-test guard**: Fails loudly when `--filter` matches zero tests (prevents silent false-greens)
+- **Flake skip**: Add test identifiers to `.gj/flake-skip.conf` (project) or `~/.gj/flake-skip.conf` (global) — both merged, one per line, `#` comments
+
+**Exit codes:** 0=pass, 1=test failure/timeout, 2=infrastructure failure (parse error)
+
+---
+
 ## Testing Philosophy
 
 **Prefer quick validation over full E2E tests during iteration.**
@@ -103,6 +121,7 @@ Need to verify something?
 ├── Quick check?      → gj logs <app> "pattern"
 ├── Visual check?     → gj ui screenshot <app>
 ├── Test interaction? → gj ui tap-button + gj logs (Orchestrator only)
+├── Unit tests?       → gj unit <app> [--filter "..."]
 ├── Full validation?  → gj test P0
 └── Pre-commit?       → gj test all
 ```
