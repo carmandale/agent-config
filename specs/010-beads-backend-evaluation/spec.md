@@ -3,7 +3,7 @@ title: "Evaluate beads backend: bd Dolt vs br (beads_rust) SQLite"
 date: 2026-03-09
 bead: .agent-config-17q
 type: feature
-status: shaping
+status: done
 ---
 
 # Evaluate beads backend: bd Dolt vs br (beads_rust) SQLite

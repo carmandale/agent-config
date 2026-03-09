@@ -45,38 +45,31 @@ All bare `bd sync` → `br sync --flush-only` (bare `br sync` = import, not expo
 - [x] 27. Update `.beads/config.yaml` — updated comments, removed daemon refs ✓
 - [x] 28. Update napkin with migration decision rationale ✓
 - [x] 29. Commit all doc/command/skill updates as ONE commit ✓ (9c5a2451)
-- [ ] 30. Do NOT push yet — Phase 4 must be ready to execute immediately after push
+- [x] 30. Pushed to origin ✓ (post-receive ran install.sh on mini automatically)
 
 ## Phase 4: Mini migration (one uninterrupted SSH session)
 
-⚠️ Steps 31–37 must execute in one uninterrupted SSH session. The window where docs say `br` but mini only has `bd` must be less than 5 minutes.
-
-- [ ] 31. Push Phase 3 commit to origin (triggers post-receive on mini, updating docs)
-- [ ] 32. SSH to mini
-- [ ] 33. Install br on mini: `curl -fsSL "https://raw.githubusercontent.com/Dicklesworthstone/beads_rust/main/install.sh" | bash`
-- [ ] 34. Verify: `br --version`, `which br`
-- [ ] 35. In `~/.agent-config`: run `br init` + `br sync --import-only` (mini has no existing beads.db — no collision risk)
-- [ ] 36. Verify `br list` shows all issues (should be 24)
-- [ ] 37. Run install.sh on mini to install tracked hook templates (pre-commit + post-merge)
+- [x] 31. Push Phase 3 commit to origin ✓
+- [x] 32. SSH to mini ✓
+- [x] 33. Install br v0.1.24 on mini ✓ (/Users/chipcarman/.local/bin/br)
+- [x] 34. Verify: br --version, which br ✓
+- [x] 35. br init --prefix ".agent-config" + br sync --import-only → 24 issues ✓
+- [x] 36. Verify br list — 24 issues ✓
+- [x] 37. install.sh → pre-commit + post-merge hooks installed ✓
 
 ## Phase 5: Verification & Cleanup
 
-- [ ] 38. Run `br doctor` on laptop — all checks pass
-- [ ] 39. Run `br doctor` on mini (via SSH) — all checks pass
-- [ ] 40. On laptop, remove stale bd artifacts from `.beads/`:
-  - `daemon.log` (5.8MB — stale bd daemon log)
-  - `dolt-server.lock`
-  - `.sync.lock`
-  - `.migration-hint-ts`
-  - Use `trash` per §8
-- [ ] 41. On mini, remove stale bd artifacts from `.beads/` (if any)
-- [ ] 42. Verify end-to-end workflow: create test bead on laptop → commit → push → pull on mini → `br list` shows it
-- [ ] 43. Multi-clone conflict test: update same issue on both machines before syncing, verify JSONL conflict is detectable by `br doctor` and recoverable via manual merge + `br sync --import-only`
-- [ ] 44. Verify bare `rg '\bbd\b' instructions/ commands/ skills/` returns only the open-sets false positive + spec directory refs
-- [ ] 45. Keep bd binary installed as emergency fallback (review after 30 days)
-- [ ] 46. Keep `beads.db.bd-backup` for 30 days, then remove
-- [ ] 47. Close bead `.agent-config-17q` with evidence: br version, issue count, both machines verified
-- [ ] 48. Update spec.md status: `shaping` → `done`
+- [x] 38. br doctor on laptop — all checks pass ✓ (fresh init fixed schema.tables)
+- [x] 39. br doctor on mini — all checks pass ✓
+- [x] 40. Trashed stale bd artifacts: daemon.log (5.5MB), dolt-server.lock, .migration-hint-ts ✓
+- [x] 41. Removed .migration-hint-ts on mini ✓
+- [x] 42. E2E test: created .agent-config-18o on laptop → pushed → visible on mini ✓
+- [x] 43. Multi-clone conflict test: both sides edited .agent-config-17q → JSONL conflict detected by br doctor (3 conflict markers) → resolved via git rebase → clean doctor after ✓
+- [x] 44. rg '\bbd\b' — only AGENTS_v1.md (archived) + open-sets false positive ✓
+- [x] 45. bd binary stays at /opt/homebrew/bin/bd (30-day fallback)
+- [x] 46. beads.db.bd-backup preserved (30-day retention)
+- [x] 47. Closed bead .agent-config-17q with full evidence ✓
+- [x] 48. Updated spec.md status: shaping → done ✓
 
 ## Dependencies
 
