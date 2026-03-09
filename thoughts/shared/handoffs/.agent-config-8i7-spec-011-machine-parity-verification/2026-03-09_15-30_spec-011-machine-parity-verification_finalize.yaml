@@ -1,0 +1,71 @@
+---
+schema_version: "1.0.0"
+mode: finalize
+date: 2026-03-09T15:30:36.748Z
+session: ".agent-config-8i7-spec-011-machine-parity-verification"
+outcome: "SUCCEEDED"
+primary_bead: ".agent-config-8i7"
+---
+
+goal: "Implement spec 011: cross-machine parity verification script and skill"
+now: "Complete — script shipped, tested, synced to mini. All 47 tasks done."
+
+done_this_session:
+  - "Created parity-check.sh (472 lines) — cross-machine runtime state comparison via batched SSH"
+  - "Created machine-parity SKILL.md — agent-discoverable skill wrapper"
+  - "Full /issue → /shape → /plan → /codex-review → /implement lifecycle completed"
+  - "Two-agent planning (YoungKnight challenger) caught 8 bugs before implementation"
+  - "Codex review (3 rounds, gpt-5.3-codex) caught 10 more issues, all resolved"
+  - "Live tested: 31 checks, ~5.4s, valid JSON, correct exit codes"
+  - "Dual-push synced to Mac mini automatically"
+
+decisions:
+  - "Shape B selected: batched single SSH call (not per-check SSH or registry pattern)"
+  - "Brewfile-based Homebrew check (20 canonical packages, not diff of all 289 vs 84)"
+  - "DRIFT (expected) verdict for pi_packages (intentional difference, doesn't affect exit code)"
+  - "classify_pm_source() compares install class (npm vs local-path), not raw strings"
+  - "timeout/gtimeout fallback with graceful degradation (no hard dependency)"
+  - "jq -n --arg for JSON output (never string interpolation)"
+  - "Clear ownership boundary: parity-check.sh = runtime state, agent-config-parity = config surfaces"
+  - "Spec R3 updated: PASS/DRIFT/MISSING vocabulary with DRIFT (expected) for intentional differences"
+
+findings:
+  - "((var++)) with set -e aborts when var is 0 — use var=$((var + 1)) instead"
+  - "pi list uses 2-space indent for identifiers, 4-space for paths — distinguish by indent level"
+  - "git rev-parse --short produces different-length SHAs across machines — use --short=7"
+  - "codex --version emits WARNING to stderr on laptop but not mini — must redirect stderr"
+  - "set -euo pipefail does NOT abort inside $() — missing tools silently captured as 'command not found'"
+  - "Brewfile tap-qualified names (steipete/tap/peekaboo) don't match brew list output — normalize with ${pkg##*/}"
+  - "Existing tools-bin/agent-config-parity (323 lines) audits config surfaces — different scope than this tool"
+
+artifacts_produced:
+  - "scripts/parity-check.sh — cross-machine parity verification script"
+  - "skills/machine-parity/SKILL.md — agent skill wrapper"
+  - "specs/011-machine-parity-verification/ — full spec lifecycle (spec, shaping, plan, tasks, codex-review, planning-transcript, log)"
+
+files:
+  - "scripts/parity-check.sh"
+  - "skills/machine-parity/SKILL.md"
+  - "specs/011-machine-parity-verification/spec.md"
+  - "specs/011-machine-parity-verification/plan.md"
+  - "specs/011-machine-parity-verification/tasks.md"
+  - "specs/011-machine-parity-verification/shaping-transcript.md"
+  - "specs/011-machine-parity-verification/planning-transcript.md"
+  - "specs/011-machine-parity-verification/codex-review.md"
+  - "specs/011-machine-parity-verification/log.md"
+
+test:
+  - "parity-check.sh --help — exits 0, prints usage"
+  - "parity-check.sh — 31 checks, 23 PASS / 4 DRIFT / 1 DRIFT (expected) / 3 MISSING, exit 1"
+  - "parity-check.sh --json | jq . — valid JSON, 31 objects"
+  - "Performance: 3 runs averaged ~5.4s (target <10s)"
+  - "shellcheck clean (no warnings)"
+  - "SSH to mini: script runs and prints help"
+
+git:
+  branch: "main"
+  commits:
+    - "77a915c7 — feat(parity-check): cross-machine parity verification script"
+    - "c0c840f8 — feat(machine-parity): skill wrapper for parity-check.sh"
+    - "fb424cb3 — implement: spec 011 complete — all tasks checked off"
+  remote: "https://github.com/carmandale/agent-config.git"
