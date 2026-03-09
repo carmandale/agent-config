@@ -1,16 +1,16 @@
 ---
 name: rp-oracle-export
-description: Export context for oracle consultation using rp-cli
+description: Export a ChatGPT-ready prompt file using rp-cli
 repoprompt_managed: true
-repoprompt_skills_version: 7
+repoprompt_skills_version: 15
 repoprompt_variant: cli
 ---
 
-# Oracle Export (CLI)
+# ChatGPT Prompt Export (CLI)
 
 Task: $ARGUMENTS
 
-Export a comprehensive prompt with full context for consultation with an external oracle.
+Export a comprehensive prompt file with full codebase context, ready to paste into GPT Pro models on ChatGPT (or any external AI).
 
 ## How It Works
 
