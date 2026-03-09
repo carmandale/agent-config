@@ -16,6 +16,7 @@
 | 2026-03-03 | Self | install.sh was creating skills symlink at `~/.codex/skills` but Codex uses `~/.agents/skills` | Codex + Gemini both discover skills from `~/.agents/skills/`, not their own home dirs |
 | 2026-03-03 | Self | TOML converter used basic strings (`"""`) which treat `\` as escape chars — broke commands with regex/globs | Use TOML literal strings (`'''`) for prompt field — backslashes are literal |
 | 2026-03-03 | Self | sed frontmatter parser matched ALL `---` pairs in a file, not just the first | Use awk with a counter for reliable first-block-only frontmatter extraction |
+| 2026-03-07 | Self | Spec 005 fix (9815a9d) was committed on feature branch but never merged to main. Spec marked "all tasks complete" while fix was stranded. Collision recurred on branch switch. | A fix isn't done until it's on the branch that runs. For gj-tool: main is the install source. Cherry-pick isolated fixes to main immediately — don't leave them stranded on feature branches. Also: `bead: TBD` in a spec = skipped gate, catch it. |
 
 ## Agent Collaboration (Critical)
 1. **[2026-03-07] Agents will try subagent, interactive_shell, or bash to spawn collaborators — they MUST be told to use pi_messenger**
