@@ -8,28 +8,16 @@ bead: .agent-config-17q
 
 ## Phase 1: Install & Verify (laptop only, throwaway test)
 
-- [ ] 1. Install br on laptop via `curl -fsSL "https://raw.githubusercontent.com/Dicklesworthstone/beads_rust/main/install.sh" | bash`
-- [ ] 2. Verify installation: `br --version`, `which br`
-- [ ] 3. Create throwaway test directory, copy `.beads/issues.jsonl` there
-- [ ] 4. Test `br init` in throwaway → verify it creates `beads.db`
-- [ ] 5. Test `br init` in a directory with an existing `beads.db` → verify `AlreadyInitialized` error (not silent overwrite)
-- [ ] 6. Run `br sync --import-only` in throwaway → verify all 24 issues import
-- [ ] 7. Smoke test command surface:
-  - `br list` — shows all issues
-  - `br ready` — shows actionable issues
-  - `br show <id>` — shows issue detail with correct fields
-  - `br ready --json` — produces valid JSON output
-  - `br create "test issue" -p 2` — verify creates with auto-detected prefix (`.agent-config-*`, R1.1)
-  - `br update <id> --status in_progress` — verify status transition (R1.3)
-  - `br update <id> --description "test"` — updates description (NOT `-d`)
-  - `br close <id> --reason "test"` — closes with reason
-  - `br label add <id> test-label` — verify label command (replaces bd tag)
-  - `br list --sort updated` — verify sort flag works
-  - `br doctor` — all checks pass
-  - `br sync --flush-only` — exports DB→JSONL
-- [ ] 8. JSONL round-trip test: export → diff against original → verify zero meaningful changes (field ordering may differ, content must match)
-- [ ] 9. Test bare `br sync` (no flags) → confirm it does IMPORT, not export (documenting the behavioral difference)
-- [ ] 10. Clean up throwaway test directory
+- [x] 1. Install br on laptop via `curl -fsSL "https://raw.githubusercontent.com/Dicklesworthstone/beads_rust/main/install.sh" | bash` — v0.1.24 at ~/.local/bin/br
+- [x] 2. Verify installation: `br --version`, `which br` ✓
+- [x] 3. Create throwaway test directory, copy `.beads/issues.jsonl` there ✓
+- [x] 4. Test `br init` in throwaway → verify it creates `beads.db` ✓ (⚠️ MUST use `--prefix ".agent-config"` — br auto-detects prefix from dir name, not JSONL)
+- [x] 5. Test `br init` in a directory with an existing `beads.db` → ALREADY_INITIALIZED error ✓
+- [x] 6. Run `br sync --import-only` in throwaway → all 24 issues imported ✓
+- [x] 7. Smoke test command surface: all commands verified ✓
+- [x] 8. JSONL round-trip test: timestamps normalized to UTC, new default fields (compaction_level, source_repo, original_size) — no data loss ✓
+- [x] 9. Test bare `br sync` (no flags) → confirmed IMPORT (not export) ✓
+- [x] 10. Clean up throwaway test directory ✓
 
 ## Phase 2: Migrate agent-config on laptop
 

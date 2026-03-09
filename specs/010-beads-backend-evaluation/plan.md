@@ -107,7 +107,9 @@ These are symlinked globally via install.sh. Edits affect ALL repos, not just ag
 
 **DB filename collision:** Both bd and br use `beads.db`. Running `br init` on a directory with bd's existing `beads.db` returns `AlreadyInitialized` error. `--force` would overwrite.
 
-**Mitigation:** Run `bd sync --flush-only` to ensure all DB state is flushed to JSONL, then rename bd's `beads.db` → `beads.db.bd-backup` before `br init`. This eliminates any data-loss window from unflushed DB state.
+**Mitigation:** Run `bd sync --flush-only` to ensure all DB state is flushed to JSONL, then rename bd's `beads.db` → `beads.db.bd-backup` before `br init --prefix ".agent-config"`. This eliminates any data-loss window from unflushed DB state.
+
+**IMPORTANT:** `br init` auto-detects prefix from the directory name (not from JSONL). Must pass `--prefix ".agent-config"` explicitly, or import will fail with `CONFIG_ERROR: Prefix mismatch`.
 
 ### Git Hooks Are Not Tracked
 
