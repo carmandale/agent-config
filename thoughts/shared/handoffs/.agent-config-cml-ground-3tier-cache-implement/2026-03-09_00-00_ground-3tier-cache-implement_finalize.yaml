@@ -1,0 +1,81 @@
+---
+schema_version: "1.0.0"
+mode: finalize
+date: 2026-03-09T00:00:49.196Z
+session: ".agent-config-cml-ground-3tier-cache-implement"
+outcome: "PARTIAL_PLUS"
+primary_bead: ".agent-config-cml"
+---
+
+goal: "Implement /ground 3-tier caching (same-session skip, cross-session light ground, full ground preserved) per spec 007"
+now: "Implementation complete and committed. Codex-reviewed (3 rounds, APPROVED). Navigator-validated (SwiftCastle, 19/19 checklist). Manual testing remains (Phase 3 tasks 3.1-3.6)."
+
+done_this_session:
+  - "Rewrote commands/ground.md with 3-tier caching (183 lines)"
+  - "Tier 1: Same-session skip via <!-- ground:complete:v1 --> sentinel (assistant-role only)"
+  - "Tier 2: Cross-session light ground with 6-hash cache freshness + full block reconstruction + cache rewrite"
+  - "Tier 3: Full ground (all 6 original steps preserved verbatim)"
+  - "Force pre-check before Tier 1 — /ground force always runs Tier 3"
+  - "Cache: .claude/ground-cache (key=value format, atomic tmp+mv, corruption fallback, 4KB cap, no-secrets)"
+  - "Hash fallback: sha256sum → shasum -a 256 → openssl dgst -sha256 → skip cache"
+  - "Added .gitignore entries for ground-cache and ground-cache.tmp"
+  - "Codex review: 3 rounds (8 → 2 → 0 findings), VERDICT: APPROVED (gpt-5.3-codex)"
+  - "Navigator validation: SwiftCastle caught 2 bugs (force ordering, mkdir ordering) + 1 minor (4KB in Tier 2d)"
+  - "All spec artifacts: spec.md, plan.md (Codex-revised), tasks.md (reconciled), codex-review.md, log.md"
+  - "Spec 008 agent-to-agent collab: Mode 2 tested end-to-end, JadeRaven merged v0.14.0"
+
+next:
+  - "Manual testing Phase 3 (tasks 3.1-3.6): full ground, same-session skip, light ground, cache bust, force, malformed cache"
+  - "Close bead .agent-config-cml after tests pass"
+  - "npm publish pi-messenger v0.14.0 (needs Dale's auth)"
+
+decisions:
+  - "Sentinel <!-- ground:complete:v1 --> over ## Grounded heading — eliminates false positives from discussion text"
+  - "Force pre-check BEFORE Tier 1 — force must override even same-session skip"
+  - "6 content hashes + HEAD SHA for cache freshness — covers all files /ground reads"
+  - "Sorted lexicographic concat for multi-file hash — prevents filesystem-dependent ordering"
+  - "Cache in .claude/ not repo root — already agent-managed, no .gitignore ownership questions"
+  - "key=value format not markdown — deterministic parsing, explicit corruption fallback"
+  - "Tier 2 reconstructs full ## Grounded block — identical output quality to Tier 3"
+  - "MISSING literal for absent files — stable hash value for non-existent files"
+
+findings:
+  - "Agents skip workflow gates under forward momentum — wrote plan solo, almost skipped /codex-review"
+  - "SwiftCastle caught force flag ordering bug — 'listed in Tier 3 conditions' ≠ 'checked before Tier 1'"
+  - "SwiftCastle caught mkdir ordering bug — directory creation after write attempt fails on fresh repos"
+  - "Mode 2 spawn/dismiss lifecycle fully working after JadeRaven's RPC mode rewrite"
+  - "HappyQuartz (Mode 2 challenger) caught deterministic hash ordering gap in original design"
+
+final_solutions:
+  - "commands/ground.md — complete 3-tier caching rewrite, Codex-approved and navigator-validated"
+  - ".gitignore — ground-cache entries added"
+
+final_decisions:
+  - "Spec 007 plan approved by Codex after 3 review rounds with substantive revisions"
+  - "Outcome is PARTIAL_PLUS — implementation committed but manual testing not yet performed"
+
+artifacts_produced:
+  - "commands/ground.md (183 lines, rewritten)"
+  - ".gitignore (2 lines added)"
+  - "specs/007-ground-session-cache/plan.md (Codex-approved revision 2)"
+  - "specs/007-ground-session-cache/tasks.md (reconciled with revisions)"
+  - "specs/007-ground-session-cache/codex-review.md (3-round transcript)"
+  - "specs/007-ground-session-cache/log.md (full audit trail)"
+  - "specs/008-agent-to-agent-collab/log.md (updated with Mode 2 test results)"
+
+files:
+  - "commands/ground.md"
+  - ".gitignore"
+  - "specs/007-ground-session-cache/spec.md"
+  - "specs/007-ground-session-cache/plan.md"
+  - "specs/007-ground-session-cache/tasks.md"
+  - "specs/007-ground-session-cache/codex-review.md"
+  - "specs/007-ground-session-cache/log.md"
+  - "specs/008-agent-to-agent-collab/log.md"
+
+git:
+  branch: "main"
+  commits:
+    - "002c87be — feat: /ground 3-tier caching"
+    - "aa8de0ac — spec: 007 ground session cache — plan, tasks, codex review, log"
+  remote: "https://github.com/carmandale/agent-config.git"
