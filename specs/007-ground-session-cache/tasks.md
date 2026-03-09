@@ -36,11 +36,12 @@ date: 2026-03-07
 
 ## Phase 3: Test
 
-- [ ] **Task 3.1**: Manual test — full ground (no cache)
+- [x] **Task 3.1**: Manual test — full ground (no cache) ✅ 2026-03-09
   - Run `/ground` in a fresh session with no `.claude/ground-cache`
   - Verify all 6 steps execute and "Full ground" announced
   - Verify `.claude/ground-cache` written with correct key=value format
   - Verify `## Grounded` summary and sentinel emitted
+  - **Result**: Tested on GMP repo (pi v0.57.1, claude-opus-4-6). All 6 steps executed in order. Tier 3 announced correctly. Cache written with all 7 keys, separator, and complete summary. Sentinel emitted. Context usage 35.9% vs 56.8% on original (−37% on worst-case tier). Summary quality maintained with all 5 required fields.
 
 - [ ] **Task 3.2**: Manual test — same-session skip (Tier 1)
   - Run `/ground` again in the same session

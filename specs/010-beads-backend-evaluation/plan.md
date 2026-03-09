@@ -17,14 +17,14 @@ Shape B (bd v0.59.0+ Dolt) eliminated by bugs #2433, #2251, and daemon requireme
 
 br is a drop-in replacement for bd's classic SQLite+JSONL architecture:
 - Same `.beads/` directory, same `beads.db` filename, same `issues.jsonl` format
-- Same ID format (`bd-` prefix + random hash) — auto-detected from existing JSONL
+- ID prefix auto-detected from existing JSONL (our prefix is `.agent-config-`, not the default `bd-`)
 - No daemon, no auto-commit, no auto-hook-install (explicit-control design)
 - `br sync --flush-only` = export DB→JSONL (identical to bd)
 - `br sync --import-only` = import JSONL→DB (identical to bd)
 
 ### Critical Behavioral Difference
 
-**Bare `br sync` (no flags) defaults to IMPORT-ONLY.** This is the opposite of `bd sync` which does a combined flush+import+git operation. All 12 occurrences of bare `bd sync` in AGENTS.md, CLAUDE.md, and commands must become `br sync --flush-only`, not `br sync`.
+**Bare `br sync` (no flags) defaults to IMPORT-ONLY.** This is the opposite of `bd sync` which does a combined flush+import+git operation. All 13 occurrences of bare `bd sync` in AGENTS.md, CLAUDE.md, and commands must become `br sync --flush-only`, not `br sync`.
 
 ### Removed Capabilities (Not Needed)
 
@@ -45,6 +45,9 @@ br is a drop-in replacement for bd's classic SQLite+JSONL architecture:
 | `bd ready --json` | `br ready --json` | Identical |
 | `bd doctor` | `br doctor` | Identical |
 | `bd close <id> --reason="text"` | `br close <id> --reason "text"` | Identical (= vs space) |
+| `bd tag <id> <tag>` | `br label add <id> <label>` | br uses "label" not "tag" |
+| `bd create ... --tags <t>` | `br create ... --labels <l>` | br uses `--labels` (plural) or `-l`, not `--tags` |
+| `bd list --sort updated` | `br list --sort updated` | Identical (br accepts `updated` as alias for `updated_at`) |
 
 ## Blast Radius
 
@@ -80,8 +83,10 @@ Heaviest: retro.md (10), worktree-task.md (5), finalize.md (4), standup.md (3), 
 
 Special cases:
 - `retro.md`: `bd update $BEAD_ID -d "$CURRENT"` → `br update $BEAD_ID --description "$CURRENT"`
+- `retro.md`: `bd tag $BEAD_ID retro-complete` → `br label add $BEAD_ID retro-complete`
+- `retro.md`, `iterate.md`: `--tags` → `--labels` (plural)
 - `pr-create.md`: `bd update <bead-id> -d "PR: <url>"` → `br update <bead-id> --description "PR: <url>"`
-- All bare `bd sync` → `br sync --flush-only`
+- All bare `bd sync` → `br sync --flush-only` (13 occurrences)
 
 ### Skills (6 files, ~38 references — GLOBAL scope)
 
@@ -92,6 +97,9 @@ These are symlinked globally via install.sh. Edits affect ALL repos, not just ag
 - `resume-handoff/SKILL.md` (5 refs)
 - `plan/SKILL.md` (1 ref)
 - `work/SKILL.md` (1 ref)
+- `prompt-craft/SKILL.md` (1 ref — `bd create` example)
+- `ntm/SKILL.md` (1 ref — `bd-1,bd-2` bead ID examples, review for naming consistency)
+- `open-sets/SKILL.md` — FALSE POSITIVE, `bd(A)` is math boundary notation, do NOT change
 
 **Constraint:** Batch all skill edits into one commit. Do not edit while another repo has active agents using these skills.
 
@@ -99,7 +107,13 @@ These are symlinked globally via install.sh. Edits affect ALL repos, not just ag
 
 **DB filename collision:** Both bd and br use `beads.db`. Running `br init` on a directory with bd's existing `beads.db` returns `AlreadyInitialized` error. `--force` would overwrite.
 
-**Mitigation:** Rename bd's `beads.db` → `beads.db.bd-backup` before `br init`.
+**Mitigation:** Run `bd sync --flush-only` to ensure all DB state is flushed to JSONL, then rename bd's `beads.db` → `beads.db.bd-backup` before `br init`. This eliminates any data-loss window from unflushed DB state.
+
+### Git Hooks Are Not Tracked
+
+`.git/hooks/` is not tracked by git. Editing hooks locally doesn't propagate to other clones. The tracked hook templates live in `hooks/` (currently only `post-commit` and `post-receive-remote`).
+
+**Mitigation:** Add `pre-commit` and `post-merge` hook templates to the tracked `hooks/` directory (br versions). Update `install.sh` to copy these hooks during setup, matching the existing pattern for `post-commit`.
 
 ## Rollback Plan
 
@@ -115,7 +129,9 @@ These are symlinked globally via install.sh. Edits affect ALL repos, not just ag
 |------|-------|------------|
 | JSONL schema incompatibility | LOW | Verified at source code level — all fields match |
 | `beads.db` collision | LOW | Rename-before-init, verified in Phase 1 throwaway |
-| Bare `br sync` behavior | MITIGATED | All 12 occurrences explicitly changed to `--flush-only` |
+| Bare `br sync` behavior | MITIGATED | All 13 occurrences explicitly changed to `--flush-only` |
+| Unflushed DB state before rename | MITIGATED | Mandatory `bd sync --flush-only` before renaming beads.db |
+| Hook propagation to other clones | MITIGATED | Tracked hook templates in `hooks/` + install.sh wiring |
 | Mini transition window | LOW | Sequence-locked to one SSH session |
 | Global skill edit timing | LOW | Batched into one commit, coordinated timing |
 | br upstream abandonment | MEDIUM | 20K Rust + MIT license, read-and-patch capable for platform fixes |

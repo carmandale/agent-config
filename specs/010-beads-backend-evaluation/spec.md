@@ -33,7 +33,7 @@ Meanwhile, `br` ([beads_rust](https://github.com/Dicklesworthstone/beads_rust)) 
 We need a reliable, maintainable issue tracker backend that:
 1. Works on both laptop and Mac mini (multi-clone safe)
 2. Doesn't require external daemons or server processes
-3. Keeps our 22 existing issues and JSONL history intact
+3. Keeps our 24 existing issues and JSONL history intact
 4. Integrates with our AGENTS.md workflow (§6 Beads Workflow)
 5. Is actively maintained and not heading toward a dead end
 
@@ -62,7 +62,7 @@ We need a reliable, maintainable issue tracker backend that:
 ## Acceptance Criteria
 
 - [ ] Clear recommendation with evidence
-- [ ] If migrating to `br`: all 22 issues import, all workflow commands work, both machines updated
+- [ ] If migrating to `br`: all 24 issues import, all workflow commands work, both machines updated
 - [ ] If staying on `bd` 0.50.3: document the risks and plan for when it becomes untenable
 - [ ] AGENTS.md §6 updated to reflect chosen tool
 - [ ] Napkin updated with decision rationale
