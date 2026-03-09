@@ -1,3 +1,5 @@
+<!-- Codex Review: APPROVED after 3 rounds | model: gpt-5.3-codex | date: 2026-03-09 -->
+<!-- Status: REVISED — R3 clarified to allow DRIFT (expected) for intentional differences -->
 ---
 title: "Machine Parity Verification Skill"
 date: 2026-03-09
@@ -18,7 +20,7 @@ Today, verifying parity is manual: SSH in, run a bunch of commands, visually com
 |----|-------------|
 | R1 | Single command produces a side-by-side comparison of laptop vs Mac mini state |
 | R2 | Checks cover: pi version, pi packages, agent-config HEAD + branch, pi-messenger version + source, openclaw version, node version |
-| R3 | Clear PASS/DRIFT/MISSING indicators per check |
+| R3 | Clear PASS/DRIFT/MISSING indicators per check. Checks where machines intentionally differ (e.g., pi packages) use DRIFT with a note, not a separate verdict. |
 | R4 | Works from the laptop (SSH to mini for remote checks) |
 | R5 | Output is useful to both humans (readable) and agents (parseable) |
 | R6 | Extensible — easy to add new checks without rewriting the core |
