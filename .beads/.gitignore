@@ -1,32 +1,32 @@
-# SQLite databases
+# Runtime artifacts (never commit)
 *.db
-*.db?*
-*.db-journal
 *.db-wal
 *.db-shm
-
-# Daemon runtime files
+last-touched
+.sync.lock
+.jsonl.lock
+sync_base.jsonl
 daemon.lock
 daemon.log
-daemon.pid
-bd.sock
+redirect
+export-state/
+dolt/
+dolt-access.lock
+dolt-server.pid
+dolt-server.log
+dolt-server.lock
+dolt-server.port
+dolt-server.activity
+bd.sock.startlock
+ephemeral.sqlite3
+.migration-hint-ts
 
-# Local version tracking (prevents upgrade notification spam after git ops)
-.local_version
-
-# Legacy database files
-db.sqlite
-bd.db
-
-# Merge artifacts (temporary files from 3-way merge)
+# Merge artifacts
 beads.base.jsonl
-beads.base.meta.json
 beads.left.jsonl
-beads.left.meta.json
 beads.right.jsonl
+beads.base.meta.json
+beads.left.meta.json
 beads.right.meta.json
-
-# Keep JSONL exports and config (source of truth for git)
-!issues.jsonl
-!metadata.json
-!config.json
+*.db?*
+.local_version
