@@ -8,7 +8,7 @@ Create a bead for this work and a numbered spec in `specs/`. This is non-negotia
 
 ## What you must do
 
-1. **Create the bead** using `bd create --title "<concise title>"` with a description derived from the issue. Mark it in_progress.
+1. **Create the bead** using `br create --title "<concise title>"` with a description derived from the issue. Mark it in_progress.
 
 2. **Determine the next spec number.** Count existing `specs/[0-9]*` directories and increment. Zero-pad to 3 digits. Pick a short, descriptive kebab-case slug (3-5 words, not "thing" or "stuff").
 

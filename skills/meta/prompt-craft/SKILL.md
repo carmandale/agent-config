@@ -94,7 +94,7 @@ The strongest anti-theater measure isn't better prompt language — it's requiri
 The principle: every critical verification gate should produce a non-fakeable artifact that gets committed to the repo.
 
 - **Codex review** → save the session transcript (`codex-review.md`) in the spec directory. Contains Codex's actual words, session ID, verdict. If the file doesn't exist, the review didn't happen.
-- **Bead creation** → `bd create` changes `.beads/` state. The bead exists or it doesn't.
+- **Bead creation** → `br create` changes `.beads/` state. The bead exists or it doesn't.
 - **Shaping** → requires two participants (user + agent, or agent + agent). One agent solo is theater. Save two-agent transcripts to `shaping-transcript.md` in the spec directory. If the user was present, their presence is the proof. If autonomous, the transcript is the proof.
 - **Implementation** → git commits exist in the log or they don't.
 

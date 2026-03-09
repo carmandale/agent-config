@@ -236,7 +236,7 @@ Before ANY action, answer these questions:
 **5. Was this already done?**
 - Check `git log --oneline -20` for recent work on this topic
 - Check `specs/` and `thoughts/shared/handoffs/` for prior session artifacts
-- Check `.beads/` via `bd list --status=open` for related tracked work
+- Check `.beads/` via `br list --status=open` for related tracked work
 - NEVER assume work is done or not done without checking
 - NEVER re-do work that was completed in a prior session
 
@@ -281,7 +281,7 @@ Does this align with what you want? Should I proceed?
 1. **Session Context Check** - At the START of every session, before any work:
    - Run `git log --oneline -10` and `git status` to understand current state
    - Read the most recent handoff artifact in `thoughts/shared/handoffs/`
-   - Check `bd ready` for open tracked work
+   - Check `br ready` for open tracked work
    - Summarize what's already done and what's pending before proposing next steps
    - This prevents re-doing completed work or missing important state
 
@@ -336,7 +336,7 @@ When user says any of: "stop", "wait", "hold on", "cancel", "no"
 git add -A && git commit -m "message"
 git push
 # ONLY if rejected: git pull --rebase && git push
-bd sync
+br sync --flush-only
 ```
 
 **NEVER** run `git pull --rebase` blindly.
@@ -347,17 +347,16 @@ bd sync
 
 ### .beads/ Directory (CRITICAL)
 
-**✅ Use `bd sync`** to manage .beads/ files
+**✅ Use `br sync --flush-only`** to manage .beads/ files
 **❌ NEVER** `git restore .beads/` or `git checkout .beads/` or manually commit
 
-If dirty after sync: run `bd sync` again. If still dirty, ask user.
+If dirty after sync: run `br sync --flush-only` again. If still dirty, ask user.
 
 ### Database Locking
 
-If `sqlite3: database is locked`:
-1. `pgrep -f "bd "` — check for other processes
-2. `sleep 2 && bd sync` — wait and retry
-3. If persistent: `pkill -f "bd "` then retry
+br has no daemon. If `sqlite3: database is locked`, another agent session may have a lock. Wait and retry:
+1. `sleep 2 && br sync --flush-only` — wait and retry
+2. If persistent: check for other agent sessions, then retry
 
 **Never ignore locking errors.**
 
@@ -372,13 +371,13 @@ If `sqlite3: database is locked`:
 ### Essential Commands
 
 ```bash
-bd ready                    # Actionable work (no blockers)
-bd update <id> --status=in_progress
-bd close <id> --reason="Done"
-bd sync                     # Commit and push
+br ready                    # Actionable work (no blockers)
+br update <id> --status=in_progress
+br close <id> --reason="Done"
+br sync --flush-only        # Export DB→JSONL (bare br sync = import!)
 ```
 
-→ **Full docs:** `bd` and `bv` skills
+→ **Full docs:** `br` and `bv` skills
 
 ---
 
@@ -499,7 +498,7 @@ Quick ref: `gj build <app>`, `gj run <app>`, `gj test P0`, `gj logs <app> "patte
 
 | Type | Examples | Timeout? |
 |------|----------|----------|
-| **Regular CLI** | `rp-cli`, `bd`, `gj`, `cass --robot`, `rg` | ❌ NO - let it finish |
+| **Regular CLI** | `rp-cli`, `br`, `gj`, `cass --robot`, `rg` | ❌ NO - let it finish |
 | **TUI/Interactive** | `pi`, `claude`, `codex`, bare `cass` | ✅ Only for --help capture |
 | **Background** | `oracle`, `nohup` processes | ❌ NO - runs detached |
 
@@ -514,7 +513,7 @@ Quick ref: `gj build <app>`, `gj run <app>`, `gj test P0`, `gj logs <app> "patte
 | `cass` | Never bare `cass`, always `--robot` | `cass` |
 | `bv` | Use `--robot-*` flags | `bv` |
 | `rp-cli` | No timeouts, `builder` can take 60-90s | `rp-cli` |
-| `bd` | Don't manually edit `.beads/` | See Beads section |
+| `br` | Don't manually edit `.beads/` | See Beads section |
 
 ### Task Delegation (interactive_shell)
 

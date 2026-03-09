@@ -348,7 +348,7 @@ ntm --robot-dashboard           # Dashboard summary
 ntm --robot-send=SESSION --msg="Fix auth" --type=claude
 ntm --robot-spawn=SESSION --spawn-cc=2 --spawn-wait
 ntm --robot-interrupt=SESSION
-ntm --robot-assign=SESSION --assign-beads=bd-1,bd-2
+ntm --robot-assign=SESSION --assign-beads=my-project-1,my-project-2
 ```
 
 ### CASS Integration

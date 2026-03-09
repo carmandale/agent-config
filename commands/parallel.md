@@ -68,8 +68,8 @@ Options:
 For tracking, create a bead per task:
 
 ```bash
-bd create "Parallel: <task 1 summary>" -p 2 --json
-bd create "Parallel: <task 2 summary>" -p 2 --json
+br create "Parallel: <task 1 summary>" -p 2 --json
+br create "Parallel: <task 2 summary>" -p 2 --json
 # etc
 ```
 

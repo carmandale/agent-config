@@ -16,13 +16,13 @@ Combine git worktrees with beads for isolated parallel work.
 If bead-id provided:
 
 ```bash
-bd show $ARGUMENTS --json
+br show $ARGUMENTS --json
 ```
 
 If "new <description>":
 
 ```bash
-bd create "<description>" -p 2 --json
+br create "<description>" -p 2 --json
 # Capture the new bead ID
 ```
 
@@ -51,7 +51,7 @@ agentmail_init(
 ## Step 4: Mark Bead In-Progress
 
 ```bash
-bd update $BEAD_ID --status in_progress
+br update $BEAD_ID --status in_progress
 ```
 
 ## Step 5: Reserve Files (Optional)
@@ -113,8 +113,8 @@ After PR is merged:
 ./scripts/wt rm $BEAD_ID
 
 # Close bead
-bd close $BEAD_ID --reason "Merged"
+br close $BEAD_ID --reason "Merged"
 
 # Sync
-bd sync && git push
+br sync --flush-only && git push
 ````

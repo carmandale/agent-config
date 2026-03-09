@@ -13,7 +13,7 @@ Analyze a bead and provide effort estimation with subtask breakdown.
 ## Step 1: Load the Bead
 
 ```bash
-bd show $ARGUMENTS --json
+br show $ARGUMENTS --json
 ```
 
 Parse the bead details: title, description, type, any linked beads.

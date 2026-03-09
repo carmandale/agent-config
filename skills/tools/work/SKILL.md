@@ -370,7 +370,7 @@ If using beads:
 
 ```bash
 # Close the bead
-bd close <bead-id> --reason "Merged in PR #X"
+br close <bead-id> --reason "Merged in PR #X"
 ```
 
 ---

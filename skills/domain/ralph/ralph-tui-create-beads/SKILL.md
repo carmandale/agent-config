@@ -47,18 +47,18 @@ Extract:
 
 ## Output Format
 
-Beads use `bd create` command:
+Beads use `br create` command:
 
 ```bash
 # Create epic (link back to source PRD)
-bd create --type=epic \
+br create --type=epic \
   --title="[Feature Name]" \
   --description="[Feature description from PRD]" \
   --external-ref="prd:./tasks/feature-name-prd.md" \
   --labels="ralph,feature"
 
 # Create child bead (with quality gates in acceptance criteria)
-bd create \
+br create \
   --parent=EPIC_ID \
   --title="[Story Title]" \
   --description="[Story description with acceptance criteria INCLUDING quality gates]" \
@@ -105,22 +105,22 @@ Stories execute in dependency order. Earlier stories must not depend on later on
 
 ---
 
-## Dependencies with `bd dep add`
+## Dependencies with `br dep add`
 
-Use the `bd dep add` command to specify which beads must complete first:
+Use the `br dep add` command to specify which beads must complete first:
 
 ```bash
 # Create the beads first
-bd create --parent=epic-123 --title="US-001: Add schema" ...
-bd create --parent=epic-123 --title="US-002: Create API" ...
-bd create --parent=epic-123 --title="US-003: Build UI" ...
+br create --parent=epic-123 --title="US-001: Add schema" ...
+br create --parent=epic-123 --title="US-002: Create API" ...
+br create --parent=epic-123 --title="US-003: Build UI" ...
 
 # Then add dependencies (issue depends-on blocker)
-bd dep add ralph-tui-002 ralph-tui-001  # US-002 depends on US-001
-bd dep add ralph-tui-003 ralph-tui-002  # US-003 depends on US-002
+br dep add ralph-tui-002 ralph-tui-001  # US-002 depends on US-001
+br dep add ralph-tui-003 ralph-tui-002  # US-003 depends on US-002
 ```
 
-**Syntax:** `bd dep add <issue> <depends-on>` — the issue depends on (is blocked by) depends-on.
+**Syntax:** `br dep add <issue> <depends-on>` — the issue depends on (is blocked by) depends-on.
 
 ralph-tui will:
 - Show blocked beads as "blocked" until dependencies complete
@@ -234,14 +234,14 @@ For UI stories, also include:
 **Output beads:**
 ```bash
 # Create epic (link back to source PRD)
-bd create --type=epic \
+br create --type=epic \
   --title="Friends Outreach Track" \
   --description="Warm outreach for deck feedback" \
   --external-ref="prd:./tasks/friends-outreach-prd.md" \
   --labels="ralph,feature"
 
 # US-001: No deps (first - creates schema)
-bd create --parent=ralph-tui-abc \
+br create --parent=ralph-tui-abc \
   --title="US-001: Add investorType field to investor table" \
   --description="As a developer, I need to categorize investors as 'cold' or 'friend'.
 
@@ -254,7 +254,7 @@ bd create --parent=ralph-tui-abc \
   --labels="ralph,task"
 
 # US-002: UI story (gets browser verification too)
-bd create --parent=ralph-tui-abc \
+br create --parent=ralph-tui-abc \
   --title="US-002: Add type toggle to investor list rows" \
   --description="As Ryan, I want to toggle investor type directly from the list.
 
@@ -269,10 +269,10 @@ bd create --parent=ralph-tui-abc \
   --labels="ralph,task"
 
 # Add dependency: US-002 depends on US-001
-bd dep add ralph-tui-002 ralph-tui-001
+br dep add ralph-tui-002 ralph-tui-001
 
 # US-003: UI story
-bd create --parent=ralph-tui-abc \
+br create --parent=ralph-tui-abc \
   --title="US-003: Filter investors by type" \
   --description="As Ryan, I want to filter the list to see just friends or cold.
 
@@ -286,7 +286,7 @@ bd create --parent=ralph-tui-abc \
   --labels="ralph,task"
 
 # Add dependency: US-003 depends on US-002
-bd dep add ralph-tui-003 ralph-tui-002
+br dep add ralph-tui-003 ralph-tui-002
 ```
 
 ---
@@ -321,4 +321,4 @@ ralph-tui will:
 - [ ] UI stories have browser verification (if specified in Quality Gates)
 - [ ] Acceptance criteria are verifiable (not vague)
 - [ ] No story depends on a later story (only earlier stories)
-- [ ] Dependencies added with `bd dep add` after creating beads
+- [ ] Dependencies added with `br dep add` after creating beads

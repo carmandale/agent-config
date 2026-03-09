@@ -284,7 +284,7 @@ If using beads for issue tracking:
 
 ```bash
 # Create a bead for this plan
-bd create --title="feat: <title>" --type=feature --priority=2
+br create --title="feat: <title>" --type=feature --priority=2
 
 # Link plan to bead
 # Add bead ID to plan header

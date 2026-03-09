@@ -23,7 +23,7 @@ git status --short
 git diff --stat
 
 # Beads in progress
-bd list --status in_progress --json
+br list --status in_progress --json
 
 # Recent commits
 git log --oneline -5

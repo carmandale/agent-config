@@ -186,7 +186,7 @@ If user says `stop`, `wait`, `hold on`, `cancel`, or `no`: halt immediately and 
 git log --oneline -10
 git status --short
 ls thoughts/shared/handoffs
-bd ready || bd --no-db ready
+br ready
 ```
 
 Read latest handoff and summarize done vs pending before changes.
@@ -241,18 +241,18 @@ Use `thoughts/shared/handoffs/current.md` for latest state.
 
 ## 6) Beads Workflow (Lean)
 
-- Use `bd sync` for `.beads` state; do not hand-edit tracked bead state files.
-- If tracked `.beads` files are dirty, run `bd sync` (up to 2 attempts).
+- Use `br sync --flush-only` for `.beads` state; do not hand-edit tracked bead state files.
+- If tracked `.beads` files are dirty, run `br sync --flush-only` (up to 2 attempts).
 - Ask user only if tracked bead files remain dirty after retries.
 - If only ignored runtime bead files are dirty, proceed.
 
 Essential commands:
 
 ```bash
-bd ready
-bd update <id> --status=in_progress
-bd close <id> --reason="Done"
-bd sync
+br ready
+br update <id> --status=in_progress
+br close <id> --reason="Done"
+br sync --flush-only
 ```
 
 ---

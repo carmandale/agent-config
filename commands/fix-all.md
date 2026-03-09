@@ -25,10 +25,10 @@ Run these commands to understand current state:
 gh pr list --state open --json number,title,headRefName,reviewDecision,statusCheckRollup
 
 # Ready beads (unblocked issues)
-bd ready --json | head -20
+br ready --json | head -20
 
 # In-progress beads
-bd list --status in_progress --json
+br list --status in_progress --json
 ```
 
 ## Step 2: Identify Work
@@ -155,4 +155,4 @@ After all subagents complete, summarize:
 - What review comments were resolved
 - Any issues that couldn't be resolved automatically
 
-Then sync beads: `bd sync && git push`
+Then sync beads: `br sync --flush-only && git push`

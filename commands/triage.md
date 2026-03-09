@@ -83,7 +83,7 @@ For ambiguous requests, gather more context:
 ```bash
 # Check current state
 git status --short
-bd list --status in_progress --json | jq '.[].title'
+br list --status in_progress --json | jq '.[].title'
 ```
 
 ## Step 3: Route

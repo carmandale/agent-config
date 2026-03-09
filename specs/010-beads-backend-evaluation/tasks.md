@@ -21,24 +21,17 @@ bead: .agent-config-17q
 
 ## Phase 2: Migrate agent-config on laptop
 
-- [ ] 11. Flush bd state: `bd sync --flush-only` (ensure no unflushed DB changes are lost)
-- [ ] 12. Rename bd's database: `mv .beads/beads.db .beads/beads.db.bd-backup`
-- [ ] 13. Run `br init` in agent-config root
-- [ ] 14. Run `br sync --import-only` → verify all 24 issues import
-- [ ] 15. Verify `br list` shows all issues with correct fields, statuses, priorities
-- [ ] 16. Update pre-commit hook (`.git/hooks/pre-commit`) — 4 substitution points:
-  - `command -v bd` → `command -v br`
-  - `"bd command not found"` → `"br command not found"`
-  - `bd sync --flush-only` → `br sync --flush-only`
-  - `"Run 'bd sync --flush-only'"` → `"Run 'br sync --flush-only'"`
-- [ ] 17. Update post-merge hook (`.git/hooks/post-merge`) — 3 substitution points:
-  - `command -v bd` → `command -v br`
-  - `bd import -i "$BEADS_DIR/issues.jsonl"` → `br sync --import-only`
-  - Error messages (2x) → reference `br`
-- [ ] 18. Add tracked hook templates to `hooks/` directory (br versions of pre-commit + post-merge)
-- [ ] 19. Update `install.sh` to copy pre-commit and post-merge hooks (matching existing post-commit pattern)
-- [ ] 20. Test hooks: create a test bead change, commit, verify JSONL is updated by pre-commit hook
-- [ ] 21. Commit hook changes + tracked templates + beads.db.bd-backup gitignore entry
+- [x] 11. Flush bd state: `bd sync --flush-only` ✓
+- [x] 12. Rename bd's database: `mv .beads/beads.db .beads/beads.db.bd-backup` ✓
+- [x] 13. Run `br init --prefix ".agent-config"` ✓ (prefix required — see Phase 1 discovery)
+- [x] 14. Run `br sync --import-only` → all 24 issues imported ✓
+- [x] 15. Verify `br list` — all issues with correct fields, statuses, priorities ✓
+- [x] 16. Update pre-commit hook — 4 substitution points ✓
+- [x] 17. Update post-merge hook — 3 substitution points ✓
+- [x] 18. Add tracked hook templates to `hooks/` (pre-commit + post-merge) ✓
+- [x] 19. Update `install.sh` — simplified hook section, removed old bd guard ✓
+- [x] 20. Test hooks: commit triggered pre-commit flush successfully ✓
+- [x] 21. Commit hook changes + tracked templates + gitignore entries ✓ (b9d481e4)
 
 ## Phase 3: Update documentation & commands
 

@@ -16,16 +16,16 @@ If no bead-id provided, show ready beads and ask which one to focus on.
 
 ```bash
 # Get bead details
-bd show $ARGUMENTS --json
+br show $ARGUMENTS --json
 
 # If no argument, show ready beads
-bd ready --json | head -10
+br ready --json | head -10
 ```
 
 ## Step 2: Mark In-Progress
 
 ```bash
-bd update $BEAD_ID --status in_progress
+br update $BEAD_ID --status in_progress
 ```
 
 ## Step 3: Gather Context

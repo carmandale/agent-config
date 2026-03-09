@@ -20,13 +20,13 @@ Run these in parallel:
 git log --oneline --since="yesterday" --all
 
 # Beads closed recently
-bd list --status closed --json | jq -r '.[:10][] | "- \(.id): \(.title)"'
+br list --status closed --json | jq -r '.[:10][] | "- \(.id): \(.title)"'
 
 # Currently in progress
-bd list --status in_progress --json | jq -r '.[] | "- \(.id): \(.title)"'
+br list --status in_progress --json | jq -r '.[] | "- \(.id): \(.title)"'
 
 # Beads created recently (check timestamps in the JSON)
-bd list --json | jq -r '.[:20][] | select(.created_at > (now - 86400 | todate)) | "- \(.id): \(.title)"'
+br list --json | jq -r '.[:20][] | select(.created_at > (now - 86400 | todate)) | "- \(.id): \(.title)"'
 
 # Any open PRs?
 gh pr list --state open --json number,title --jq '.[] | "- PR #\(.number): \(.title)"'

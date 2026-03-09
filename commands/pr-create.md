@@ -43,7 +43,7 @@ git diff main..HEAD --stat
 git log main..HEAD --format="%s%n%b" 
 
 # Related beads (check branch name and commit messages)
-bd list --json 2>/dev/null | jq -r '.[] | select(.id | test("'$BRANCH'|bd-")) | "\(.id): \(.title)"' | head -10
+br list --json 2>/dev/null | jq -r '.[] | select(.id | test("'$BRANCH'")) | "\(.id): \(.title)"' | head -10
 ```
 
 ## Step 4: Analyze Changes
@@ -123,7 +123,7 @@ EOF
 gh pr view --web
 
 # Update bead with PR link (if applicable)
-# bd update <bead-id> -d "PR: <url>"
+# br update <bead-id> --description "PR: <url>"
 ```
 
 Output:

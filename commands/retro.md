@@ -20,7 +20,7 @@ The argument is: $ARGUMENTS
 
 ```bash
 # Get bead details
-bd show $BEAD_ID --json
+br show $BEAD_ID --json
 
 # Get related commits
 git log --oneline --all --grep="$BEAD_ID" | head -10
@@ -33,10 +33,10 @@ git log --all --grep="$BEAD_ID" --name-only --pretty=format: | sort -u | head -2
 
 ```bash
 # What was completed this session?
-bd list --status closed --json | head -10
+br list --status closed --json | head -10
 
 # What's still in progress?
-bd list --status in_progress --json
+br list --status in_progress --json
 
 # Recent commits
 git log --oneline -20
@@ -58,10 +58,10 @@ Check for child beads or discovered-from links:
 
 ```bash
 # If epic, get children
-bd list --parent $BEAD_ID --json 2>/dev/null || true
+br list --parent $BEAD_ID --json 2>/dev/null || true
 
 # Check for discoveries
-bd list --json | jq '.[] | select(.dependencies[]? | .target == "'$BEAD_ID'" and .type == "discovered-from")' 2>/dev/null || true
+br list --json | jq '.[] | select(.dependencies[]? | .target == "'$BEAD_ID'" and .type == "discovered-from")' 2>/dev/null || true
 ```
 
 ## Step 3: Structured Reflection
@@ -209,7 +209,7 @@ If reusable code patterns were discovered:
 Create beads for non-trivial action items:
 
 ```bash
-bd create "<action item>" -t chore -p 2 --tags retro-action --json
+br create "<action item>" -t chore -p 2 --labels retro-action --json
 ```
 
 ## Step 6: Update the Bead (if bead-id provided)
@@ -218,10 +218,10 @@ Add retro notes to the bead:
 
 ```bash
 # Get current description
-CURRENT=$(bd show $BEAD_ID --json | jq -r '.description')
+CURRENT=$(br show $BEAD_ID --json | jq -r '.description')
 
 # Append retro summary (abbreviated)
-bd update $BEAD_ID -d "$CURRENT
+br update $BEAD_ID --description "$CURRENT
 
 ---
 **Retro Notes:**
@@ -230,13 +230,13 @@ bd update $BEAD_ID -d "$CURRENT
 - Pattern: <if any>"
 
 # Add tag
-bd tag $BEAD_ID retro-complete 2>/dev/null || true
+br label add $BEAD_ID retro-complete 2>/dev/null || true
 ```
 
 ## Step 7: Sync
 
 ```bash
-bd sync
+br sync --flush-only
 git push 2>/dev/null || true
 ```
 

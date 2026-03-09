@@ -243,7 +243,7 @@ If `--learn` flag was passed and novel errors were encountered during iteration:
 
 4. **File bead for tracking**:
    ```bash
-   bd create "Error pattern: <type>" -t chore --tags error-pattern --json
+   br create "Error pattern: <type>" -t chore --labels error-pattern --json
    ```
 
 This creates a self-improving feedback loop - each iteration teaches the system about new error patterns.

@@ -326,7 +326,7 @@ bv --robot-insights | jq '.bottlenecks'
     "cycle_count": 0
   },
   "commands": {
-    "claim_top": "bd update BV-123 --status in_progress"
+    "claim_top": "br update BV-123 --status in_progress"
   },
   "data_hash": "abc123...",
   "status": {...}
@@ -632,22 +632,22 @@ Use `bv --profile-startup` for diagnostics.
 
 ---
 
-## Integration with bd (Beads CLI)
+## Integration with br (Beads CLI)
 
-BV reads from `.beads/beads.jsonl` created by `bd`:
+BV reads from `.beads/beads.jsonl` created by `br`:
 
 ```bash
 # Initialize beads
-bd init
+br init
 
 # Create issues
-bd create "Implement login" -t feature -p 1
+br create "Implement login" -t feature -p 1
 
 # Update status
-bd update BV-123 --status in_progress
+br update BV-123 --status in_progress
 
 # Close
-bd close BV-123 --reason "Completed"
+br close BV-123 --reason "Completed"
 ```
 
 **Important:** `.beads/` is authoritative state. Always commit it with code changes.

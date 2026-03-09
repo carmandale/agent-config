@@ -190,7 +190,7 @@ Use this order:
 4. From git branch name (if it contains a bead ID).
 5. If still unknown, check most-recent in_progress bead:
 ```bash
-bd list --status in_progress --sort updated --limit 5 --json
+br list --status in_progress --sort updated --limit 5 --json
 ```
 
 If you can infer **one** bead, state it and proceed:
@@ -262,14 +262,14 @@ State your inferred outcome from SESSION_SUMMARY, then let the user confirm or c
 
 ### 4) (Optional) Close bead
 ```bash
-bd close <BEAD_ID> --reason "Completed"
+br close <BEAD_ID> --reason "Completed"
 ```
 
 ### 5) Close linked GitHub issue (if present)
 Check if the bead has a linked GitHub issue; if so, close it. If not, continue without stopping.
 
 ```bash
-bd show <BEAD_ID> --json
+br show <BEAD_ID> --json
 ```
 
 If the bead has `external-ref: gh-<num>`, close it:
@@ -292,7 +292,7 @@ git push
 
 ### 7) Sync beads
 ```bash
-bd sync
+br sync --flush-only
 ```
 
 ## Output

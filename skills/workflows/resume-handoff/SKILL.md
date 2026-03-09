@@ -165,14 +165,14 @@ Present the results and ask which one to resume from (even if only one — let t
 ### Step 2: Load Bead Context (if primary_bead exists)
 
 ```bash
-bd show <primary_bead>
+br show <primary_bead>
 ```
 
 Check bead status. If the bead is closed, note that — the user may want to reopen it or create a new bead.
 
 If the bead is open but not in_progress:
 ```bash
-bd update <primary_bead> --status=in_progress
+br update <primary_bead> --status=in_progress
 ```
 
 ### Step 3: Verify Current State
@@ -252,11 +252,11 @@ If the artifact is more than 7 days old, warn:
 "This artifact is from [date] ([N days ago]). The codebase may have changed significantly. I'll verify the current state carefully before proceeding."
 
 ### Missing bead
-If `primary_bead` is set but `bd show` fails, warn and offer concrete recovery:
+If `primary_bead` is set but `br show` fails, warn and offer concrete recovery:
 "The bead [id] referenced in this artifact was not found. It may have been closed or deleted. Options:
-1. Create a new bead: `bd create --title="[goal from artifact]" --type=task`
+1. Create a new bead: `br create --title="[goal from artifact]" --type=task`
 2. Continue without a bead (just follow the next steps)
-3. Search for a similar bead: `bd list --status=open`"
+3. Search for a similar bead: `br list --status=open`"
 
 ### No artifacts found
 If discovery finds nothing:

@@ -193,16 +193,16 @@ file_reservation_paths(
     paths=["src/auth/**/*.ts"],
     ttl_seconds=3600,
     exclusive=True,
-    reason="bd-123"  # Link to Beads task
+    reason="my-project-abc"  # Link to Beads task
 )
 
 # 4. Do work, send progress updates
 send_message(
     project_key, agent_name,
     to=["BlueLake"],
-    subject="[bd-123] Auth module progress",
+    subject="[my-project-abc] Auth module progress",
     body_md="Completed login flow. Starting session management.",
-    thread_id="bd-123"
+    thread_id="my-project-abc"
 )
 
 # 5. Release reservations when done
@@ -312,7 +312,7 @@ mcp-agent-mail products search MyProduct "urgent AND deploy" --limit 50
 mcp-agent-mail products inbox MyProduct BlueLake --urgent-only
 
 # Product-wide thread summary
-mcp-agent-mail products summarize-thread MyProduct "bd-123"
+mcp-agent-mail products summarize-thread MyProduct "my-project-abc"
 ```
 
 ---
@@ -364,26 +364,26 @@ uv run python -m mcp_agent_mail.cli share verify ./bundle
 
 ## Integration with Beads
 
-Beads (`bd`) owns task status/priority; Agent Mail owns conversations and audit trails.
+Beads (`br`) owns task status/priority; Agent Mail owns conversations and audit trails.
 
 **Conventions:**
-- Use Beads issue ID as Mail `thread_id`: `send_message(..., thread_id="bd-123")`
-- Prefix subjects: `[bd-123] Starting auth refactor`
-- Include issue ID in file reservation `reason`: `file_reservation_paths(..., reason="bd-123")`
+- Use Beads issue ID as Mail `thread_id`: `send_message(..., thread_id="my-project-abc")`
+- Prefix subjects: `[my-project-abc] Starting auth refactor`
+- Include issue ID in file reservation `reason`: `file_reservation_paths(..., reason="my-project-abc")`
 
 **Typical flow:**
 ```bash
 # 1. Pick ready work
-bd ready --json
+br ready --json
 
 # 2. Reserve files
-file_reservation_paths(project_key, agent_name, ["src/**"], reason="bd-123")
+file_reservation_paths(project_key, agent_name, ["src/**"], reason="my-project-abc")
 
 # 3. Announce start
-send_message(..., thread_id="bd-123", subject="[bd-123] Starting work")
+send_message(..., thread_id="my-project-abc", subject="[my-project-abc] Starting work")
 
 # 4. Complete
-bd close bd-123 --reason "Completed"
+br close my-project-abc --reason "Completed"
 release_file_reservations(project_key, agent_name)
 ```
 
@@ -488,7 +488,7 @@ searchable threads, and advisory file reservations. Human-auditable artifacts in
 **How to use:**
 1. Register identity: `ensure_project` + `register_agent` (or `macro_start_session`)
 2. Reserve files: `file_reservation_paths(project_key, agent_name, ["src/**"], exclusive=true)`
-3. Communicate: `send_message(..., thread_id="bd-123")`, `fetch_inbox`, `acknowledge_message`
+3. Communicate: `send_message(..., thread_id="my-project-abc")`, `fetch_inbox`, `acknowledge_message`
 4. Fast reads: `resource://inbox/{agent}?project=<abs-path>&limit=20`
 
 **Macros vs granular:**

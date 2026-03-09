@@ -88,6 +88,17 @@
 - Assuming README install behavior is fully current without checking `install.sh` and `install-all.sh` directly
 - Checking config file content matches baseline without verifying what that config DEPENDS ON (e.g., settings.json → hooks). Shallow verification creates false confidence.
 
+## Beads Migration (bd → br)
+- **[2026-03-09] Migrated from bd v0.50.3 to br v0.1.24 (beads_rust)**
+  - Shape C selected: bd upstream dropped SQLite (R2 discriminator), br is drop-in Rust replacement
+  - ⚠️ Bare `br sync` = IMPORT only (opposite of bd). Always use `br sync --flush-only` to export.
+  - `br init` requires `--prefix ".agent-config"` — auto-detects from dir name, NOT from JSONL
+  - `bd update -d` → `br update --description` (no `-d` short alias on update)
+  - `bd tag` → `br label add`, `--tags` → `--labels` (plural)
+  - br has no daemon — no pgrep/pkill needed, no contention block
+  - bd binary stays installed at `/opt/homebrew/bin/bd` as emergency fallback (30-day retention)
+  - `beads.db.bd-backup` preserved for 30 days
+
 ## Domain Notes
 - **Claude Code plugins** provide: skills/, commands/, agents/, CLAUDE.md, .claude-plugin/
 - **Plugin locations**: 

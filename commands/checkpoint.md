@@ -175,7 +175,7 @@ Use this order:
 4. From git branch name (if it contains a bead ID).
 5. If still unknown, check most-recent in_progress bead:
 ```bash
-bd list --status in_progress --sort updated --limit 5 --json
+br list --status in_progress --sort updated --limit 5 --json
 ```
 
 If you can infer **one** bead, state it and proceed:
