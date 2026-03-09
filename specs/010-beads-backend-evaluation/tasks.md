@@ -37,38 +37,14 @@ bead: .agent-config-17q
 
 All bare `bd sync` → `br sync --flush-only` (bare `br sync` = import, not export!)
 
-- [ ] 22. Update `instructions/AGENTS.md` — 7 occurrences:
-  - Line 189: `bd ready || bd --no-db ready` → `br ready` (remove fallback, br always has DB)
-  - Lines 244–245: `bd sync` → `br sync --flush-only`
-  - Lines 252–255: `bd ready/update/close/sync` → `br` equivalents
-- [ ] 23. Update `instructions/CLAUDE.md` — 11 occurrences:
-  - Lines 239, 284, 375–376: `bd` commands → `br` equivalents
-  - Lines 339, 350, 353: bare `bd sync` → `br sync --flush-only`
-  - Lines 358–360: REMOVE pgrep/pkill contention block entirely, replace with: "br has no daemon; if .beads/ files are dirty, run `br sync --flush-only` to export, then stage normally."
-- [ ] 24. Update commands — 15 files, special cases:
-  - `retro.md`: `bd update $BEAD_ID -d` → `br update $BEAD_ID --description`
-  - `retro.md`: `bd tag $BEAD_ID retro-complete` → `br label add $BEAD_ID retro-complete`
-  - `retro.md`, `iterate.md`: `--tags` → `--labels` (plural)
-  - `pr-create.md`: `bd update <id> -d` → `br update <id> --description`
-  - `checkpoint.md`, `handoff.md`, `finalize.md`: `--sort updated` → `--sort updated` (identical, verified)
-  - All bare `bd sync` → `br sync --flush-only` (13 occurrences total)
-  - All other `bd` → `br` (same flags apply)
-  - Files: checkpoint.md, context-dump.md, estimate.md, finalize.md, fix-all.md, focus.md, handoff.md, issue.md, iterate.md, parallel.md, pr-create.md, retro.md, standup.md, triage.md, worktree-task.md
-- [ ] 25. Update skills — 8 files (⚠️ GLOBAL scope, affects all repos):
-  - Coordinate timing: no active cross-repo agent sessions using these skills
-  - `skills/domain/ralph/ralph-tui-create-beads/SKILL.md` (18 refs) — `bd dep add` → `br dep add`, `bd create` → `br create`
-  - `skills/tools/agent-mail/SKILL.md` (13 refs) — note: bare `bd sync` here too → `--flush-only`
-  - `skills/tools/bv/SKILL.md` (7 refs)
-  - `skills/workflows/resume-handoff/SKILL.md` (5 refs)
-  - `skills/tools/plan/SKILL.md` (1 ref)
-  - `skills/tools/work/SKILL.md` (1 ref)
-  - `skills/meta/prompt-craft/SKILL.md` (1 ref — `bd create` example)
-  - `skills/tools/ntm/SKILL.md` (1 ref — `bd-1,bd-2` bead ID examples, review for consistency)
-  - ⚠️ DO NOT edit `skills/domain/math/math/topology/open-sets/SKILL.md` — `bd(A)` is math notation, not a bd command
-- [ ] 26. Update `.beads/README.md` — replace `bd` examples with `br`
-- [ ] 27. Update `.beads/config.yaml` comments — replace `bd` references with `br`
-- [ ] 28. Update napkin (`.claude/napkin.md`) with migration decision rationale
-- [ ] 29. Commit all doc/command/skill updates as ONE commit
+- [x] 22. Update `instructions/AGENTS.md` — 7 refs updated ✓
+- [x] 23. Update `instructions/CLAUDE.md` — 11 refs updated, pgrep/pkill block removed ✓
+- [x] 24. Update commands — 15 files, all special cases handled ✓
+- [x] 25. Update skills — 8 files (GLOBAL scope), all refs updated ✓
+- [x] 26. Update `.beads/README.md` — rewritten for br ✓
+- [x] 27. Update `.beads/config.yaml` — updated comments, removed daemon refs ✓
+- [x] 28. Update napkin with migration decision rationale ✓
+- [x] 29. Commit all doc/command/skill updates as ONE commit ✓ (9c5a2451)
 - [ ] 30. Do NOT push yet — Phase 4 must be ready to execute immediately after push
 
 ## Phase 4: Mini migration (one uninterrupted SSH session)
