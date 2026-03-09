@@ -30,3 +30,7 @@ beads.left.meta.json
 beads.right.meta.json
 *.db?*
 .local_version
+
+# br (beads_rust) artifacts
+.br_history/
+beads.db.bd-backup
