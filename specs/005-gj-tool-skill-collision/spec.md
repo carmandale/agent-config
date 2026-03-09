@@ -4,7 +4,7 @@ title: "fix: Resolve gj-tool skill collision on Pi agent startup"
 type: fix
 status: active
 date: 2026-03-05
-bead: TBD
+bead: .agent-config-99d
 ---
 
 # fix: Resolve gj-tool skill collision on Pi agent startup
