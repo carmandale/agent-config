@@ -63,6 +63,18 @@ When a command references a skill, agents often read the description and wing it
 
 3. **Don't rely on artifact gating** where the agent checks its own work against a checklist. The agent is both executor and gatekeeper — it'll produce artifacts that technically satisfy the checklist without having done the real work. The human is the best gatekeeper.
 
+## Instructions Are Code
+
+Agent instructions execute top-to-bottom like code. Agents don't re-read a command file looking for preconditions buried in later sections — they process sequentially and stop at the first match. Three specific failure modes:
+
+**Ordering is execution order.** If a check appears in section 3 but must fire before section 1, it won't. Example: a `/ground` command listed "force flag" as a Tier 3 entry condition. But the agent evaluates Tier 1 first — if Tier 1 matches, Tier 3's conditions are never read. The force flag was silently ignored. Fix: move the force pre-check to the preamble, before any tier evaluation.
+
+**Preconditions before operations.** If step 3 writes a file and step 4 creates the directory, the write fails on a fresh machine. Agents follow the numbered order literally. Example: cache write instructions said "write to `.claude/ground-cache.tmp`" in step 2 and "if `.claude/` doesn't exist, create it" in step 4. On a repo with no `.claude/` directory, step 2 fails. Fix: directory creation must be step 1.
+
+**Constraints in ALL branches.** If a data hygiene rule appears in one code path but not another, the unguarded path produces dirty output. Example: a "4KB cap, no secrets" rule was stated for Tier 3's cache write but omitted from Tier 2's cache rewrite. Tier 2 could produce an oversized or sensitive cache. Fix: state the constraint in every branch that produces the artifact, even if it feels redundant.
+
+**The test:** Read your command file as if you're an agent seeing it for the first time, top-to-bottom, and you'll stop at the first section that matches your situation. Does every possible execution path encounter all the preconditions and constraints it needs? If a constraint lives in a section the agent might not reach, it's dead code.
+
 ## Preventing Process Theater
 
 Agents will sometimes "perform" a workflow — producing plausible-looking artifacts without having done the actual work. This is especially common with complex skills (shaping, deep review) where the output format is known but the work is hard. Theater happens because it's cheaper to reverse-engineer the deliverables from the format than to go through the process.

@@ -22,8 +22,8 @@
    Do instead: Every command with a two-agent gate must include explicit pi_messenger instructions with exact tool call syntax. Agents don't infer the right mechanism — they invent wrong ones. Name the wrong tools explicitly ("do NOT use subagent, interactive_shell, or bash") and give the exact right tool call.
 2. **[2026-03-07] "Two participants required" is not specific enough**
    Do instead: Tell the agent: (1) run pi_messenger list, (2) send a message to the named collaborator, (3) wait for reply via steering prompt, (4) if nobody is on the mesh, ask the user to start one. Do not proceed solo.
-3. **[2026-03-07] Agents skip workflow gates under forward momentum**
-   Do instead: JadeGrove skipped /codex-review and went straight from /plan to /implement. Even the agent that wrote the workflow commands will skip gates when excited about progress. Gates must be enforced structurally, not relied on by memory.
+3. **[2026-03-07] Agents skip workflow gates under forward momentum (confirmed 2x on 2026-03-07)**
+   Do instead: JadeGrove skipped /codex-review and went straight from /plan to /implement. JadePhoenix wrote plan.md solo (skipping two-agent gate on /plan) and was about to skip /codex-review — the user had to say "come on now. what is the flow?" to break the momentum. Even the agent that wrote the workflow commands, that has the napkin open, that knows this lesson exists, will skip gates when excited about progress. Gates must be enforced structurally, not relied on by memory. This lesson has been learned and re-learned — if you're reading this, you're probably about to skip a gate right now.
 4. **[2026-03-07] Message budget (default 10) is too low for real collaboration**
    Fixed: ~/.pi/agent/pi-messenger.json now has chatty: 100. The spawn/dismiss feature (spec 008) will properly exempt collaborators from budget entirely.
 
