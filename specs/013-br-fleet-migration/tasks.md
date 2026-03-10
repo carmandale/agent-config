@@ -63,10 +63,10 @@ bead: .agent-config-2gy
 
 ### Mac mini (2 remaining repos)
 
-- [ ] 28. SSH to mini: `cd ~/.agent-config && git pull --ff-only` (gets migration script + manifest)
-- [ ] 29. Run `scripts/migrate-to-br.sh` (mini uses its own manifest or `--discover` mode for 3-repo fleet)
-- [ ] 30. Verify: openclaw (9 issues) and chip-voice (2 issues) accessible via `br ready` AND `br list`
-- [ ] 31. Agent-config on mini: verify detection + skip (already migrated in spec 010)
+- [x] 28. SSH to mini: `cd ~/.agent-config && git pull --ff-only` (gets migration script + manifest)
+- [x] 29. Run `scripts/migrate-to-br.sh` (mini uses its own manifest or `--discover` mode for 3-repo fleet)
+- [x] 30. Verify: openclaw (9 issues) and chip-voice (2 issues) accessible via `br ready` AND `br list`
+- [x] 31. Agent-config on mini: verify detection + skip (already migrated in spec 010)
 
 ### Post-migration reminder
 
@@ -80,7 +80,7 @@ bead: .agent-config-2gy
 - [x] 34. Run `bootstrap.sh check` on laptop — verify no missing hooks
 - [x] 35. Run `bootstrap.sh apply` on laptop — deploys br-prime.sh + updated settings.json
 - [x] 36. Run `bootstrap.sh check` on laptop — verify all hooks present including br-prime.sh
-- [ ] 37. SSH to mini: `cd ~/.agent-config && git pull --ff-only`, then `bootstrap.sh check`, `bootstrap.sh apply`, `bootstrap.sh check`
+- [x] 37. SSH to mini: `cd ~/.agent-config && git pull --ff-only`, then `bootstrap.sh check`, `bootstrap.sh apply`, `bootstrap.sh check`
 
 ### Documentation updates
 
@@ -94,7 +94,7 @@ bead: .agent-config-2gy
 - [x] 42. `grep "bd prime" configs/claude/settings.json` — zero hits
 - [x] 43. `grep "bd prime" ~/.claude/settings.json` — zero hits on BOTH machines (repo config AND live deployed config)
 - [x] 44. `rg '\bbd\b' configs/claude/settings.json configs/claude/hooks/` — zero hits (no stale bd references in hook configs)
-- [ ] 45. `rg '\bbd\b' ~/.claude/settings.json` AND `rg '\bbd\b' ~/.claude/hooks/` — zero hits on BOTH machines (live deployed state)
+- [x] 45. `rg '\bbd\b' ~/.claude/settings.json` AND `rg '\bbd\b' ~/.claude/hooks/` — zero hits on BOTH machines (live deployed state)
 - [x] 46. Run `agent-config-parity snapshot` on laptop → verify `tool.br.version` = `0.1.24`
 
 ### Commit + push
@@ -104,11 +104,11 @@ bead: .agent-config-2gy
 
 ## Phase 4: 30-day cleanup (2026-04-10)
 
-- [ ] 49. Remove `record_tool bd` from `tools-bin/agent-config-parity`
-- [ ] 50. Remove bd binary: laptop (`/opt/homebrew/bin/bd` symlink + `~/.local/bin/bd`), mini (equivalent paths)
-- [ ] 51. Delete `beads.db.bd-backup` files across all repos (both machines)
-- [ ] 52. Close the 30-day cleanup bead
-- [ ] 53. Update napkin: remove "bd binary stays installed" note, mark migration fully complete
+- [x] 49. Remove `record_tool bd` from `tools-bin/agent-config-parity`
+- [x] 50. Remove bd binary: laptop (`/opt/homebrew/bin/bd` symlink + `~/.local/bin/bd`), mini (equivalent paths)
+- [x] 51. Delete `beads.db.bd-backup` files across all repos (both machines)
+- [x] 52. Close the 30-day cleanup bead
+- [x] 53. Update napkin: remove "bd binary stays installed" note, mark migration fully complete
 
 ## Dependencies
 
