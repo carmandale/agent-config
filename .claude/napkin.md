@@ -17,6 +17,8 @@
 | 2026-03-03 | Self | TOML converter used basic strings (`"""`) which treat `\` as escape chars — broke commands with regex/globs | Use TOML literal strings (`'''`) for prompt field — backslashes are literal |
 | 2026-03-03 | Self | sed frontmatter parser matched ALL `---` pairs in a file, not just the first | Use awk with a counter for reliable first-block-only frontmatter extraction |
 | 2026-03-07 | Self | Spec 005 fix (9815a9d) was committed on feature branch but never merged to main. Spec marked "all tasks complete" while fix was stranded. Collision recurred on branch switch. | A fix isn't done until it's on the branch that runs. For gj-tool: main is the install source. Cherry-pick isolated fixes to main immediately — don't leave them stranded on feature branches. Also: `bead: TBD` in a spec = skipped gate, catch it. |
+| 2026-03-10 | Self | Beads worktree (`.git/beads-worktrees/main`) locked `main` branch — `git checkout main` failed with "already used by worktree." Had to `git worktree remove --force` before checking out main. | If `git checkout main` fails with "already used by worktree," check `git worktree list`. The beads worktree from `br sync` may be holding main. Remove it with `git worktree remove .git/beads-worktrees/main --force`. |
+| 2026-03-10 | Self | Read intermediate output of a multi-command SSH pipeline ("ahead by 16 commits") and reported it as final state. The next line (fast-forward pull) had already fixed it. Alarmed the user unnecessarily. | Read the FULL output of a command before commenting on any part of it. Intermediate state during a pipeline is not the final state. |
 
 ## Agent Collaboration (Critical)
 1. **[2026-03-07] Agents will try subagent, interactive_shell, or bash to spawn collaborators — they MUST be told to use pi_messenger**
@@ -79,6 +81,7 @@
 - For cross-machine setup, capture and diff a symlink/dir matrix between source and target machines before declaring parity
 - Use `tools-bin/agent-config-parity` snapshots plus `compare` to validate parity and external-surface/tool-version drift
 - Upgrade toolchain on both machines from Homebrew before parity snapshots when strict version sync matters
+- **Shared helper for multi-consumer logic**: When two scripts need the same check (bootstrap.sh detective + install.sh preventive), extract to `scripts/lib/*.sh` and source from both. Callers set dynamic paths before sourcing (e.g., `AGENT_CONFIG_SKILLS="$REPO_ROOT/skills"`). Eliminates drift — one file, zero duplicated logic. Proven in spec 012.
 
 ## Patterns That Don't Work
 - Individual per-skill symlinks - get stale when new skills are added to repo
@@ -89,6 +92,12 @@
 - Checking config file content matches baseline without verifying what that config DEPENDS ON (e.g., settings.json → hooks). Shallow verification creates false confidence.
 
 ## Navigator Review Value (Reinforced)
+- **[2026-03-10] PureRaven navigator caught 2 pre-commit issues in spec 012 implementation**
+  - AGENT_CONFIG_SKILLS hardcoded to `$HOME/.agent-config/skills` — would silently check wrong dir if repo cloned elsewhere. Fixed: each caller sets it dynamically before sourcing shared helper.
+  - log_err in install.sh routed to stderr (via log_error alias) while bootstrap.sh uses stdout. Captured output from `./install.sh | grep` would drop collision warnings. Fixed: explicit stdout log_err.
+  - Both caught by reading the actual code, not trusting claims. Consistent with spec 009 lesson.
+
+
 - **[2026-03-10] UltraKnight navigator review caught 4 real defects in spec 013 implementation**
   - Exit-code detection: `|| true` was discarding flush failure exit codes (data-loss risk)
   - Missing GMP `--rename-prefix` code (entirely absent, not just wrong)
