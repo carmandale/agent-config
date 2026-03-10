@@ -1,0 +1,369 @@
+#!/usr/bin/env bash
+# scripts/migrate-to-br.sh — Fleet-wide bd→br migration
+# Spec: 013-br-fleet-migration | Bead: .agent-config-2gy
+#
+# Reads a fleet manifest and migrates each repo from bd to br.
+# Detection: `br list` output — if DATABASE_ERROR, repo needs migration.
+# NEVER auto-commits to other repos. Operator reviews JSONL changes.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+AGENT_CONFIG_DIR="$(dirname "$SCRIPT_DIR")"
+VERSION_FILE="$AGENT_CONFIG_DIR/configs/br-version.txt"
+MANIFEST_FILE=""
+DRY_RUN=false
+DISCOVER_ROOT=""
+
+# Summary counters
+declare -a MIGRATED=()
+declare -a SKIPPED_BR_WORKS=()
+declare -a SKIPPED_ALREADY=()
+declare -a INITIALIZED=()
+declare -a FAILED=()
+declare -a JSONL_DIRTY=()
+
+usage() {
+    cat <<EOF
+Usage: $(basename "$0") [OPTIONS]
+
+Options:
+  --manifest FILE    Path to fleet-manifest.txt (default: specs/013-br-fleet-migration/fleet-manifest.txt)
+  --discover ROOT    Discovery mode: scan ROOT for .beads/ dirs and print manifest (no migration)
+  --dry-run          Log actions without executing
+  -h, --help         Show this help
+
+Modes:
+  Default: Read manifest, migrate repos that need it
+  --discover: Scan for repos and output manifest format (for initial manifest generation)
+EOF
+    exit 0
+}
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --manifest) MANIFEST_FILE="$2"; shift 2 ;;
+        --discover) DISCOVER_ROOT="$2"; shift 2 ;;
+        --dry-run) DRY_RUN=true; shift ;;
+        -h|--help) usage ;;
+        *) echo "ERROR: Unknown option: $1"; usage ;;
+    esac
+done
+
+# ============================================================
+# Discovery mode — output manifest, do NOT migrate
+# ============================================================
+if [[ -n "$DISCOVER_ROOT" ]]; then
+    echo "# Fleet Manifest — generated $(date +%Y-%m-%d)"
+    echo "# Format: <status> <repo-path>"
+    find "$DISCOVER_ROOT" -mindepth 2 -maxdepth 2 -name ".beads" -type d -print0 2>/dev/null | \
+    while IFS= read -r -d '' beads_dir; do
+        repo_dir=$(dirname "$beads_dir")
+        repo_name=$(basename "$repo_dir")
+        output=$(cd "$repo_dir" && br list 2>&1) || true
+        if echo "$output" | grep -q "DATABASE_ERROR"; then
+            echo "needs-migration $repo_dir"
+        else
+            echo "br-works $repo_dir"
+        fi
+    done | sort -t' ' -k1,1 -k2,2
+    exit 0
+fi
+
+# ============================================================
+# Migration mode — read manifest, process repos
+# ============================================================
+
+# Default manifest path
+if [[ -z "$MANIFEST_FILE" ]]; then
+    MANIFEST_FILE="$AGENT_CONFIG_DIR/specs/013-br-fleet-migration/fleet-manifest.txt"
+fi
+
+if [[ ! -f "$MANIFEST_FILE" ]]; then
+    echo "ERROR: Manifest not found: $MANIFEST_FILE"
+    echo "Generate one with: $(basename "$0") --discover /path/to/repos"
+    exit 1
+fi
+
+# ============================================================
+# Preflight: version check
+# ============================================================
+if [[ ! -f "$VERSION_FILE" ]]; then
+    echo "ERROR: Version file not found: $VERSION_FILE"
+    exit 1
+fi
+
+EXPECTED_VERSION=$(cat "$VERSION_FILE" | tr -d '[:space:]')
+ACTUAL_VERSION=$(br --version 2>&1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+
+if [[ "$EXPECTED_VERSION" != "$ACTUAL_VERSION" ]]; then
+    echo "ERROR: br version mismatch — expected $EXPECTED_VERSION, got $ACTUAL_VERSION."
+    echo "Update br or configs/br-version.txt before proceeding."
+    exit 1
+fi
+
+echo "✅ br version check: $ACTUAL_VERSION matches $EXPECTED_VERSION"
+echo ""
+
+# ============================================================
+# Detect if repo needs migration: br list check for DATABASE_ERROR
+# ============================================================
+needs_migration() {
+    local repo_dir="$1"
+    local output
+    output=$(cd "$repo_dir" && br list 2>&1) || true
+    echo "$output" | grep -q "DATABASE_ERROR"
+}
+
+# ============================================================
+# Per-repo migration procedure
+# ============================================================
+migrate_repo() {
+    local repo_dir="$1"
+    local repo_name
+    repo_name=$(basename "$repo_dir")
+    local beads_dir="$repo_dir/.beads"
+    local db_file="$beads_dir/beads.db"
+    local jsonl_file="$beads_dir/issues.jsonl"
+
+    echo "━━━ Processing: $repo_name ━━━"
+    echo "    Path: $repo_dir"
+
+    # Step 1: Check if already br-compatible
+    if ! needs_migration "$repo_dir"; then
+        echo "    ✅ br list works — already compatible, skipping"
+        SKIPPED_BR_WORKS+=("$repo_name")
+        echo ""
+        return 0
+    fi
+
+    echo "    🔄 DATABASE_ERROR detected — needs migration"
+
+    # Step 2: Pre-flush with bd
+    if [[ -f "$jsonl_file" ]]; then
+        echo "    📤 Pre-flush: bd sync --flush-only"
+        if [[ "$DRY_RUN" == true ]]; then
+            echo "    [DRY-RUN] Would run: cd '$repo_dir' && bd sync --flush-only"
+        else
+            local flush_output
+            flush_output=$(cd "$repo_dir" && bd sync --flush-only 2>&1) || true
+
+            # Check if flush failed
+            if echo "$flush_output" | grep -qiE "error|fatal|panic|no such column"; then
+                if [[ -f "$db_file" ]] && [[ $(stat -f%z "$db_file" 2>/dev/null || echo 0) -gt 0 ]]; then
+                    echo "    ❌ FAILED: bd sync --flush-only failed with a non-empty beads.db"
+                    echo "    Error: $(echo "$flush_output" | head -3)"
+                    echo "    Operator must investigate before this repo can proceed."
+                    FAILED+=("$repo_name: pre-flush failed — $flush_output")
+                    echo ""
+                    return 1
+                fi
+            fi
+
+            # Check if JSONL was modified
+            local jsonl_dirty
+            jsonl_dirty=$(cd "$repo_dir" && git diff --name-only -- .beads/issues.jsonl 2>/dev/null || true)
+            if [[ -n "$jsonl_dirty" ]]; then
+                echo "    📝 JSONL was updated by pre-flush (needs manual git commit)"
+                JSONL_DIRTY+=("$repo_dir")
+            fi
+        fi
+    fi
+
+    # Step 3: Backup existing db
+    if [[ -f "$db_file" ]]; then
+        echo "    💾 Backup: mv beads.db → beads.db.bd-backup"
+        if [[ "$DRY_RUN" == true ]]; then
+            echo "    [DRY-RUN] Would run: mv '$db_file' '$db_file.bd-backup'"
+        else
+            mv "$db_file" "${db_file}.bd-backup"
+        fi
+    fi
+
+    # Step 4: br init
+    local prefix="$repo_name"
+    echo "    🔧 Init: br init --prefix '$prefix' --force"
+    if [[ "$DRY_RUN" == true ]]; then
+        echo "    [DRY-RUN] Would run: cd '$repo_dir' && br init --prefix '$prefix' --force"
+    else
+        (cd "$repo_dir" && br init --prefix "$prefix" --force 2>&1) || {
+            echo "    ❌ FAILED: br init failed"
+            FAILED+=("$repo_name: br init failed")
+            echo ""
+            return 1
+        }
+    fi
+
+    # Step 5: Import from JSONL
+    if [[ -f "$jsonl_file" ]] && [[ $(grep -c '{' "$jsonl_file" 2>/dev/null || echo 0) -gt 0 ]]; then
+        echo "    📥 Import: br sync --import-only"
+        if [[ "$DRY_RUN" == true ]]; then
+            echo "    [DRY-RUN] Would run: cd '$repo_dir' && br sync --import-only"
+        else
+            local import_output
+            import_output=$(cd "$repo_dir" && br sync --import-only 2>&1) || true
+            if echo "$import_output" | grep -qiE "^error|fatal|panic"; then
+                echo "    ❌ FAILED: br sync --import-only failed"
+                echo "    Error: $(echo "$import_output" | head -3)"
+                FAILED+=("$repo_name: import failed — $import_output")
+                echo ""
+                return 1
+            fi
+        fi
+
+        # Step 6: ID-set integrity check (uses sqlite3 directly — br list caps at 50)
+        if [[ "$DRY_RUN" == false ]]; then
+            echo "    🔍 Verifying ID-set integrity..."
+            local br_ids jsonl_ids id_diff
+            br_ids=$(sqlite3 "$db_file" "SELECT id FROM issues ORDER BY id;" 2>/dev/null)
+            jsonl_ids=$(jq -r '.id' "$jsonl_file" 2>/dev/null | sort)
+
+            id_diff=$(diff <(echo "$br_ids") <(echo "$jsonl_ids") 2>/dev/null || true)
+            if [[ -n "$id_diff" ]]; then
+                local br_count jsonl_count
+                br_count=$(echo "$br_ids" | grep -c . || echo 0)
+                jsonl_count=$(echo "$jsonl_ids" | grep -c . || echo 0)
+                echo "    ❌ FAILED: ID-set mismatch (db=$br_count, jsonl=$jsonl_count)"
+                echo "    Diff: $(echo "$id_diff" | head -5)"
+                FAILED+=("$repo_name: ID-set mismatch — db=$br_count, jsonl=$jsonl_count")
+                echo ""
+                return 1
+            fi
+
+            local count
+            count=$(echo "$br_ids" | grep -c . || echo 0)
+            echo "    ✅ ID-set integrity verified: $count issues match"
+        fi
+    else
+        echo "    ℹ️  No JSONL data — init only (no import)"
+        INITIALIZED+=("$repo_name")
+        echo ""
+        return 0
+    fi
+
+    # Step 7: br doctor (informational — br doctor has known false positives)
+    if [[ "$DRY_RUN" == false ]]; then
+        local doctor_output
+        doctor_output=$(cd "$repo_dir" && br doctor 2>&1) || true
+        if echo "$doctor_output" | grep -q "ERROR"; then
+            echo "    ⚠️  br doctor reports errors (non-blocking, known false positives):"
+            echo "$doctor_output" | grep "ERROR" | sed 's/^/    /'
+        fi
+    fi
+
+    MIGRATED+=("$repo_name")
+    echo "    ✅ Migration complete"
+    echo ""
+    return 0
+}
+
+# ============================================================
+# Main: process manifest
+# ============================================================
+echo "═══════════════════════════════════════════════════"
+echo "  Fleet Migration: bd → br"
+echo "  Manifest: $MANIFEST_FILE"
+echo "  Dry run: $DRY_RUN"
+echo "═══════════════════════════════════════════════════"
+echo ""
+
+TOTAL=0
+while IFS= read -r line; do
+    # Skip comments and empty lines
+    [[ "$line" =~ ^#.*$ ]] && continue
+    [[ -z "$line" ]] && continue
+
+    status=$(echo "$line" | awk '{print $1}')
+    repo_path=$(echo "$line" | cut -d' ' -f2-)
+
+    if [[ ! -d "$repo_path" ]]; then
+        echo "⚠️  Repo not found, skipping: $repo_path"
+        continue
+    fi
+
+    TOTAL=$((TOTAL + 1))
+
+    case "$status" in
+        already-migrated)
+            echo "━━━ $(basename "$repo_path"): already-migrated (manifest) — skipping ━━━"
+            SKIPPED_ALREADY+=("$(basename "$repo_path")")
+            echo ""
+            ;;
+        br-works)
+            echo "━━━ $(basename "$repo_path"): br-works (manifest) — verifying ━━━"
+            # Verify it still works
+            if needs_migration "$repo_path"; then
+                echo "    ⚠️  Manifest says br-works but DATABASE_ERROR detected! Migrating..."
+                migrate_repo "$repo_path" || true
+            else
+                echo "    ✅ Confirmed: br list works"
+                SKIPPED_BR_WORKS+=("$(basename "$repo_path")")
+            fi
+            echo ""
+            ;;
+        needs-migration)
+            migrate_repo "$repo_path" || true
+            ;;
+        *)
+            echo "⚠️  Unknown status '$status' for: $repo_path"
+            ;;
+    esac
+done < "$MANIFEST_FILE"
+
+# ============================================================
+# Summary
+# ============================================================
+echo ""
+echo "═══════════════════════════════════════════════════"
+echo "  MIGRATION SUMMARY"
+echo "═══════════════════════════════════════════════════"
+echo ""
+echo "Total repos processed: $TOTAL"
+echo ""
+
+if [[ ${#MIGRATED[@]} -gt 0 ]]; then
+    echo "✅ MIGRATED (${#MIGRATED[@]}):"
+    printf '   %s\n' "${MIGRATED[@]}"
+    echo ""
+fi
+
+if [[ ${#SKIPPED_BR_WORKS[@]} -gt 0 ]]; then
+    echo "⏭️  SKIPPED — br already works (${#SKIPPED_BR_WORKS[@]}):"
+    printf '   %s\n' "${SKIPPED_BR_WORKS[@]}"
+    echo ""
+fi
+
+if [[ ${#SKIPPED_ALREADY[@]} -gt 0 ]]; then
+    echo "⏭️  SKIPPED — already migrated (${#SKIPPED_ALREADY[@]}):"
+    printf '   %s\n' "${SKIPPED_ALREADY[@]}"
+    echo ""
+fi
+
+if [[ ${#INITIALIZED[@]} -gt 0 ]]; then
+    echo "🔧 INITIALIZED — no data (${#INITIALIZED[@]}):"
+    printf '   %s\n' "${INITIALIZED[@]}"
+    echo ""
+fi
+
+if [[ ${#FAILED[@]} -gt 0 ]]; then
+    echo "❌ FAILED (${#FAILED[@]}):"
+    printf '   %s\n' "${FAILED[@]}"
+    echo ""
+fi
+
+if [[ ${#JSONL_DIRTY[@]} -gt 0 ]]; then
+    echo "📝 JSONL CHANGES NEEDING MANUAL COMMIT (${#JSONL_DIRTY[@]}):"
+    for repo in "${JSONL_DIRTY[@]}"; do
+        echo "   cd '$repo' && git add .beads/issues.jsonl && git commit -m 'chore: pre-br-migration bd flush' && git push"
+    done
+    echo ""
+fi
+
+# Exit with error if any failed
+if [[ ${#FAILED[@]} -gt 0 ]]; then
+    echo "⛔ ${#FAILED[@]} repo(s) failed. Investigate before proceeding."
+    exit 1
+fi
+
+echo "✅ All repos processed successfully."

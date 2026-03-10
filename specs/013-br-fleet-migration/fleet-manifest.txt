@@ -1,0 +1,54 @@
+# Fleet Manifest — Spec 013: bd→br migration
+# Generated: 2026-03-10
+# Format: <status> <repo-path>
+#
+# Detection method: `br list` output check
+#   NEEDS-MIGRATION = br list returns DATABASE_ERROR (bd-schema db blocking br)
+#   BR-WORKS = br list succeeds (already compatible with br)
+#   already-migrated = agent-config (migrated in spec 010)
+#
+# Laptop fleet: 40 repos total
+#   - 1 already-migrated (agent-config)
+#   - 16 br-works (br list succeeds, no migration action needed)
+#   - 23 needs-migration (br list fails with DATABASE_ERROR)
+#
+already-migrated /Users/dalecarman/.agent-config
+br-works /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/agent-orchestrator
+br-works /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/agent-os
+br-works /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/apple-notes-export
+br-works /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/beads
+br-works /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/beads_viewer
+br-works /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/gastown
+br-works /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/groovetech-media-player
+br-works /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/opencode-swarm-plugin
+br-works /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/orchestrator-127-phase2-status-parser
+br-works /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/orchestrator-150-broadcast-preservation
+br-works /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/orchestrator-issue-133-scanning-connection-ui
+br-works /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/pi-messenger
+br-works /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/pipedrive
+br-works /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/QR-AR-native
+br-works /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/quickbooks
+br-works /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/ultimate_bug_scanner
+needs-migration /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/aligner
+needs-migration /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/automated_plan_reviser_pro
+needs-migration /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/AVPStreamKit
+needs-migration /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/chip-config
+needs-migration /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/codex-orchestrator
+needs-migration /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/CodexSkillManager
+needs-migration /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/coding_agent_session_search
+needs-migration /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/Continuous-Claude-v3
+needs-migration /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/destructive_command_guard
+needs-migration /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/gj-tool
+needs-migration /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/gjdraw
+needs-migration /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/groovetech-media-server
+needs-migration /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/KaiserEmpathy
+needs-migration /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/lucy
+needs-migration /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/mcp_agent_mail
+needs-migration /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/oh-my-opencode
+needs-migration /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/opencode-config
+needs-migration /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/orchestrator
+needs-migration /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/PfizerOutdoCancerV2
+needs-migration /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/pi-interactive-shell
+needs-migration /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/ralph-loop
+needs-migration /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/ralph-orchestrator
+needs-migration /Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/ralph-tui
