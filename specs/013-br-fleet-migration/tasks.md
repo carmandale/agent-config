@@ -100,7 +100,7 @@ bead: .agent-config-2gy
 ### Commit + push
 
 - [x] 47. Commit all Phase 3 changes: settings.json update, AGENTS_v1.md deletion, AGENTS.md §6 update, parity tool update
-- [ ] 48. Push to origin. Mini pulls + applies.
+- [x] 48. Push to origin. Mini pulls + applies.
 
 ## Phase 4: 30-day cleanup (2026-04-10)
 
