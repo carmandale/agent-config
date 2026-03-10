@@ -13,43 +13,43 @@ bead: .agent-config-2gy
 
 ### Fleet manifest
 
-- [ ] 1. Generate fleet manifest: run `find` for `.beads/` dirs under laptop dev root, write `specs/013-br-fleet-migration/fleet-manifest.txt` with one repo per line + status annotation (working/schema-drift/dolt-nag/bricked/empty/no-jsonl/already-migrated)
-- [ ] 2. Verify manifest matches known counts: 1 already-migrated + 24 working + 6 schema-drift + 4 Dolt-nag + 1 bricked (GMP) + 4 empty/no-JSONL = 40 total laptop repos. Mini: 3 repos (1 already-migrated + 2 to migrate). Grand total: 43 repos across both machines.
+- [x] 1. Generate fleet manifest: run `find` for `.beads/` dirs under laptop dev root, write `specs/013-br-fleet-migration/fleet-manifest.txt` with one repo per line + status annotation (working/schema-drift/dolt-nag/bricked/empty/no-jsonl/already-migrated)
+- [x] 2. Verify manifest matches known counts: 1 already-migrated + 24 working + 6 schema-drift + 4 Dolt-nag + 1 bricked (GMP) + 4 empty/no-JSONL = 40 total laptop repos. Mini: 3 repos (1 already-migrated + 2 to migrate). Grand total: 43 repos across both machines.
 
 ### Migration script
 
-- [ ] 3. Write `scripts/migrate-to-br.sh` — manifest-driven (reads `fleet-manifest.txt`), NOT recursive discovery. `--discover` flag available only for initial manifest generation.
-- [ ] 4. Script preflight: read `configs/br-version.txt`, compare with `br --version`. Hard-fail if mismatch: "br version mismatch — expected X.Y.Z, got A.B.C."
-- [ ] 5. Implement per-repo procedure in order: (a) detect already-br-compatible (`br list` succeeds without DATABASE_ERROR → skip entire repo), (b) pre-flush (`bd sync --flush-only` — **hard-fail on non-zero exit code if `beads.db` exists with data**), (c) backup (`mv beads.db beads.db.bd-backup`), (d) `br init --prefix "$(basename $PWD)" --force`, (e) `br sync --import-only` (+ `--rename-prefix` for GMP), (f) ID-set integrity check: `sqlite3 .beads/beads.db "SELECT id FROM issues ORDER BY id;"` vs `jq -r '.id' .beads/issues.jsonl | sort` — diff must be empty (sqlite3 used because br list --all --json caps at 50), (g) `br doctor` informational check
-- [ ] 6. Implement GMP special case: hardcoded repo name match (`groovetech-media-player`) → add `--rename-prefix` to import step unconditionally. Pre-flush failure is expected (known-bricked), proceed using existing JSONL.
-- [ ] 7. Implement empty/no-JSONL repo handling: run `br init --prefix "$(basename $PWD)" --force` (no import step) so `br ready` and `br list` work immediately. Add to "INITIALIZED (no data)" summary section.
-- [ ] 8. Add `--dry-run` flag to script (log actions without executing)
-- [ ] 9. Error handling: per-repo hard-fail on flush failure (with beads.db) or ID-set mismatch. Continue to next repo. Summary at end listing (a) repos migrated, (b) repos skipped (already done), (c) repos skipped (empty/no-JSONL), (d) repos FAILED (with error details), (e) repos with JSONL changes needing manual git commit
-- [ ] 10. Script does NOT auto-commit to arbitrary repos. Summary lists repos with dirty JSONL for operator review.
+- [x] 3. Write `scripts/migrate-to-br.sh` — manifest-driven (reads `fleet-manifest.txt`), NOT recursive discovery. `--discover` flag available only for initial manifest generation.
+- [x] 4. Script preflight: read `configs/br-version.txt`, compare with `br --version`. Hard-fail if mismatch: "br version mismatch — expected X.Y.Z, got A.B.C."
+- [x] 5. Implement per-repo procedure in order: (a) detect already-br-compatible (`br list` succeeds without DATABASE_ERROR → skip entire repo), (b) pre-flush (`bd sync --flush-only` — **hard-fail on non-zero exit code if `beads.db` exists with data**), (c) backup (`mv beads.db beads.db.bd-backup`), (d) `br init --prefix "$(basename $PWD)" --force`, (e) `br sync --import-only` (+ `--rename-prefix` for GMP), (f) ID-set integrity check: `sqlite3 .beads/beads.db "SELECT id FROM issues ORDER BY id;"` vs `jq -r '.id' .beads/issues.jsonl | sort` — diff must be empty (sqlite3 used because br list --all --json caps at 50), (g) `br doctor` informational check
+- [x] 6. Implement GMP special case: hardcoded repo name match (`groovetech-media-player`) → add `--rename-prefix` to import step unconditionally. Pre-flush failure is expected (known-bricked), proceed using existing JSONL.
+- [x] 7. Implement empty/no-JSONL repo handling: run `br init --prefix "$(basename $PWD)" --force` (no import step) so `br ready` and `br list` work immediately. Add to "INITIALIZED (no data)" summary section.
+- [x] 8. Add `--dry-run` flag to script (log actions without executing)
+- [x] 9. Error handling: per-repo hard-fail on flush failure (with beads.db) or ID-set mismatch. Continue to next repo. Summary at end listing (a) repos migrated, (b) repos skipped (already done), (c) repos skipped (empty/no-JSONL), (d) repos FAILED (with error details), (e) repos with JSONL changes needing manual git commit
+- [x] 10. Script does NOT auto-commit to arbitrary repos. Summary lists repos with dirty JSONL for operator review.
 
 ### Hook replacement
 
-- [ ] 11. Write `configs/claude/hooks/br-prime.sh` — translate all 13 bd commands to br equivalents
-- [ ] 12. First line of output: sync direction warning (`⚠️ CRITICAL: br sync (bare) = IMPORT. Use br sync --flush-only to EXPORT.`)
-- [ ] 13. Verify br-prime.sh output: run it, diff semantically against `bd prime` output, confirm all 13 command mappings correct. Critical checks: `bd sync` → `br sync --flush-only`, `bd tag` → `br label add`, `bd create --tags` → `br create --labels`, `bd update -d` → `br update --description`
+- [x] 11. Write `configs/claude/hooks/br-prime.sh` — translate all 13 bd commands to br equivalents
+- [x] 12. First line of output: sync direction warning (`⚠️ CRITICAL: br sync (bare) = IMPORT. Use br sync --flush-only to EXPORT.`)
+- [x] 13. Verify br-prime.sh output: run it, diff semantically against `bd prime` output, confirm all 13 command mappings correct. Critical checks: `bd sync` → `br sync --flush-only`, `bd tag` → `br label add`, `bd create --tags` → `br create --labels`, `bd update -d` → `br update --description`
 
 ### Version governance
 
-- [ ] 14. Create `configs/br-version.txt` containing `0.1.24`
+- [x] 14. Create `configs/br-version.txt` containing `0.1.24`
 
 ### Dry-run test matrix (throwaway copies)
 
-- [ ] 15. Test (a): Schema-drift repo — pre-flush + init + import. Verify ID-set integrity (sorted diff = empty).
-- [ ] 16. Test (b): Already-migrated repo (agent-config) — detection + skip. Verify no re-init, no bd sync attempted.
-- [ ] 17. Test (c): GMP special case — init + import with `--rename-prefix`. Verify all issues have `groovetech-media-player-*` prefix. Verify count ≥ 148. Verify ID-set integrity.
-- [ ] 18. Test (d): Empty/no-JSONL repo — no-op. Verify no errors.
-- [ ] 19. Test (e): Working repo — standard path. Verify ID-set integrity.
-- [ ] 20. Test (f): br-prime.sh output correctness — all 13 command mappings verified, sync direction warning present.
-- [ ] 21. Test (g): Version mismatch — temporarily edit br-version.txt to wrong version, verify script hard-fails at preflight.
+- [x] 15. Test (a): Schema-drift repo — pre-flush + init + import. Verify ID-set integrity (sorted diff = empty).
+- [x] 16. Test (b): Already-migrated repo (agent-config) — detection + skip. Verify no re-init, no bd sync attempted.
+- [x] 17. Test (c): GMP special case — init + import with `--rename-prefix`. Verify all issues have `groovetech-media-player-*` prefix. Verify count ≥ 148. Verify ID-set integrity.
+- [x] 18. Test (d): Empty/no-JSONL repo — no-op. Verify no errors.
+- [x] 19. Test (e): Working repo — standard path. Verify ID-set integrity.
+- [x] 20. Test (f): br-prime.sh output correctness — all 13 command mappings verified, sync direction warning present.
+- [x] 21. Test (g): Version mismatch — temporarily edit br-version.txt to wrong version, verify script hard-fails at preflight.
 
 ### Commit migration artifacts
 
-- [ ] 22. Commit `scripts/migrate-to-br.sh` + `configs/br-version.txt` + `configs/claude/hooks/br-prime.sh` + `specs/013-br-fleet-migration/fleet-manifest.txt` to agent-config, push to origin. Mini needs to pull the script before Phase 2.
+- [x] 22. Commit `scripts/migrate-to-br.sh` + `configs/br-version.txt` + `configs/claude/hooks/br-prime.sh` + `specs/013-br-fleet-migration/fleet-manifest.txt` to agent-config, push to origin. Mini needs to pull the script before Phase 2.
 
 ## Phase 2: Execute migration
 

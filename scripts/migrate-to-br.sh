@@ -174,18 +174,62 @@ migrate_repo() {
         fi
     fi
 
-    # Step 3: Backup existing db
+    # Step 3: Backup existing db + clean WAL/SHM (stale WAL corrupts fresh br init)
     if [[ -f "$db_file" ]]; then
         echo "    💾 Backup: mv beads.db → beads.db.bd-backup"
         if [[ "$DRY_RUN" == true ]]; then
             echo "    [DRY-RUN] Would run: mv '$db_file' '$db_file.bd-backup'"
         else
             mv "$db_file" "${db_file}.bd-backup"
+            # Remove WAL/SHM files — they belong to the old bd database
+            # Leaving them causes "database disk image is malformed" on br init
+            [[ -f "${db_file}-wal" ]] && trash "${db_file}-wal" 2>/dev/null
+            [[ -f "${db_file}-shm" ]] && trash "${db_file}-shm" 2>/dev/null
         fi
     fi
 
-    # Step 4: br init
+    # Step 3.5: Normalize JSONL IDs for br compatibility
+    # br rejects: (a) uppercase chars in IDs, (b) dots in hash portion (bd sub-issue notation)
+    if [[ -f "$jsonl_file" ]] && [[ $(grep -c '{' "$jsonl_file" 2>/dev/null || echo 0) -gt 0 ]]; then
+        local has_upper has_dots needs_normalize=false
+        has_upper=$(jq -r '.id' "$jsonl_file" 2>/dev/null | grep -c '[A-Z]' || true)
+        has_dots=$(jq -r '.id' "$jsonl_file" 2>/dev/null | grep -c '\.' || true)
+        [[ "$has_upper" -gt 0 ]] && needs_normalize=true
+        [[ "$has_dots" -gt 0 ]] && needs_normalize=true
+        if [[ "$needs_normalize" == true ]]; then
+            echo "    🔡 Normalizing JSONL IDs (uppercase=$has_upper, dots=$has_dots)"
+            if [[ "$DRY_RUN" == false ]]; then
+                # Lowercase all IDs and replace dots with 'd' (collision-free, verified)
+                # Also normalize depends_on/blocked_by refs
+                local tmp_jsonl="${jsonl_file}.normalizing"
+                jq -c '
+                    def normalize_id: ascii_downcase | gsub("\\."; "d");
+                    .id |= normalize_id |
+                    if .depends_on then .depends_on = [.depends_on[] | .id |= normalize_id] else . end |
+                    if .blocked_by then .blocked_by = [.blocked_by[] | .id |= normalize_id] else . end
+                ' "$jsonl_file" > "$tmp_jsonl" && mv "$tmp_jsonl" "$jsonl_file"
+                # Mark JSONL as dirty since we modified it
+                JSONL_DIRTY+=("$repo_dir")
+            fi
+        fi
+    fi
+
+    # Step 4: br init — use lowercased prefix from JSONL (not basename)
     local prefix="$repo_name"
+    if [[ -f "$jsonl_file" ]] && [[ $(grep -c '{' "$jsonl_file" 2>/dev/null || echo 0) -gt 0 ]]; then
+        # Extract prefix from first JSONL entry (already lowercased above)
+        local first_id
+        first_id=$(jq -r '.id' "$jsonl_file" 2>/dev/null | head -1)
+        if [[ -n "$first_id" ]]; then
+            local detected_prefix="${first_id%-*}"
+            if [[ -n "$detected_prefix" && "$detected_prefix" != "$first_id" ]]; then
+                prefix="$detected_prefix"
+                if [[ "$prefix" != "$repo_name" ]]; then
+                    echo "    ℹ️  Using JSONL prefix '$prefix' (differs from repo name '$repo_name')"
+                fi
+            fi
+        fi
+    fi
     echo "    🔧 Init: br init --prefix '$prefix' --force"
     if [[ "$DRY_RUN" == true ]]; then
         echo "    [DRY-RUN] Would run: cd '$repo_dir' && br init --prefix '$prefix' --force"
@@ -200,11 +244,13 @@ migrate_repo() {
 
     # Step 5: Import from JSONL
     if [[ -f "$jsonl_file" ]] && [[ $(grep -c '{' "$jsonl_file" 2>/dev/null || echo 0) -gt 0 ]]; then
-        # GMP special case: hardcoded --rename-prefix for dual prefix resolution
+        # Detect multi-prefix: if JSONL has IDs with different prefixes, need --rename-prefix
         local import_flags="--import-only"
-        if [[ "$repo_name" == "groovetech-media-player" ]]; then
+        local unique_prefixes
+        unique_prefixes=$(jq -r '.id' "$jsonl_file" 2>/dev/null | sed 's/-[^-]*$//' | sort -u | wc -l | tr -d ' ')
+        if [[ "$unique_prefixes" -gt 1 ]]; then
             import_flags="--import-only --rename-prefix"
-            echo "    🔧 GMP special case: adding --rename-prefix for dual prefix resolution"
+            echo "    🔧 Multi-prefix detected ($unique_prefixes prefixes) — adding --rename-prefix"
         fi
 
         echo "    📥 Import: br sync $import_flags"
@@ -226,25 +272,34 @@ migrate_repo() {
         # Step 6: ID-set integrity check (uses sqlite3 directly — br list caps at 50)
         if [[ "$DRY_RUN" == false ]]; then
             echo "    🔍 Verifying ID-set integrity..."
-            local br_ids jsonl_ids id_diff
+            local br_ids jsonl_ids br_count jsonl_count
             br_ids=$(sqlite3 "$db_file" "SELECT id FROM issues ORDER BY id;" 2>/dev/null)
             jsonl_ids=$(jq -r '.id' "$jsonl_file" 2>/dev/null | sort)
+            br_count=$(echo "$br_ids" | grep -c . || echo 0)
+            jsonl_count=$(echo "$jsonl_ids" | grep -c . || echo 0)
 
-            id_diff=$(diff <(echo "$br_ids") <(echo "$jsonl_ids") 2>/dev/null || true)
-            if [[ -n "$id_diff" ]]; then
-                local br_count jsonl_count
-                br_count=$(echo "$br_ids" | grep -c . || echo 0)
-                jsonl_count=$(echo "$jsonl_ids" | grep -c . || echo 0)
-                echo "    ❌ FAILED: ID-set mismatch (db=$br_count, jsonl=$jsonl_count)"
-                echo "    Diff: $(echo "$id_diff" | head -5)"
-                FAILED+=("$repo_name: ID-set mismatch — db=$br_count, jsonl=$jsonl_count")
-                echo ""
-                return 1
+            if echo "$import_flags" | grep -q "rename-prefix"; then
+                # --rename-prefix generates new hashes, so ID-set diff will always differ
+                # Verify by count only + confirm import logged correct number
+                if [[ "$br_count" -ne "$jsonl_count" ]]; then
+                    echo "    ❌ FAILED: Count mismatch after --rename-prefix (db=$br_count, jsonl=$jsonl_count)"
+                    FAILED+=("$repo_name: count mismatch after rename — db=$br_count, jsonl=$jsonl_count")
+                    echo ""
+                    return 1
+                fi
+                echo "    ✅ Count-based integrity verified: $br_count issues (--rename-prefix changes IDs)"
+            else
+                local id_diff
+                id_diff=$(diff <(echo "$br_ids") <(echo "$jsonl_ids") 2>/dev/null || true)
+                if [[ -n "$id_diff" ]]; then
+                    echo "    ❌ FAILED: ID-set mismatch (db=$br_count, jsonl=$jsonl_count)"
+                    echo "    Diff: $(echo "$id_diff" | head -5)"
+                    FAILED+=("$repo_name: ID-set mismatch — db=$br_count, jsonl=$jsonl_count")
+                    echo ""
+                    return 1
+                fi
+                echo "    ✅ ID-set integrity verified: $br_count issues match"
             fi
-
-            local count
-            count=$(echo "$br_ids" | grep -c . || echo 0)
-            echo "    ✅ ID-set integrity verified: $count issues match"
         fi
     else
         echo "    ℹ️  No JSONL data — init only (no import)"
