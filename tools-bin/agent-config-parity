@@ -134,6 +134,7 @@ record_tool() {
                 ;;
             node) ver="$("$bin" --version 2>/dev/null | head -n 1 || true)" ;;
             bd) ver="$("$bin" --version 2>/dev/null | head -n 1 || true)" ;;
+            br) ver="$("$bin" --version 2>/dev/null | head -n 1 || true)" ;;
             rg) ver="$("$bin" --version 2>/dev/null | head -n 1 || true)" ;;
             *) ver="present" ;;
         esac
@@ -217,6 +218,7 @@ generate_snapshot() {
         record_tool bunx
         record_tool node
         record_tool bd
+        record_tool br
         record_tool rg
     } >"$tmp"
 

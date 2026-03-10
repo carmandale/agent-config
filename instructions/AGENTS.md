@@ -241,10 +241,13 @@ Use `thoughts/shared/handoffs/current.md` for latest state.
 
 ## 6) Beads Workflow (Lean)
 
+- The issue tracker is **`br`** (beads_rust). Never use `bd` (deprecated Go version).
 - Use `br sync --flush-only` for `.beads` state; do not hand-edit tracked bead state files.
 - If tracked `.beads` files are dirty, run `br sync --flush-only` (up to 2 attempts).
 - Ask user only if tracked bead files remain dirty after retries.
 - If only ignored runtime bead files are dirty, proceed.
+- **Version governance**: Never run `br upgrade` without `--version`. Pinned version: see `configs/br-version.txt`.
+- **Sync direction**: `br sync` with no flags = IMPORT (JSONL → DB). Always use `br sync --flush-only` for export.
 
 Essential commands:
 

@@ -55,7 +55,7 @@ bead: .agent-config-2gy
 
 ### Laptop fleet (38 remaining repos + 1 already-migrated + 1 bricked)
 
-- [ ] 23. Run `scripts/migrate-to-br.sh` on laptop
+- [x] 23. Run `scripts/migrate-to-br.sh` on laptop
 - [ ] 24. Review script summary: check repos migrated, skipped, failed. **Zero failures required to proceed** (any failure = investigate + fix + rerun before continuing).
 - [ ] 25. Spot-check 5+ repos: `br ready` AND `br list` works. Must include: GMP, 1 schema-drift, 1 Dolt-nag, 1 working, 1 high-issue repo (orchestrator or dcg)
 - [ ] 26. GMP specific: verify `br list --all` shows issues with `groovetech-media-player-*` prefixes, count ≥ 148
