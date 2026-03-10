@@ -13,7 +13,7 @@ bead: .agent-config-12r
 
 - [x] **T1.1** Remove stale npm-installed pi-messenger: `trash ~/.pi/agent/extensions/pi-messenger/` (fallback: `mv` to `~/.Trash/pi-messenger-$(date +%Y%m%d)/`)
 - [x] **T1.2** Verify removal: `ls ~/.pi/agent/extensions/pi-messenger/` should fail (dir gone)
-- [ ] **T1.3** Start Pi, confirm zero `[Extension issues]` for pi-messenger
+- [x] **T1.3** Start Pi, confirm zero `[Extension issues]` for pi-messenger
 
 ## Phase 2: Fix false-positive bootstrap check
 
@@ -43,7 +43,7 @@ bead: .agent-config-12r
 
 - [x] **T5.1** Delete stale backup files: `find ~/.pi/agent/extensions/ -name '*.backup.*' -mtime +5 -delete`
 - [x] **T5.2** Verify: `ls ~/.pi/agent/extensions/*.backup.* 2>/dev/null | wc -l` → 0
-- [ ] **T5.3** Optional: remove stale `~/.pi/agent/skills/` directory (contains only redundant testflight symlink, already discoverable via `~/.agents/skills/`)
+- [ ] **T5.3** Optional (skipped): remove stale `~/.pi/agent/skills/` directory (contains only redundant testflight symlink, already discoverable via `~/.agents/skills/`)
 
 ## Phase 6: Test the guard
 
@@ -53,7 +53,7 @@ bead: .agent-config-12r
 
 ## Phase 7: Commit, verify end-to-end, sync Mini
 
-- [ ] **T7.1** `git add scripts/lib/collision-check.sh scripts/bootstrap.sh install.sh && git commit -m "fix(012): extension/skill collision guard + cleanup"`
-- [ ] **T7.2** Full verification: `./scripts/bootstrap.sh check` — all pass, 0 collisions, 0 false positives
-- [ ] **T7.3** Start Pi — zero `[Extension issues]`, zero `[Skill conflicts]`
-- [ ] **T7.4** Push and sync Mini: `git push && ssh mini-ts "cd ~/.agent-config && git pull --ff-only && ./scripts/bootstrap.sh check"` — guard runs cleanly, 0 collisions
+- [x] **T7.1** `git add scripts/lib/collision-check.sh scripts/bootstrap.sh install.sh && git commit -m "fix(012): extension/skill collision guard + cleanup"`
+- [x] **T7.2** Full verification: `./scripts/bootstrap.sh check` — all pass, 0 collisions, 0 false positives
+- [x] **T7.3** Start Pi — zero `[Extension issues]`, zero `[Skill conflicts]`
+- [x] **T7.4** Push and sync Mini: `git push && ssh mini-ts "cd ~/.agent-config && git pull --ff-only && ./scripts/bootstrap.sh check"` — guard runs cleanly, 0 collisions
