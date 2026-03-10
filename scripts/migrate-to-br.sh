@@ -146,18 +146,21 @@ migrate_repo() {
         if [[ "$DRY_RUN" == true ]]; then
             echo "    [DRY-RUN] Would run: cd '$repo_dir' && bd sync --flush-only"
         else
+            local flush_exit=0
             local flush_output
-            flush_output=$(cd "$repo_dir" && bd sync --flush-only 2>&1) || true
+            flush_output=$(cd "$repo_dir" && bd sync --flush-only 2>&1) || flush_exit=$?
 
-            # Check if flush failed
-            if echo "$flush_output" | grep -qiE "error|fatal|panic|no such column"; then
+            # Hard-fail if exit code is non-zero AND beads.db has data
+            if [[ "$flush_exit" -ne 0 ]]; then
                 if [[ -f "$db_file" ]] && [[ $(stat -f%z "$db_file" 2>/dev/null || echo 0) -gt 0 ]]; then
-                    echo "    ❌ FAILED: bd sync --flush-only failed with a non-empty beads.db"
-                    echo "    Error: $(echo "$flush_output" | head -3)"
+                    echo "    ❌ FAILED: bd sync --flush-only exited $flush_exit with a non-empty beads.db"
+                    echo "    Output: $(echo "$flush_output" | head -5)"
                     echo "    Operator must investigate before this repo can proceed."
-                    FAILED+=("$repo_name: pre-flush failed — $flush_output")
+                    FAILED+=("$repo_name: pre-flush exit=$flush_exit — $(echo "$flush_output" | head -1)")
                     echo ""
                     return 1
+                else
+                    echo "    ⚠️  bd sync --flush-only exited $flush_exit but no beads.db with data — continuing"
                 fi
             fi
 
@@ -197,16 +200,24 @@ migrate_repo() {
 
     # Step 5: Import from JSONL
     if [[ -f "$jsonl_file" ]] && [[ $(grep -c '{' "$jsonl_file" 2>/dev/null || echo 0) -gt 0 ]]; then
-        echo "    📥 Import: br sync --import-only"
+        # GMP special case: hardcoded --rename-prefix for dual prefix resolution
+        local import_flags="--import-only"
+        if [[ "$repo_name" == "groovetech-media-player" ]]; then
+            import_flags="--import-only --rename-prefix"
+            echo "    🔧 GMP special case: adding --rename-prefix for dual prefix resolution"
+        fi
+
+        echo "    📥 Import: br sync $import_flags"
         if [[ "$DRY_RUN" == true ]]; then
-            echo "    [DRY-RUN] Would run: cd '$repo_dir' && br sync --import-only"
+            echo "    [DRY-RUN] Would run: cd '$repo_dir' && br sync $import_flags"
         else
+            local import_exit=0
             local import_output
-            import_output=$(cd "$repo_dir" && br sync --import-only 2>&1) || true
-            if echo "$import_output" | grep -qiE "^error|fatal|panic"; then
-                echo "    ❌ FAILED: br sync --import-only failed"
-                echo "    Error: $(echo "$import_output" | head -3)"
-                FAILED+=("$repo_name: import failed — $import_output")
+            import_output=$(cd "$repo_dir" && br sync $import_flags 2>&1) || import_exit=$?
+            if [[ "$import_exit" -ne 0 ]]; then
+                echo "    ❌ FAILED: br sync $import_flags exited $import_exit"
+                echo "    Output: $(echo "$import_output" | head -5)"
+                FAILED+=("$repo_name: import exit=$import_exit — $(echo "$import_output" | head -1)")
                 echo ""
                 return 1
             fi

@@ -9,17 +9,17 @@ if [ ! -d ".beads" ]; then
 fi
 
 cat <<'CONTEXT'
-# Beads Workflow Context
-
-> **Context Recovery**: This is injected by br-prime.sh hook
-> Runs on SessionStart and PreCompact when .beads/ detected
-
 # ⚠️ CRITICAL: br sync DIRECTION WARNING ⚠️
 
 **`br sync` (bare) = IMPORT. This OVERWRITES your database with JSONL contents.**
 **Use `br sync --flush-only` to EXPORT database state to JSONL.**
 
 Never run bare `br sync` unless you intend to import from JSONL.
+
+# Beads Workflow Context
+
+> **Context Recovery**: This is injected by br-prime.sh hook
+> Runs on SessionStart and PreCompact when .beads/ detected
 
 # 🚨 SESSION CLOSE PROTOCOL 🚨
 
@@ -43,6 +43,12 @@ Never run bare `br sync` unless you intend to import from JSONL.
 - Persistence you don't need beats lost context
 - Git workflow: hooks auto-sync, run `br sync --flush-only` at session end
 - Session management: check `br ready` for available work
+
+## ⚠️ Flag Changes from Previous Version
+- `--tags` → `--labels` (on create/update)
+- `-d` → `--description` (on update)
+- `tag <id> <label>` → `label add <id> <label>`
+- `sync` (bare) now means IMPORT — use `sync --flush-only` to EXPORT
 
 ## Essential Commands
 
