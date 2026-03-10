@@ -44,14 +44,15 @@ Detection uses br list DATABASE_ERROR check, not the original bd-based categorie
 
 **Script preflight**: Before any per-repo work, the script reads `configs/br-version.txt` and compares against `br --version`. If they differ, the script hard-fails with an error: "br version mismatch — expected X.Y.Z, got A.B.C. Update br or configs/br-version.txt before proceeding." This enforces R6 governance at the point of execution, not just documentation.
 
+<!-- REVISED during implementation: detection, GMP status, and ID check all updated -->
 **Per-repo procedure** (from spec 010 precedent):
-1. Detect: `br doctor` passes → skip entire repo (already migrated)
-2. Pre-flush: `bd sync --flush-only`. **If this fails AND `.beads/beads.db` exists with data (file size > 0)**, the script **hard-fails for that repo** with a prominent error and adds it to the "FAILED" list. The operator must investigate before that repo can proceed. The only exception is GMP (hardcoded special case), which is known-bricked — its pre-flush failure is expected and the script proceeds using existing JSONL as source of truth. Rationale: silent skip violates R1 (no data loss) because unflushed SQLite state would be lost.
+1. Detect: `br list` succeeds without `DATABASE_ERROR` → skip entire repo (already br-compatible)
+2. Pre-flush: `bd sync --flush-only`. **If exit code is non-zero AND `.beads/beads.db` exists with data (file size > 0)**, the script **hard-fails for that repo**. The operator must investigate before that repo can proceed. GMP has a hardcoded `--rename-prefix` path but is currently br-works (already migrated).
 3. `mv .beads/beads.db .beads/beads.db.bd-backup`
 4. `br init --prefix "$(basename $PWD)" --force`
-5. `br sync --import-only` (+ `--rename-prefix` for GMP)
-6. Verify: ID-set integrity check — `br list --all --json | jq -r '.[].id' | sort > /tmp/br-ids.txt` and `jq -r '.id' .beads/issues.jsonl | sort > /tmp/jsonl-ids.txt`, then `diff /tmp/br-ids.txt /tmp/jsonl-ids.txt`. Both sides produce newline-delimited sorted IDs in the same format. Any diff = hard-fail for that repo. Count match is a secondary confirmation (`wc -l` on both files), not the primary check.
-7. `br doctor` — all checks pass
+5. `br sync --import-only` (+ `--rename-prefix` for GMP if it ever needs re-migration)
+6. Verify: ID-set integrity check — `sqlite3 .beads/beads.db "SELECT id FROM issues ORDER BY id;"` vs `jq -r '.id' .beads/issues.jsonl | sort`, then `diff`. Both produce newline-delimited sorted IDs. Any diff = hard-fail. (Uses sqlite3 directly because `br list --all --json` caps at 50 results.)
+7. `br doctor` — informational check (known false positives on some schemas)
 
 Detection-first ordering prevents pre-flush from running `bd sync --flush-only` on already-migrated repos (agent-config), which would fail because bd can't read br's schema.
 
