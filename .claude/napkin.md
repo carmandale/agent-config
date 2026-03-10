@@ -88,6 +88,16 @@
 - Assuming README install behavior is fully current without checking `install.sh` and `install-all.sh` directly
 - Checking config file content matches baseline without verifying what that config DEPENDS ON (e.g., settings.json → hooks). Shallow verification creates false confidence.
 
+## Navigator Review Value (Reinforced)
+- **[2026-03-10] UltraKnight navigator review caught 4 real defects in spec 013 implementation**
+  - Exit-code detection: `|| true` was discarding flush failure exit codes (data-loss risk)
+  - Missing GMP `--rename-prefix` code (entirely absent, not just wrong)
+  - Sync direction warning not first line of hook output
+  - Flag migration changes undocumented in hook
+  - Plus 2 documentation drifts (plan.md contradicting implementation)
+  - Verdict: BLOCK was correct. All 4 fixes were necessary before fleet execution.
+  - Takeaway: Navigator review on implementation artifacts (not just plans) catches bugs that self-review misses. The adversarial posture matters.
+
 ## Beads (br — beads_rust)
 - **[2026-03-10] Fleet migration COMPLETE: 43 repos across laptop + mini (spec 013)**
   - `bd` binary REMOVED from both machines. Use `br` exclusively.
