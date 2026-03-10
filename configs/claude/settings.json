@@ -83,7 +83,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bd prime"
+            "command": "bash ~/.agent-config/configs/claude/hooks/br-prime.sh"
           }
         ]
       }
@@ -246,7 +246,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bd prime"
+            "command": "bash ~/.agent-config/configs/claude/hooks/br-prime.sh"
           }
         ]
       }

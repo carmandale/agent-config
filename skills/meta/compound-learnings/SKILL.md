@@ -168,13 +168,38 @@ EOF
 ```
 
 #### For Skills:
-Create `.claude/skills/<name>/SKILL.md` with:
-- Frontmatter (name, description, allowed-tools)
-- When to Use
-- Step-by-step instructions (executable)
-- Examples from the learnings
+Create `.claude/skills/<category>/<name>/SKILL.md`. Choose category with the decision rule: wraps CLI/API → `tools/`, analyzes/reviews → `review/`, orchestrates dev process → `workflows/`, technology-specific → `domain/<sub>/`, agent behavior → `meta/`.
 
-Add triggers to `skill-rules.json` if appropriate.
+**The YAML frontmatter is mandatory.** Without `description`, the skill is invisible to all agents. Use this exact template:
+
+```markdown
+---
+name: <skill-name>
+description: <What it does. Use when [specific triggers]. Handles [patterns].>
+---
+
+# Skill Title
+
+## When to Use
+
+- [trigger 1]
+- [trigger 2]
+
+## Process
+
+[Step-by-step instructions]
+
+## Evidence
+
+- [source session/spec]: [what happened]
+```
+
+The `description` field is the primary discovery mechanism — include what the skill does, when to use it (trigger phrases), and what patterns/keywords should activate it.
+
+After creating the skill, add a top-level discovery symlink:
+```bash
+ln -s <category>/<name> skills/<name>
+```
 
 #### For Hooks:
 Create shell wrapper + TypeScript handler:
