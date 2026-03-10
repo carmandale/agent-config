@@ -161,6 +161,13 @@ do_check() {
   check_dir "$CONFIGS/pi/extensions" "$HOME/.pi/agent/extensions"
 
   echo ""
+  echo "─── Pi Extension/Skill Collisions ───"
+  AGENT_CONFIG_SKILLS="$REPO_ROOT/skills"
+  source "$SCRIPT_DIR/lib/collision-check.sh"
+  check_extension_collisions
+  check_skill_collisions
+
+  echo ""
   echo "─── Claude Hooks (dependencies of settings.json) ───"
   # Parse settings.json for hook file paths and verify each one exists
   local settings="$CONFIGS/claude/settings.json"
@@ -198,7 +205,6 @@ do_check() {
   for link_target in \
     "$HOME/.pi/agent/prompts:$REPO_ROOT/commands" \
     "$HOME/.pi/agent/AGENTS.md:$REPO_ROOT/instructions/AGENTS.md" \
-    "$HOME/.pi/agent/skills:$REPO_ROOT/skills" \
     "$HOME/.claude/commands:$REPO_ROOT/commands" \
     "$HOME/.claude/CLAUDE.md:$REPO_ROOT/instructions/AGENTS.md" \
     "$HOME/.claude/skills:$REPO_ROOT/skills" \
