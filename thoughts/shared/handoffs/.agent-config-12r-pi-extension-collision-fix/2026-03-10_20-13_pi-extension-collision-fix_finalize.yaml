@@ -1,0 +1,78 @@
+---
+schema_version: "1.0.0"
+mode: finalize
+date: 2026-03-10T20:13:33.587Z
+session: ".agent-config-12r-pi-extension-collision-fix"
+outcome: "SUCCEEDED"
+primary_bead: ".agent-config-12r"
+---
+
+goal: "Fix pi-messenger extension collision (dual-load from extensions/ and settings.json packages) and add structural collision guard to bootstrap.sh and install.sh"
+now: "All tasks complete. PR #2 open. Collision removed, guard working on both machines, Codex-approved plan fully implemented."
+
+done_this_session:
+  - "Fixed 4 skills missing YAML frontmatter (fixup-restage, navigator-role, typescript-cross-boundary, upstream-contribution-hygiene)"
+  - "Fixed compound-learnings skill template to mandate YAML frontmatter for future skills"
+  - "Moved 4 skills to proper category subdirectories with top-level discovery symlinks"
+  - "Created bead .agent-config-12r and spec 012-pi-extension-collision"
+  - "Shaped solution (Shape C) with YoungXenon challenger — 3 rounds"
+  - "Planned with YoungXenon — 3 rounds, 2 blockers resolved"
+  - "Codex review — 2 rounds, 6 findings addressed, APPROVED"
+  - "Implemented with PureRaven navigator — 2 pre-commit issues caught and fixed"
+  - "Trashed stale ~/.pi/agent/extensions/pi-messenger/ (v0.13.0)"
+  - "Removed false-positive ~/.pi/agent/skills symlink check from bootstrap.sh"
+  - "Created scripts/lib/collision-check.sh shared helper (3 functions, 275 lines)"
+  - "Integrated guard into bootstrap.sh (detective) and install.sh (preventive)"
+  - "Cleaned 25 stale .backup.* files from extensions/"
+  - "Verified on both laptop and Mini via SSH"
+  - "PR #2 opened: https://github.com/carmandale/agent-config/pull/2"
+
+next:
+  - "Merge PR #2 after review"
+  - "T5.3 optional: remove stale ~/.pi/agent/skills/ directory (harmless, contains only redundant testflight symlink)"
+
+decisions:
+  - "Shape C selected over A/B/D — fix instance + structural guard in bootstrap.sh"
+  - "Shared helper (scripts/lib/) instead of duplicated logic — eliminates drift between bootstrap.sh and install.sh"
+  - "trash command for removal instead of executing stale install.mjs --remove (security)"
+  - "Backup cleanup threshold -mtime +5 (not +7) to catch all March 1/3 files"
+  - "AGENT_CONFIG_SKILLS set dynamically by each consumer, not hardcoded in helper"
+  - "log_err in install.sh writes to stdout (matching bootstrap.sh), not stderr"
+  - "C3 skill guard cut during planning (wrong premise), then restored by Codex review with two concrete vectors"
+  - "Do NOT create ~/.pi/agent/skills symlink — install.sh deliberately skips it to avoid double discovery"
+
+findings:
+  - "Pi extension collision class: same pattern as spec 005 (gj-tool skill collision) — two install mechanisms, overlapping discovery paths"
+  - "install.sh has explicit comments (lines 99, 183-184) explaining why ~/.pi/agent/skills symlink must NOT be created"
+  - "bootstrap.sh was checking for a symlink that should NOT exist — false positive since bootstrap.sh was written"
+  - "Mini has different packages path (relative ../../dev/pi-messenger-fork) — basename() handles both absolute and relative"
+  - "pi-messenger package declares pi.skills=['./skills'] with one skill (pi-messenger-crew) — no collision with agent-config currently"
+
+files:
+  - "scripts/lib/collision-check.sh (NEW — shared collision detection helper)"
+  - "scripts/bootstrap.sh (removed false-positive, added collision section)"
+  - "install.sh (added preventive collision check with log aliases)"
+  - "specs/012-pi-extension-collision/ (spec, plan, tasks, shaping transcript, codex review, log)"
+  - "skills/compound-learnings/SKILL.md (template fix for future skills)"
+  - "skills/fixup-restage/SKILL.md (added frontmatter, moved to workflows/)"
+  - "skills/navigator-role/SKILL.md (added frontmatter, moved to meta/)"
+  - "skills/typescript-cross-boundary/SKILL.md (added frontmatter, moved to domain/)"
+  - "skills/upstream-contribution-hygiene/SKILL.md (added frontmatter, moved to workflows/)"
+
+test:
+  - "bootstrap.sh check: 28 matched, 3 pre-existing drift, 0 missing, 0 collisions (laptop)"
+  - "bootstrap.sh check: 29 matched, 1 drift, 1 missing (pre-existing), 0 collisions (Mini)"
+  - "Extension collision detection: fake pi-design-deck dir → COLLISION reported ✓"
+  - "install.sh collision warning: same fake dir → warning on stdout ✓"
+  - "Skill Vector 2: fake test-fake-skill dir → POTENTIAL COLLISION reported ✓"
+  - "Pi startup: zero [Extension issues] output ✓"
+  - "Backup cleanup: 25 files → 0 files ✓"
+
+git:
+  branch: "fix/012-pi-extension-collision"
+  commits:
+    - "5806cc15 — docs(012): plan, tasks, codex-review, shaping transcript"
+    - "48ec4cad — fix(012): extension/skill collision guard + cleanup"
+    - "d8cd7fa9 — docs(012): mark all tasks complete, update log"
+  pr: "https://github.com/carmandale/agent-config/pull/2"
+  remote: "https://github.com/carmandale/agent-config.git"

@@ -190,6 +190,24 @@ if [[ -d "$SKILLS_DIR" ]]; then
 fi
 
 #==============================================================================
+# Pi Extension/Skill Collision Check (preventive — same logic as bootstrap.sh)
+#==============================================================================
+DRIFT=0  # Required by collision-check.sh
+AGENT_CONFIG_SKILLS="$SCRIPT_DIR/skills"
+# Aliases: collision-check.sh uses bootstrap.sh naming convention
+log_ok() { log_success "$@"; }
+log_err() { echo -e "${RED}✗${NC} $1"; }  # stdout, not stderr — matches bootstrap.sh behavior
+source "$SCRIPT_DIR/scripts/lib/collision-check.sh"
+
+_collision_drift=$DRIFT
+check_extension_collisions
+check_skill_collisions
+if [[ $DRIFT -gt $_collision_drift ]]; then
+    echo ""
+    log_warn "Collisions detected above. Fix before starting Pi."
+fi
+
+#==============================================================================
 # Git Hooks (auto-sync on commit)
 #==============================================================================
 HOOKS_DIR="$SCRIPT_DIR/hooks"
