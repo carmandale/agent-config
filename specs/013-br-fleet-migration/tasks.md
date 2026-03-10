@@ -56,10 +56,10 @@ bead: .agent-config-2gy
 ### Laptop fleet (38 remaining repos + 1 already-migrated + 1 bricked)
 
 - [x] 23. Run `scripts/migrate-to-br.sh` on laptop
-- [ ] 24. Review script summary: check repos migrated, skipped, failed. **Zero failures required to proceed** (any failure = investigate + fix + rerun before continuing).
-- [ ] 25. Spot-check 5+ repos: `br ready` AND `br list` works. Must include: GMP, 1 schema-drift, 1 Dolt-nag, 1 working, 1 high-issue repo (orchestrator or dcg)
-- [ ] 26. GMP specific: verify `br list --all` shows issues with `groovetech-media-player-*` prefixes, count ≥ 148
-- [ ] 27. For repos listed in script summary as "JSONL changes needing commit": review changes, `cd <repo> && git add .beads/issues.jsonl && git commit -m "chore: pre-br-migration bd flush" && git push`
+- [x] 24. Review script summary: check repos migrated, skipped, failed. **Zero failures required to proceed** (any failure = investigate + fix + rerun before continuing).
+- [x] 25. Spot-check 5+ repos: `br ready` AND `br list` works. Must include: GMP, 1 schema-drift, 1 Dolt-nag, 1 working, 1 high-issue repo (orchestrator or dcg)
+- [x] 26. GMP specific: verify `br list --all` shows issues with `groovetech-media-player-*` prefixes, count ≥ 148
+- [x] 27. For repos listed in script summary as "JSONL changes needing commit": review changes, `cd <repo> && git add .beads/issues.jsonl && git commit -m "chore: pre-br-migration bd flush" && git push`
 
 ### Mac mini (2 remaining repos)
 
@@ -70,36 +70,36 @@ bead: .agent-config-2gy
 
 ### Post-migration reminder
 
-- [ ] 32. Create bead for 30-day cleanup with due date 2026-04-10: "Remove bd binary, bd-backup files, bd from parity tool"
+- [x] 32. Create bead for 30-day cleanup with due date 2026-04-10: "Remove bd binary, bd-backup files, bd from parity tool"
 
 ## Phase 3: Deploy hooks + docs
 
 ### Hook deployment
 
-- [ ] 33. Update `configs/claude/settings.json`: lines 87 and 249 — `"command": "bd prime"` → `"command": "~/.claude/hooks/br-prime.sh"` (matches existing .sh hook format)
-- [ ] 34. Run `bootstrap.sh check` on laptop — verify no missing hooks
-- [ ] 35. Run `bootstrap.sh apply` on laptop — deploys br-prime.sh + updated settings.json
-- [ ] 36. Run `bootstrap.sh check` on laptop — verify all hooks present including br-prime.sh
+- [x] 33. Update `configs/claude/settings.json`: lines 87 and 249 — `"command": "bd prime"` → `"command": "~/.claude/hooks/br-prime.sh"` (matches existing .sh hook format)
+- [x] 34. Run `bootstrap.sh check` on laptop — verify no missing hooks
+- [x] 35. Run `bootstrap.sh apply` on laptop — deploys br-prime.sh + updated settings.json
+- [x] 36. Run `bootstrap.sh check` on laptop — verify all hooks present including br-prime.sh
 - [ ] 37. SSH to mini: `cd ~/.agent-config && git pull --ff-only`, then `bootstrap.sh check`, `bootstrap.sh apply`, `bootstrap.sh check`
 
 ### Documentation updates
 
-- [ ] 38. Delete `instructions/AGENTS_v1.md` (28 stale bd references)
-- [ ] 39. Update `instructions/AGENTS.md` §6: add line "Never run `br upgrade` without `--version <X.Y.Z>`. Both machines must be updated together."
-- [ ] 40. Update `tools-bin/agent-config-parity`: add `record_tool br` at line 220 (keep `record_tool bd` for 30-day window)
+- [x] 38. Delete `instructions/AGENTS_v1.md` (28 stale bd references)
+- [x] 39. Update `instructions/AGENTS.md` §6: add line "Never run `br upgrade` without `--version <X.Y.Z>`. Both machines must be updated together."
+- [x] 40. Update `tools-bin/agent-config-parity`: add `record_tool br` at line 220 (keep `record_tool bd` for 30-day window)
 
 ### Verification
 
-- [ ] 41. `rg '\bbd\b' instructions/AGENTS.md` — zero hits
-- [ ] 42. `grep "bd prime" configs/claude/settings.json` — zero hits
-- [ ] 43. `grep "bd prime" ~/.claude/settings.json` — zero hits on BOTH machines (repo config AND live deployed config)
-- [ ] 44. `rg '\bbd\b' configs/claude/settings.json configs/claude/hooks/` — zero hits (no stale bd references in hook configs)
+- [x] 41. `rg '\bbd\b' instructions/AGENTS.md` — zero hits
+- [x] 42. `grep "bd prime" configs/claude/settings.json` — zero hits
+- [x] 43. `grep "bd prime" ~/.claude/settings.json` — zero hits on BOTH machines (repo config AND live deployed config)
+- [x] 44. `rg '\bbd\b' configs/claude/settings.json configs/claude/hooks/` — zero hits (no stale bd references in hook configs)
 - [ ] 45. `rg '\bbd\b' ~/.claude/settings.json` AND `rg '\bbd\b' ~/.claude/hooks/` — zero hits on BOTH machines (live deployed state)
-- [ ] 46. Run `agent-config-parity snapshot` on laptop → verify `tool.br.version` = `0.1.24`
+- [x] 46. Run `agent-config-parity snapshot` on laptop → verify `tool.br.version` = `0.1.24`
 
 ### Commit + push
 
-- [ ] 47. Commit all Phase 3 changes: settings.json update, AGENTS_v1.md deletion, AGENTS.md §6 update, parity tool update
+- [x] 47. Commit all Phase 3 changes: settings.json update, AGENTS_v1.md deletion, AGENTS.md §6 update, parity tool update
 - [ ] 48. Push to origin. Mini pulls + applies.
 
 ## Phase 4: 30-day cleanup (2026-04-10)
