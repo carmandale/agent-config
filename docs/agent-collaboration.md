@@ -59,6 +59,14 @@ This blocks until the collaborator joins the mesh and is ready to receive messag
 
 The `agent` parameter must be a crew agent with `crewRole: collaborator` (e.g., `crew-challenger`). The `prompt` should include specific file paths to read and the context the collaborator needs — do NOT tell them to `/ground` themselves.
 
+### ⚠️ Wait for the collaborator's first message
+
+After spawn returns, the collaborator is processing its initial prompt — reading files, analyzing context, composing its first response. **Do NOT send additional messages until the collaborator sends its first message to you.** This takes **3–10 minutes** on large codebases.
+
+- **Do not ping.** Silence means "processing," not "stuck."
+- **Do not dismiss before 5 minutes minimum.** Challengers on large repos (GMP, Orchestrator) routinely need 5–10 minutes for their first response.
+- **To check if actually stuck:** Look at the collaborator's registry entry — if `session.toolCalls` or `session.tokens` are still increasing, it's working. Flat counts for 3+ minutes with no message = potentially stuck.
+
 ### 2. Exchange messages
 
 Same as Mode 1 — send messages, receive replies via steering prompts. Use phase markers:
