@@ -91,7 +91,6 @@ The `install.sh` script creates symlinks from each agent's config location to th
 ~/.claude/skills         → ~/.agent-config/skills
 ~/.agents/skills         → ~/.agent-config/skills  (Codex + Gemini)
 ~/.config/agent-skills   → ~/.agent-config/skills
-~/.pi/agent/skills       → ~/.agent-config/skills
 ```
 
 ## Dual Instructions Support
@@ -385,7 +384,6 @@ All agents point to the same unified location:
 ~/.claude/skills        → ~/.agent-config/skills
 ~/.agents/skills        → ~/.agent-config/skills  (Codex + Gemini)
 ~/.config/agent-skills  → ~/.agent-config/skills
-~/.pi/agent/skills      → ~/.agent-config/skills
 ```
 
 ### Adding Skills
