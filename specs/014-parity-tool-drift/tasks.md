@@ -16,11 +16,11 @@
 
 ## Phase 2: Extend Symlink Parity Test
 
-- [ ] 8. Add `PARITY_TOOL="$REPO_ROOT/tools-bin/agent-config-parity"` path variable
-- [ ] 9. Add section 7: extract managed path destinations from parity tool using `record_managed_path` grep pattern
-- [ ] 10. Add assertion: every install.sh symlink is tracked by parity tool
-- [ ] 11. Add assertion: every parity tool managed path exists in install.sh
-- [ ] 12. Add assertion: install.sh and parity tool have same count
+- [x] 8. Add `PARITY_TOOL="$REPO_ROOT/tools-bin/agent-config-parity"` path variable
+- [x] 9. Add section 7: extract managed path destinations from parity tool using `record_managed_path` grep pattern
+- [x] 10. Add assertion: every install.sh symlink is tracked by parity tool
+- [x] 11. Add assertion: every parity tool managed path exists in install.sh
+- [x] 12. Add assertion: install.sh and parity tool have same count
 
 ## Phase 3: Fix README Stale Entries
 

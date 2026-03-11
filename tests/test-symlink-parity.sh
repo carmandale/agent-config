@@ -20,6 +20,7 @@ REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 INSTALL_SH="$REPO_ROOT/install.sh"
 BOOTSTRAP_SH="$REPO_ROOT/scripts/bootstrap.sh"
 README_MD="$REPO_ROOT/README.md"
+PARITY_TOOL="$REPO_ROOT/tools-bin/agent-config-parity"
 
 # Colors
 RED='\033[0;31m'
@@ -55,7 +56,8 @@ section() {
 INSTALL_PATHS=$(mktemp)
 BOOTSTRAP_PATHS=$(mktemp)
 README_HOW_PATHS=$(mktemp)
-cleanup() { rm -f "$INSTALL_PATHS" "$BOOTSTRAP_PATHS" "$README_HOW_PATHS"; }
+PARITY_PATHS=$(mktemp)
+cleanup() { rm -f "$INSTALL_PATHS" "$BOOTSTRAP_PATHS" "$README_HOW_PATHS" "$PARITY_PATHS"; }
 trap cleanup EXIT
 
 echo -e "${BOLD}Symlink Parity Test Suite${NC}"
@@ -69,6 +71,7 @@ section "1. Source files exist"
 assert "install.sh exists" "[[ -f '$INSTALL_SH' ]]"
 assert "bootstrap.sh exists" "[[ -f '$BOOTSTRAP_SH' ]]"
 assert "README.md exists" "[[ -f '$README_MD' ]]"
+assert "agent-config-parity exists" "[[ -f '$PARITY_TOOL' ]]"
 
 #==============================================================================
 section "2. Extract symlink paths from each source"
@@ -116,6 +119,19 @@ sed -n '/^## How It Works/,/^## /p' "$README_MD" \
 README_COUNT=$(wc -l < "$README_HOW_PATHS" | tr -d ' ')
 assert "README 'How It Works' has symlink entries ($README_COUNT found)" \
   "[[ $README_COUNT -gt 0 ]]"
+
+# agent-config-parity: extract managed path destinations from record_managed_path calls
+# Pattern: record_managed_path "key" "$HOME/.path/to/thing" "$repo_dir/..."
+# Captures the second argument (the $HOME/... path), strips $HOME/
+grep 'record_managed_path "' "$PARITY_TOOL" \
+  | grep -v '^record_managed_path()' \
+  | sed -n 's/.*"\$HOME\/\([^"]*\)".*/\1/p' \
+  | sort \
+  > "$PARITY_PATHS"
+
+PARITY_COUNT=$(wc -l < "$PARITY_PATHS" | tr -d ' ')
+assert "parity tool has managed path entries ($PARITY_COUNT found)" \
+  "[[ $PARITY_COUNT -gt 0 ]]"
 
 #==============================================================================
 section "3. install.sh ↔ bootstrap.sh parity"
@@ -168,7 +184,7 @@ assert "install.sh and README have same count ($INSTALL_COUNT vs $README_COUNT)"
   "[[ '$INSTALL_COUNT' == '$README_COUNT' ]]"
 
 #==============================================================================
-section "5. All three sources agree"
+section "5. All four sources agree"
 #==============================================================================
 
 ALL_MATCH="true"
@@ -178,8 +194,11 @@ fi
 if ! diff -q "$INSTALL_PATHS" "$README_HOW_PATHS" >/dev/null 2>&1; then
   ALL_MATCH="false"
 fi
+if ! diff -q "$INSTALL_PATHS" "$PARITY_PATHS" >/dev/null 2>&1; then
+  ALL_MATCH="false"
+fi
 
-assert "install.sh, bootstrap.sh, and README all have identical symlink sets" \
+assert "install.sh, bootstrap.sh, README, and parity tool all have identical symlink sets" \
   "[[ '$ALL_MATCH' == 'true' ]]"
 
 #==============================================================================
@@ -202,6 +221,31 @@ while IFS= read -r rel_path; do
     assert "$label is MISSING (install.sh needs re-run)" "false"
   fi
 done < "$INSTALL_PATHS"
+
+#==============================================================================
+section "7. install.sh ↔ parity tool managed paths"
+#==============================================================================
+
+# Every path in install.sh must be tracked by parity tool
+INSTALL_NOT_IN_PARITY=$(comm -23 "$INSTALL_PATHS" "$PARITY_PATHS")
+if [[ -n "$INSTALL_NOT_IN_PARITY" ]]; then
+  echo -e "  ${RED}In install.sh but NOT in parity tool:${NC}"
+  echo "$INSTALL_NOT_IN_PARITY" | while read -r p; do echo "    - $p"; done
+fi
+assert "every install.sh symlink is tracked by parity tool" \
+  "[[ -z '$INSTALL_NOT_IN_PARITY' ]]"
+
+# Every parity tool managed path should exist in install.sh
+PARITY_NOT_IN_INSTALL=$(comm -13 "$INSTALL_PATHS" "$PARITY_PATHS")
+if [[ -n "$PARITY_NOT_IN_INSTALL" ]]; then
+  echo -e "  ${RED}In parity tool but NOT in install.sh:${NC}"
+  echo "$PARITY_NOT_IN_INSTALL" | while read -r p; do echo "    - $p"; done
+fi
+assert "every parity tool managed path exists in install.sh" \
+  "[[ -z '$PARITY_NOT_IN_INSTALL' ]]"
+
+assert "install.sh and parity tool have same count ($INSTALL_COUNT vs $PARITY_COUNT)" \
+  "[[ '$INSTALL_COUNT' == '$PARITY_COUNT' ]]"
 
 #==============================================================================
 # Report
