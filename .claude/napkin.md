@@ -82,6 +82,8 @@
 - Use `tools-bin/agent-config-parity` snapshots plus `compare` to validate parity and external-surface/tool-version drift
 - Upgrade toolchain on both machines from Homebrew before parity snapshots when strict version sync matters
 - **Shared helper for multi-consumer logic**: When two scripts need the same check (bootstrap.sh detective + install.sh preventive), extract to `scripts/lib/*.sh` and source from both. Callers set dynamic paths before sourcing (e.g., `AGENT_CONFIG_SKILLS="$REPO_ROOT/skills"`). Eliminates drift — one file, zero duplicated logic. Proven in spec 012.
+- **Automated diff tests beat "keep in sync" comments**: When 4 sources (install.sh, bootstrap.sh, README, parity tool) must list the same paths, a test that extracts from each and diffs them is the only reliable coupling. Comments get ignored. Codex review independently identified this as the R1 top finding. See `tests/test-symlink-parity.sh` section 7 and rule `structural-coupling.md`. Proven in spec 014.
+- **Codex review catches structural plan weaknesses**: In spec 014, Codex R1 found 5 issues the original plan missed — most importantly that "comment-only coupling" is not structural enforcement. The two-round review loop (REVISE → APPROVED) produced a materially stronger plan. Worth the extra round.
 
 ## Patterns That Don't Work
 - Individual per-skill symlinks - get stale when new skills are added to repo
@@ -106,6 +108,11 @@
   - Plus 2 documentation drifts (plan.md contradicting implementation)
   - Verdict: BLOCK was correct. All 4 fixes were necessary before fleet execution.
   - Takeaway: Navigator review on implementation artifacts (not just plans) catches bugs that self-review misses. The adversarial posture matters.
+
+- **[2026-03-10] FastLion navigator review validated spec 014 implementation**
+  - 5 concrete validation checks with evidence: path count match (11 vs 11), regex extraction verified by running it, normalizePath edge cases tested (4 inputs), README removal diffed for adjacent-line damage, full diff read
+  - Verdict: APPROVED — clean implementation, one non-blocking observation (Dropbox account name assumption, correctly out of scope)
+  - Takeaway: A clean navigator review is still valuable — it proves the work was checked, not just claimed.
 
 ## Beads (br — beads_rust)
 - **[2026-03-10] Fleet migration COMPLETE: 43 repos across laptop + mini (spec 013)**
@@ -139,5 +146,6 @@
   - Skills: `~/.agents/skills/` (shared with Codex)
   - Commands: `~/.gemini/commands/*.toml` (TOML format, NOT Markdown — requires conversion)
   - Commands use `prompt = '''...'''` (literal strings) and optional `description = "..."`
+- **Path canonicalization order** (for security/bypass resistance): (1) strip `@`, (2) expand `~/`, (3) `resolve()`. Order matters — `@~/bin/gj` fails if you try `~` expansion before `@` stripping. Proven in spec 014, installed-binary-guard.ts.
 - **Mini SSH**: `ssh mini-ts` (user `chipcarman`, host `chips-mac-mini`)
 - **Mini update procedure**: `ssh mini-ts "cd ~/.agent-config && git pull --ff-only && ./install.sh"`
