@@ -158,7 +158,7 @@ generate_snapshot() {
     host_name="$(scutil --get ComputerName 2>/dev/null || hostname)"
 
     {
-        emit "snapshot.version" "1"
+        emit "snapshot.version" "2"
         emit "snapshot.generated_at_utc" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
         emit "snapshot.host" "$host_name"
         emit "snapshot.user" "${USER:-unknown}"
@@ -183,18 +183,20 @@ generate_snapshot() {
             emit "system.macos.build" "$(sw_vers -buildVersion)"
         fi
 
-        # Managed by install.sh
-        record_managed_path "pi_commands" "$HOME/.pi/agent/commands" "$repo_dir/commands"
+        # COUPLED: These paths MUST match install.sh create_symlink calls.
+        # Automated guard: tests/test-symlink-parity.sh verifies all 4 sources agree.
+        # If you add/remove/rename a path here, also update install.sh, bootstrap.sh, README.md.
+        record_managed_path "pi_prompts" "$HOME/.pi/agent/prompts" "$repo_dir/commands"
         record_managed_path "pi_instructions" "$HOME/.pi/agent/AGENTS.md" "$repo_dir/instructions/AGENTS.md"
         record_managed_path "claude_commands" "$HOME/.claude/commands" "$repo_dir/commands"
         record_managed_path "claude_instructions" "$HOME/.claude/CLAUDE.md" "$repo_dir/instructions/AGENTS.md"
         record_managed_path "codex_prompts" "$HOME/.codex/prompts" "$repo_dir/commands"
         record_managed_path "codex_instructions" "$HOME/.codex/AGENTS.md" "$repo_dir/instructions/AGENTS.md"
+        record_managed_path "gemini_instructions" "$HOME/.gemini/GEMINI.md" "$repo_dir/instructions/AGENTS.md"
         record_managed_path "opencode_commands" "$HOME/.config/opencode/commands" "$repo_dir/commands"
         record_managed_path "claude_skills" "$HOME/.claude/skills" "$repo_dir/skills"
-        record_managed_path "codex_skills" "$HOME/.codex/skills" "$repo_dir/skills"
+        record_managed_path "agents_skills" "$HOME/.agents/skills" "$repo_dir/skills"
         record_managed_path "agent_skills" "$HOME/.config/agent-skills" "$repo_dir/skills"
-        record_managed_path "pi_skills" "$HOME/.pi/agent/skills" "$repo_dir/skills"
 
         # Outside .agent-config (important for full parity)
         record_external_path "claude_settings" "$HOME/.claude/settings.json" "agent-local settings/hook config"
