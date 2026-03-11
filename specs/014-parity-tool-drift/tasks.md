@@ -24,8 +24,8 @@
 
 ## Phase 3: Fix README Stale Entries
 
-- [ ] 13. Remove `~/.pi/agent/skills → ~/.agent-config/skills` from "How It Works" symlink map (~line 94)
-- [ ] 14. Remove `~/.pi/agent/skills → ~/.agent-config/skills` from "Skills (Unified)" symlinks section (~line 388)
+- [x] 13. Remove `~/.pi/agent/skills → ~/.agent-config/skills` from "How It Works" symlink map (~line 94)
+- [x] 14. Remove `~/.pi/agent/skills → ~/.agent-config/skills` from "Skills (Unified)" symlinks section (~line 388)
 
 ## Phase 4: Fix Hardcoded Paths in Extension
 
