@@ -37,9 +37,9 @@
 
 ## Phase 5: Verify
 
-- [ ] 20. Run `tests/test-symlink-parity.sh` — all assertions pass including new section 7
-- [ ] 21. Run `agent-config-parity snapshot` — all managed paths report `ok`
-- [ ] 22. Run `scripts/bootstrap.sh check` — symlinks section matches
-- [ ] 23. Verify `snapshot.version=2` in parity output
-- [ ] 24. Verify `grep 'pi/agent/skills' README.md` returns empty (stale entry removed)
-- [ ] 25. Commit: `fix(014): align parity tool with install.sh, extend test guard, fix extension paths`
+- [x] 20. Run `tests/test-symlink-parity.sh` — all assertions pass including new section 7
+- [x] 21. Run `agent-config-parity snapshot` — all managed paths report `ok`
+- [x] 22. Run `scripts/bootstrap.sh check` — symlinks section matches
+- [x] 23. Verify `snapshot.version=2` in parity output
+- [x] 24. Verify `grep 'pi/agent/skills' README.md` returns empty (stale entry removed)
+- [x] 25. Commit: `fix(014): align parity tool with install.sh, extend test guard, fix extension paths`
