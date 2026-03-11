@@ -5,25 +5,33 @@
  * Prevents the pattern of editing ~/bin/* directly instead of tracked source.
  */
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import { homedir } from "node:os";
+import { join, resolve } from "node:path";
+
+const HOME = homedir();
 
 // Map of installed paths → source repo locations
 const BINARY_SOURCE_MAP: Record<string, { source: string; install: string }> = {
-  "/Users/dalecarman/bin/gj": {
-    source: "/Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/gj-tool/bin/gj",
-    install: 'cd "/Users/dalecarman/Groove Jones Dropbox/Dale Carman/Projects/dev/gj-tool" && ./install.sh',
+  [join(HOME, "bin", "gj")]: {
+    source: join(HOME, "Groove Jones Dropbox/Dale Carman/Projects/dev/gj-tool/bin/gj"),
+    install: `cd "${join(HOME, "Groove Jones Dropbox/Dale Carman/Projects/dev/gj-tool")}" && ./install.sh`,
   },
   // Add more mappings as needed
 };
 
 function normalizePath(path: string): string {
-  if (path.startsWith("~/")) {
-    return path.replace("~", "/Users/dalecarman");
+  // Canonicalization order matters for bypass resistance:
+  // 1. Strip leading @ (some models prepend it)
+  // 2. Expand ~/ to home directory
+  // 3. Resolve to absolute canonical path
+  let p = path;
+  if (p.startsWith("@")) {
+    p = p.slice(1);
   }
-  // Strip leading @ (some models include it)
-  if (path.startsWith("@")) {
-    return path.slice(1);
+  if (p.startsWith("~/")) {
+    p = join(HOME, p.slice(2));
   }
-  return path;
+  return resolve(p);
 }
 
 export default function (pi: ExtensionAPI) {

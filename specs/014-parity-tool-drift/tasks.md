@@ -29,11 +29,11 @@
 
 ## Phase 4: Fix Hardcoded Paths in Extension
 
-- [ ] 15. Add `import { homedir } from "node:os"` and `import { join, resolve } from "node:path"` to `installed-binary-guard.ts`
-- [ ] 16. Build `BINARY_SOURCE_MAP` keys dynamically using `join(homedir(), "bin", "gj")`
-- [ ] 17. Build source and install values dynamically using `homedir()` — preserve Dropbox path structure as relative to home
-- [ ] 18. Fix `normalizePath()` canonicalization order: (1) strip `@`, (2) expand `~/` with `homedir()`, (3) `resolve()` to absolute
-- [ ] 19. Verify no `/Users/dalecarman` literals remain: `grep -c '/Users/' configs/pi/extensions/installed-binary-guard.ts` → 0
+- [x] 15. Add `import { homedir } from "node:os"` and `import { join, resolve } from "node:path"` to `installed-binary-guard.ts`
+- [x] 16. Build `BINARY_SOURCE_MAP` keys dynamically using `join(homedir(), "bin", "gj")`
+- [x] 17. Build source and install values dynamically using `homedir()` — preserve Dropbox path structure as relative to home
+- [x] 18. Fix `normalizePath()` canonicalization order: (1) strip `@`, (2) expand `~/` with `homedir()`, (3) `resolve()` to absolute
+- [x] 19. Verify no `/Users/dalecarman` literals remain: `grep -c '/Users/' configs/pi/extensions/installed-binary-guard.ts` → 0
 
 ## Phase 5: Verify
 
