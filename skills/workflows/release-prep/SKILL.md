@@ -1,6 +1,6 @@
 ---
-name: release
-description: Release preparation workflow - security audit → E2E tests → review → changelog → docs
+name: release-prep
+description: Release preparation workflow - security audit → E2E tests → review → changelog → docs. Use when preparing a release, not project-specific release management.
 ---
 
 # /release - Release Workflow
