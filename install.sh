@@ -185,7 +185,7 @@ if [[ -d "$SKILLS_DIR" ]]; then
     create_symlink "$SKILLS_DIR" "$HOME/.config/agent-skills"
     
     echo ""
-    log_info "Skills unified: $(find "$SKILLS_DIR" -mindepth 2 -maxdepth 2 -type d | wc -l | tr -d ' ') skills across $(ls -1 "$SKILLS_DIR" | wc -l | tr -d ' ') categories"
+    log_info "Skills unified: $(find "$SKILLS_DIR" -name "SKILL.md" | wc -l | tr -d ' ') skills across $(find "$SKILLS_DIR" -maxdepth 1 -mindepth 1 -type d -not -name '.*' | wc -l | tr -d ' ') categories"
     echo ""
 fi
 

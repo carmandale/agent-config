@@ -11,21 +11,21 @@ bead: .agent-config-1pz
 
 ## Phase 1: Prepare (non-breaking)
 
-- [ ] **1.1** Rename `skills/workflows/release/` → `skills/workflows/release-prep/`
-- [ ] **1.2** Update `skills/workflows/release-prep/SKILL.md` frontmatter: `name: release` → `name: release-prep`, update description
-- [ ] **1.3** Move `skills/apple-notes/` → `skills/tools/apple-notes/`
-- [ ] **1.4** Move `skills/machine-parity/` → `skills/tools/machine-parity/`
-- [ ] **1.5** Move `skills/mini-sync/` → `skills/tools/mini-sync/`
-- [ ] **1.6** Verify: `find skills/ -maxdepth 1 -type d -not -name skills -not -name '.*'` returns only category dirs (tools, review, workflows, meta, domain)
-- [ ] **1.7** Commit Phase 1: `fix(015): rename release→release-prep, move orphan skills to categories`
+- [x] **1.1** Rename `skills/workflows/release/` → `skills/workflows/release-prep/`
+- [x] **1.2** Update `skills/workflows/release-prep/SKILL.md` frontmatter: `name: release` → `name: release-prep`, update description
+- [x] **1.3** Move `skills/apple-notes/` → `skills/tools/apple-notes/`
+- [x] **1.4** Move `skills/machine-parity/` → `skills/tools/machine-parity/`
+- [x] **1.5** Move `skills/mini-sync/` → `skills/tools/mini-sync/`
+- [x] **1.6** Verify: `find skills/ -maxdepth 1 -type d -not -name skills -not -name '.*'` returns only category dirs (tools, review, workflows, meta, domain)
+- [x] **1.7** Commit Phase 1: `fix(015): rename release→release-prep, move orphan skills to categories`
 
 ## Phase 2: Atomic structural change (MUST be single commit)
 
-- [ ] **2.1** Delete all discovery symlinks: `find skills/ -maxdepth 1 -type l -delete`
-- [ ] **2.2** Verify zero symlinks remain: `find skills/ -maxdepth 1 -type l | wc -l` = 0
-- [ ] **2.3** Verify all skills still reachable: `find skills/ -name "SKILL.md" | wc -l` = current count
-- [ ] **2.4** Update `scripts/lib/collision-check.sh` Vector 1: replace flat check with recursive find (`find "$AGENT_CONFIG_SKILLS" -name "$skill_name" -type d -print -quit`)
-- [ ] **2.5** Commit Phase 2 (B1 + B1b together): `fix(015): remove 261 discovery symlinks, update collision guard to recursive find`
+- [x] **2.1** Delete all discovery symlinks: `find skills/ -maxdepth 1 -type l -delete`
+- [x] **2.2** Verify zero symlinks remain: `find skills/ -maxdepth 1 -type l | wc -l` = 0
+- [x] **2.3** Verify all skills still reachable: `find skills/ -name "SKILL.md" | wc -l` = current count
+- [x] **2.4** Update `scripts/lib/collision-check.sh` Vector 1: replace flat check with recursive find (`find "$AGENT_CONFIG_SKILLS" -name "$skill_name" -type d -print -quit`)
+- [x] **2.5** Commit Phase 2 (B1 + B1b together): `fix(015): remove 261 discovery symlinks, update collision guard to recursive find`
 
 ## Phase 3: Guards and cleanup
 

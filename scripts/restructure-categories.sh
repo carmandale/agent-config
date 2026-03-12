@@ -330,95 +330,13 @@ for old_dir in skills/cc3 skills/personal skills/ralph-o skills/compound skills/
 done
 
 # ─────────────────────────────────────────────────────────────
-# PHASE 6: Regenerate discovery symlinks
+# PHASE 6 (REMOVED — spec 015): Discovery symlinks were removed because they
+# cause self-collision for recursive scanners (Pi, Claude Code, Codex, Gemini).
+# All agents discover skills via recursive SKILL.md scan of category dirs.
+# Do NOT recreate top-level symlinks.
 # ─────────────────────────────────────────────────────────────
 
-info "Phase 6: Regenerating top-level discovery symlinks"
-
-SYMLINKS_CREATED=0
-SYMLINK_COLLISIONS=0
-
-# Track which names have been claimed
-declare -A CLAIMED
-
-# Process categories in priority order (highest priority last, so they win)
-# Priority: domain/ < meta/ < workflows/ < review/ < tools/
-CATEGORY_ORDER=(
-  "domain/other"
-  "domain/math"
-  "domain/agentica"
-  "domain/gitnexus"
-  "domain/notion"
-  "domain/ralph"
-  "domain/compound"
-  "domain/swift"
-  "meta"
-  "workflows"
-  "review"
-  "tools"
-)
-
-for category in "${CATEGORY_ORDER[@]}"; do
-  cat_path="skills/$category"
-  [[ -d "$cat_path" ]] || continue
-
-  for skill_dir in "$cat_path"/*/; do
-    [[ -d "$skill_dir" ]] || continue
-    skill_name=$(basename "$skill_dir")
-
-    # Skip internal dirs
-    [[ "$skill_name" == _* ]] && continue
-
-    link="skills/$skill_name"
-
-    if [[ -n "${CLAIMED[$skill_name]:-}" ]]; then
-      # Higher priority category claims this name — overwrite
-      if $DRY; then
-        log "[dry-run] overwrite symlink: $skill_name (${CLAIMED[$skill_name]} → $category/$skill_name)"
-      else
-        rm -f "$link"
-      fi
-      SYMLINK_COLLISIONS=$((SYMLINK_COLLISIONS + 1))
-    fi
-
-    do_create_symlink "$category/$skill_name" "$link"
-    CLAIMED[$skill_name]="$category"
-    SYMLINKS_CREATED=$((SYMLINKS_CREATED + 1))
-  done
-done
-
-# Handle shaping submodule skills (special paths)
-# breadboarding, breadboard-reflection, shaping are inside shaping-skills submodule
-for sub_skill in breadboarding breadboard-reflection shaping; do
-  sub_path="domain/shaping/shaping-skills/$sub_skill"
-  if [[ -d "skills/$sub_path" ]]; then
-    link="skills/$sub_skill"
-    [[ -L "$link" ]] && do_rm_symlink "$link"
-    do_create_symlink "$sub_path" "$link"
-    CLAIMED[$sub_skill]="domain/shaping"
-    SYMLINKS_CREATED=$((SYMLINKS_CREATED + 1))
-  fi
-done
-
-# napkin is directly in shaping submodule
-if [[ -d "skills/domain/shaping/napkin" ]]; then
-  link="skills/napkin"
-  [[ -L "$link" ]] && do_rm_symlink "$link"
-  do_create_symlink "domain/shaping/napkin" "$link"
-  CLAIMED[napkin]="domain/shaping"
-  SYMLINKS_CREATED=$((SYMLINKS_CREATED + 1))
-fi
-
-# tools/last30days submodule
-if [[ -d "skills/tools/last30days" ]]; then
-  link="skills/last30days"
-  [[ -L "$link" ]] && do_rm_symlink "$link"
-  do_create_symlink "tools/last30days" "$link"
-  CLAIMED[last30days]="tools"
-  SYMLINKS_CREATED=$((SYMLINKS_CREATED + 1))
-fi
-
-info "Created $SYMLINKS_CREATED symlinks ($SYMLINK_COLLISIONS name collisions resolved by priority)"
+info "Phase 6: Skipped — discovery symlinks removed (spec 015)"
 
 # ─────────────────────────────────────────────────────────────
 # PHASE 7: Verification

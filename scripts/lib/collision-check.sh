@@ -241,7 +241,7 @@ for skill_rel in pi.get('skills', []):
           collision_count=$((collision_count + 1))
           log_err "SKILL COLLISION: '$skill_name' declared by package '$pkg_name' AND exists in agent-config"
           log_err "    package: $pkg_path/skills/*/$skill_name"
-          log_err "    agent-config: $AGENT_CONFIG_SKILLS/$skill_name"
+          log_err "    agent-config: $(find "$AGENT_CONFIG_SKILLS" -name "$skill_name" -type d -print -quit)"
           DRIFT=$((DRIFT + 1))
         fi
       done <<< "$skills_dirs"
@@ -264,6 +264,52 @@ for skill_rel in pi.get('skills', []):
         log_warn "    path: $entry"
         log_warn "    This may duplicate a skill already managed via ~/.agents/skills/"
         log_warn "    Fix: trash ${entry%/}"
+        DRIFT=$((DRIFT + 1))
+      fi
+    done
+  fi
+
+  # --- Vector 3: Loopback symlinks in ~/.pi/agent/skills/ pointing into agent-config ---
+  # These create a redundant second discovery path for the same skill,
+  # causing cross-source collision (e.g., testflight — spec 005).
+  if [[ -d "$PI_SKILLS" ]]; then
+    for entry in "$PI_SKILLS"/*/; do
+      [[ -L "${entry%/}" ]] || continue
+      local resolved
+      resolved=$(cd "${entry%/}" && pwd -P 2>/dev/null) || continue
+      if [[ "$resolved" == */.agent-config/skills/* ]]; then
+        collision_count=$((collision_count + 1))
+        log_warn "LOOPBACK: '$(basename "$entry")' in ~/.pi/agent/skills/ points into agent-config"
+        log_warn "    symlink: ${entry%/}"
+        log_warn "    resolves to: $resolved"
+        log_warn "    Fix: trash ${entry%/}"
+        DRIFT=$((DRIFT + 1))
+      fi
+    done
+  fi
+
+  # --- Vector 4: Broad cross-source collision check ---
+  # Any entry in ~/.pi/agent/skills/ (symlink or dir) whose basename matches
+  # an agent-config skill name at any depth. Catches manual symlinks, package
+  # installs, and direct copies that Vector 1 and 2 miss.
+  if [[ -d "$PI_SKILLS" ]]; then
+    for entry in "$PI_SKILLS"/*/; do
+      [[ -d "$entry" ]] || continue
+      local entry_name
+      entry_name=$(basename "$entry")
+      # Skip loopbacks (already caught by Vector 3)
+      if [[ -L "${entry%/}" ]]; then
+        local resolved
+        resolved=$(cd "${entry%/}" && pwd -P 2>/dev/null) || continue
+        [[ "$resolved" == */.agent-config/skills/* ]] && continue
+      fi
+      # Check if this name exists anywhere in agent-config skills
+      if find "$AGENT_CONFIG_SKILLS" -name "$entry_name" -type d -print -quit 2>/dev/null | grep -q .; then
+        collision_count=$((collision_count + 1))
+        log_err "CROSS-SOURCE COLLISION: '$entry_name' exists in both ~/.pi/agent/skills/ and agent-config"
+        log_err "    pi-skills: ${entry%/}"
+        log_err "    agent-config: $(find "$AGENT_CONFIG_SKILLS" -name "$entry_name" -type d -print -quit)"
+        log_err "    Fix: rename one of them to avoid name conflict"
         DRIFT=$((DRIFT + 1))
       fi
     done
