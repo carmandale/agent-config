@@ -277,7 +277,7 @@ for skill_rel in pi.get('skills', []):
       [[ -L "${entry%/}" ]] || continue
       local resolved
       resolved=$(cd "${entry%/}" && pwd -P 2>/dev/null) || continue
-      if [[ "$resolved" == */.agent-config/skills/* ]]; then
+      if [[ "$resolved" == "$AGENT_CONFIG_SKILLS"* ]]; then
         collision_count=$((collision_count + 1))
         log_warn "LOOPBACK: '$(basename "$entry")' in ~/.pi/agent/skills/ points into agent-config"
         log_warn "    symlink: ${entry%/}"
@@ -301,7 +301,7 @@ for skill_rel in pi.get('skills', []):
       if [[ -L "${entry%/}" ]]; then
         local resolved
         resolved=$(cd "${entry%/}" && pwd -P 2>/dev/null) || continue
-        [[ "$resolved" == */.agent-config/skills/* ]] && continue
+        [[ "$resolved" == "$AGENT_CONFIG_SKILLS"* ]] && continue
       fi
       # Check if this name exists anywhere in agent-config skills
       if find "$AGENT_CONFIG_SKILLS" -name "$entry_name" -type d -print -quit 2>/dev/null | grep -q .; then

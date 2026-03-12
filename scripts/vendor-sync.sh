@@ -57,19 +57,19 @@ VENDOR_DEST[xcode-26]="skills/domain/swift/xcode-26"
 VENDOR_COMMIT[xcode-26]="b11f995ecb7bc404774d8e03e1d4d78309454170"
 
 # remotion-best-practices — from ~/.agents/skills (no upstream git repo)
-VENDOR_SOURCE[remotion-best-practices]="local:~/.agents/skills/remotion-best-practices"
+VENDOR_SOURCE[remotion-best-practices]="local:~/.agent-config/skills/domain/other/remotion-best-practices"
 VENDOR_PATH[remotion-best-practices]="."
 VENDOR_DEST[remotion-best-practices]="skills/domain/other/remotion-best-practices"
 VENDOR_COMMIT[remotion-best-practices]="none"
 
 # find-skills — from ~/.agents/skills (no upstream git repo)
-VENDOR_SOURCE[find-skills]="local:~/.agents/skills/find-skills"
+VENDOR_SOURCE[find-skills]="local:~/.agent-config/skills/tools/find-skills"
 VENDOR_PATH[find-skills]="."
 VENDOR_DEST[find-skills]="skills/tools/find-skills"
 VENDOR_COMMIT[find-skills]="none"
 
 # visual-explainer — was a nested git clone, now vendored (no upstream)
-VENDOR_SOURCE[visual-explainer]="local:~/.agents/skills/visual-explainer"
+VENDOR_SOURCE[visual-explainer]="local:~/.agent-config/skills/workflows/visual-explainer"
 VENDOR_PATH[visual-explainer]="."
 VENDOR_DEST[visual-explainer]="skills/workflows/visual-explainer"
 VENDOR_COMMIT[visual-explainer]="none"

@@ -13,7 +13,7 @@ Analyze the conversation to detect which skill is running, reflect on what went 
 </objective>
 
 <context>
-Skill detection: !`ls -1 ./skills/*/SKILL.md | head -5`
+Skill detection: !`find ./skills -name "SKILL.md" -maxdepth 3 | head -5`
 </context>
 
 <quick_start>
@@ -34,7 +34,7 @@ Identify the skill from conversation context:
 - Check which SKILL.md was recently referenced
 - Examine current task context
 
-Set: `SKILL_NAME=[skill-name]` and `SKILL_DIR=./skills/$SKILL_NAME`
+Set: `SKILL_NAME=[skill-name]` and `SKILL_DIR=$(find ./skills -name "$SKILL_NAME" -type d -print -quit)`
 
 If unclear, ask the user.
 </step_1>

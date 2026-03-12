@@ -29,13 +29,13 @@ bead: .agent-config-1pz
 
 ## Phase 3: Guards and cleanup
 
-- [ ] **3.1** Remove `~/.pi/agent/skills/testflight` symlink (redundant loopback into agent-config)
-- [ ] **3.2** Add Vector 3 to `collision-check.sh`: detect loopback symlinks in `~/.pi/agent/skills/` that resolve into `~/.agent-config/`
-- [ ] **3.3** Add Vector 4 to `collision-check.sh`: check ALL `~/.pi/agent/skills/` entries (symlinks and dirs) against agent-config skill names via recursive find
-- [ ] **3.4** Update `install.sh` line 188: fix summary stat to use `find -name "SKILL.md"` for skill count and derive category count dynamically
-- [ ] **3.5** Remove Phase 6 from `scripts/restructure-categories.sh` (symlink regeneration) — replace with explanatory comment
-- [ ] **3.6** Verify install.sh has no other code that creates discovery symlinks
-- [ ] **3.7** Commit Phase 3: `fix(015): add Vector 3+4 guards, fix stats, disable symlink regeneration`
+- [x] **3.1** Remove `~/.pi/agent/skills/testflight` symlink (redundant loopback into agent-config)
+- [x] **3.2** Add Vector 3 to `collision-check.sh`: detect loopback symlinks in `~/.pi/agent/skills/` that resolve into `~/.agent-config/`
+- [x] **3.3** Add Vector 4 to `collision-check.sh`: check ALL `~/.pi/agent/skills/` entries (symlinks and dirs) against agent-config skill names via recursive find
+- [x] **3.4** Update `install.sh` line 188: fix summary stat to use `find -name "SKILL.md"` for skill count and derive category count dynamically
+- [x] **3.5** Remove Phase 6 from `scripts/restructure-categories.sh` (symlink regeneration) — replace with explanatory comment
+- [x] **3.6** Verify install.sh has no other code that creates discovery symlinks
+- [x] **3.7** Commit Phase 3: `fix(015): add Vector 3+4 guards, fix stats, disable symlink regeneration`
 
 ## Phase 4: Consumer updates
 

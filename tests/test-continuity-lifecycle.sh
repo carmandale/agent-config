@@ -511,9 +511,6 @@ section "10. Symlink integrity"
 assert "resume-handoff skill exists in workflows category" \
   "[[ -f '$HOME/.claude/skills/workflows/resume-handoff/SKILL.md' ]]"
 
-assert "resume-handoff top-level symlink resolves" \
-  "[[ -L '$HOME/.claude/skills/resume-handoff' && -d '$HOME/.claude/skills/resume-handoff' ]]"
-
 assert "create-handoff skill fully removed" \
   "[[ ! -e '$HOME/.claude/skills/workflows/create-handoff/SKILL.md' && ! -e '$HOME/.claude/skills/create-handoff' ]]"
 

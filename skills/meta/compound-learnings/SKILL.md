@@ -196,10 +196,7 @@ description: <What it does. Use when [specific triggers]. Handles [patterns].>
 
 The `description` field is the primary discovery mechanism — include what the skill does, when to use it (trigger phrases), and what patterns/keywords should activate it.
 
-After creating the skill, add a top-level discovery symlink:
-```bash
-ln -s <category>/<name> skills/<name>
-```
+Skills placed in category directories are discovered automatically via recursive scan — no symlink needed.
 
 #### For Hooks:
 Create shell wrapper + TypeScript handler:
