@@ -373,7 +373,6 @@ Skills are unified across all agents, organized by function:
 │   ├── ralph/      # Ralph orchestrator
 │   ├── shaping/    # Shaping methodology (submodules)
 │   └── ...         # agentica, design, gitnexus, math, notion, other
-└── <name> -> <category>/<name>  # Discovery symlinks
 ```
 
 ### Symlinks
@@ -398,7 +397,7 @@ Add new skills to the appropriate category using the decision rule:
 ```bash
 mkdir ~/.agent-config/skills/tools/my-tool
 # Create SKILL.md with description and instructions
-ln -s tools/my-tool skills/my-tool  # Discovery symlink
+# Skills in category dirs are discovered automatically — no symlink needed
 ```
 
 ### Skill Format

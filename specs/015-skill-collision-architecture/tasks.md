@@ -39,12 +39,12 @@ bead: .agent-config-1pz
 
 ## Phase 4: Consumer updates
 
-- [ ] **4.1** Update `tests/test-continuity-lifecycle.sh`: remove line 515 top-level symlink assertion (category-path assertion on line 513 already covers it)
-- [ ] **4.2** Update `scripts/vendor-sync.sh`: change 3 `local:` source paths to absolute `~/.agent-config/...` category paths (or remove if self-referential no-ops)
-- [ ] **4.3** Update `commands/compound/heal-skill.md`: replace flat `SKILL_DIR=./skills/$SKILL_NAME` with `find`-based category discovery, update line 16 detection command
-- [ ] **4.4** Update `skills/meta/compound-learnings/SKILL.md`: remove lines 199-201 discovery symlink creation instruction, replace with note about recursive discovery
-- [ ] **4.5** Audit: verify `skills/domain/shaping/shaping-skills/README.md` and `last30days/docs/plans/*.md` are historical/external (leave as-is)
-- [ ] **4.6** Commit Phase 4: `fix(015): update consumers of flat discovery symlink paths`
+- [x] **4.1** Update `tests/test-continuity-lifecycle.sh`: remove line 515 top-level symlink assertion (category-path assertion on line 513 already covers it)
+- [x] **4.2** Update `scripts/vendor-sync.sh`: change 3 `local:` source paths to absolute `~/.agent-config/...` category paths (or remove if self-referential no-ops)
+- [x] **4.3** Update `commands/compound/heal-skill.md`: replace flat `SKILL_DIR=./skills/$SKILL_NAME` with `find`-based category discovery, update line 16 detection command
+- [x] **4.4** Update `skills/meta/compound-learnings/SKILL.md`: remove lines 199-201 discovery symlink creation instruction, replace with note about recursive discovery
+- [x] **4.5** Audit: verify `skills/domain/shaping/shaping-skills/README.md` and `last30days/docs/plans/*.md` are historical/external (leave as-is)
+- [x] **4.6** Commit Phase 4: `fix(015): update consumers of flat discovery symlink paths`
 
 ## Phase 5: Documentation
 

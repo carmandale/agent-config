@@ -10,18 +10,17 @@ This is **the source of truth** for agent configuration across Pi, Claude Code, 
 
 ```
 ~/.agent-config/
-├── skills/                  # Shared skills (symlinked to ~/.claude/skills, ~/.pi/agent/skills, etc.)
+├── skills/                  # Shared skills (symlinked to ~/.claude/skills, ~/.agents/skills, etc.)
 │   ├── tools/               # Wraps external CLI/API/service (~76)
 │   ├── review/              # Analyzes/reviews code or content (~21)
 │   ├── workflows/           # Orchestrates multi-step dev processes (~54)
 │   ├── meta/                # Agent behavior rules, patterns (~42)
-│   ├── domain/              # Technology-specific knowledge (~62)
-│   │   ├── swift/           # Apple/Swift platform
-│   │   ├── compound/        # Vendored compound plugin set
-│   │   ├── ralph/           # Ralph orchestrator
-│   │   ├── shaping/         # Shaping methodology (submodules)
-│   │   └── ...              # agentica, design, gitnexus, math, notion, other
-│   └── [name] -> [category]/[name]  # Top-level symlinks for discovery
+│   └── domain/              # Technology-specific knowledge (~62)
+│       ├── swift/           # Apple/Swift platform
+│       ├── compound/        # Vendored compound plugin set
+│       ├── ralph/           # Ralph orchestrator
+│       ├── shaping/         # Shaping methodology (submodules)
+│       └── ...              # agentica, design, gitnexus, math, notion, other
 ├── commands/                # Slash commands (shared across agents)
 ├── instructions/
 │   ├── AGENTS.md            # Global instructions (symlinked to ~/.claude/CLAUDE.md, etc.)
@@ -39,7 +38,6 @@ The `install.sh` script creates these symlinks:
 | `~/.claude/skills` | `~/.agent-config/skills` |
 | `~/.claude/CLAUDE.md` | `~/.agent-config/instructions/AGENTS.md` |
 | `~/.claude/commands` | `~/.agent-config/commands` |
-| `~/.pi/agent/skills` | `~/.agent-config/skills` |
 | `~/.pi/agent/AGENTS.md` | `~/.agent-config/instructions/AGENTS.md` |
 | `~/.pi/agent/prompts` | `~/.agent-config/commands` |
 | `~/.agents/skills` | `~/.agent-config/skills` |
@@ -51,7 +49,7 @@ The `install.sh` script creates these symlinks:
 
 ## Skills System
 
-**Both Pi and Claude Code have native skill systems.** Skills are discovered from `~/.claude/skills/` (or `~/.pi/agent/skills/`).
+**Both Pi and Claude Code have native skill systems.** Skills are discovered from `~/.claude/skills/` and `~/.agents/skills/` (both symlinked to `~/.agent-config/skills/`).
 
 ### Skill Format
 
@@ -146,7 +144,7 @@ Changes take effect immediately for new agent sessions (no restart needed for mo
 ```bash
 mkdir -p skills/tools/my-skill           # Choose the right category
 # Create skills/tools/my-skill/SKILL.md
-ln -s tools/my-skill skills/my-skill     # Top-level symlink for discovery
+# Skills in category dirs are discovered automatically — no symlink needed
 ```
 
 ### Fix broken symlinks
@@ -157,5 +155,5 @@ ln -s tools/my-skill skills/my-skill     # Top-level symlink for discovery
 ### Check what an agent sees
 ```bash
 ls -la ~/.claude/skills/        # What Claude Code sees
-ls -la ~/.pi/agent/skills/      # What Pi sees
+ls -la ~/.agents/skills/        # What Pi / Codex / Gemini see
 ```
