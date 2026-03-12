@@ -236,8 +236,8 @@ for skill_rel in pi.get('skills', []):
 
       while IFS= read -r skill_name; do
         [[ -z "$skill_name" ]] && continue
-        # Check against agent-config skills (both category dirs and top-level symlinks)
-        if [[ -d "$AGENT_CONFIG_SKILLS/$skill_name" ]] || [[ -L "$AGENT_CONFIG_SKILLS/$skill_name" ]]; then
+        # Check against agent-config skills (recursive — category dirs at any depth)
+        if find "$AGENT_CONFIG_SKILLS" -name "$skill_name" -type d -print -quit 2>/dev/null | grep -q .; then
           collision_count=$((collision_count + 1))
           log_err "SKILL COLLISION: '$skill_name' declared by package '$pkg_name' AND exists in agent-config"
           log_err "    package: $pkg_path/skills/*/$skill_name"
