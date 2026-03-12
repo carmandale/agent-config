@@ -48,10 +48,10 @@ bead: .agent-config-1pz
 
 ## Phase 5: Documentation
 
-- [ ] **5.1** Update repo-root `AGENTS.md`: remove stale `~/.pi/agent/skills` symlink reference, remove "Top-level symlinks enable discovery" text, remove `ln -s` instruction
-- [ ] **5.2** Update `README.md`: remove `<name> -> <category>/<name>` tree entry, remove `ln -s tools/my-tool skills/my-tool` from "Adding Skills" instructions
-- [ ] **5.3** Verify `instructions/AGENTS.md` (global) has no discovery symlink references
-- [ ] **5.4** Commit Phase 5: `docs(015): remove all discovery symlink references from docs`
+- [x] **5.1** Update repo-root `AGENTS.md`: remove stale `~/.pi/agent/skills` symlink reference, remove "Top-level symlinks enable discovery" text, remove `ln -s` instruction
+- [x] **5.2** Update `README.md`: remove `<name> -> <category>/<name>` tree entry, remove `ln -s tools/my-tool skills/my-tool` from "Adding Skills" instructions
+- [x] **5.3** Verify `instructions/AGENTS.md` (global) has no discovery symlink references
+- [x] **5.4** Commit Phase 5: `docs(015): remove all discovery symlink references from docs`
 
 ## Phase 6: Verification
 
