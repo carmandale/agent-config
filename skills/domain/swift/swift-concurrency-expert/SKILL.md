@@ -223,6 +223,15 @@ See `references/glossary.md` for quick definitions of core concurrency terms use
 
 - `references/swift-6-2-concurrency.md` — Swift 6.2 specific changes, `NonisolatedNonsendingByDefault`, `@concurrent`, default isolation
 - `references/swiftui-concurrency-tour-wwdc.md` — SwiftUI-specific concurrency guidance from WWDC
+- `references/bug-patterns.md` — Common concurrency bugs and how to fix them
+- `references/cancellation.md` — Task cancellation patterns and cooperative cancellation
+- `references/diagnostics.md` — Debugging concurrency issues
+- `references/hotspots.md` — Common concurrency problem areas
+- `references/bridging.md` — Bridging synchronous and asynchronous code
+- `references/interop.md` — Interop with legacy/Objective-C code
+- `references/new-features.md` — Newest Swift concurrency features
+- `references/structured.md` — Structured concurrency patterns (TaskGroup, async let)
+- `references/unstructured.md` — Unstructured task patterns and when to use them
 
 ---
 
