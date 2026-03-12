@@ -11,32 +11,44 @@ Use this skill to build, review, or improve SwiftUI features with correct state 
 ## Workflow Decision Tree
 
 ### 1) Review existing SwiftUI code
+- **First, consult `references/latest-apis.md`** to ensure only current, non-deprecated APIs are used
 - Check property wrapper usage against the selection guide (see `references/state-management.md`)
 - Verify modern API usage (see `references/modern-apis.md`)
 - Verify view composition follows extraction rules (see `references/view-structure.md`)
 - Check performance patterns are applied (see `references/performance-patterns.md`)
 - Verify list patterns use stable identity (see `references/list-patterns.md`)
 - Check animation patterns for correctness (see `references/animation-basics.md`, `references/animation-transitions.md`)
+- Review accessibility: proper grouping, traits, Dynamic Type support (see `references/accessibility-patterns.md`)
+- Check chart patterns for correct mark usage and data identity (see `references/charts.md`, `references/charts-accessibility.md`)
+- For macOS targets: verify macOS-specific APIs and patterns (see `references/macos-scenes.md`, `references/macos-window-styling.md`, `references/macos-views.md`)
 - Inspect Liquid Glass usage for correctness and consistency (see `references/liquid-glass.md`)
 - Validate iOS 26+ availability handling with sensible fallbacks
 
 ### 2) Improve existing SwiftUI code
+- **First, consult `references/latest-apis.md`** to replace any deprecated APIs with their modern equivalents
 - Audit state management for correct wrapper selection (prefer `@Observable` over `ObservableObject`)
 - Replace deprecated APIs with modern equivalents (see `references/modern-apis.md`)
 - Extract complex views into separate subviews (see `references/view-structure.md`)
 - Refactor hot paths to minimize redundant state updates (see `references/performance-patterns.md`)
 - Ensure ForEach uses stable identity (see `references/list-patterns.md`)
 - Improve animation patterns (use value parameter, proper transitions, see `references/animation-basics.md`, `references/animation-transitions.md`)
+- Improve accessibility: use `Button` over tap gestures, add `@ScaledMetric` for Dynamic Type (see `references/accessibility-patterns.md`)
+- Review chart code for correct modifier scope and accessibility (see `references/charts.md`, `references/charts-accessibility.md`)
+- For macOS targets: adopt macOS-specific APIs where appropriate (see `references/macos-scenes.md`, `references/macos-window-styling.md`, `references/macos-views.md`)
 - Suggest image downsampling when `UIImage(data:)` is used (as optional optimization, see `references/image-optimization.md`)
 - Adopt Liquid Glass only when explicitly requested by the user
 
 ### 3) Implement new SwiftUI feature
+- **First, consult `references/latest-apis.md`** to use only current, non-deprecated APIs
 - Design data flow first: identify owned vs injected state (see `references/state-management.md`)
 - Use modern APIs (no deprecated modifiers or patterns, see `references/modern-apis.md`)
 - Use `@Observable` for shared state (with `@MainActor` if not using default actor isolation)
 - Structure views for optimal diffing (extract subviews early, keep views small, see `references/view-structure.md`)
 - Separate business logic into testable models (see `references/layout-best-practices.md`)
 - Use correct animation patterns (implicit vs explicit, transitions, see `references/animation-basics.md`, `references/animation-transitions.md`, `references/animation-advanced.md`)
+- Use `Button` for tappable elements, add accessibility grouping and labels (see `references/accessibility-patterns.md`)
+- For charts: use correct mark types and gate iOS 17+/18+/26+ APIs (see `references/charts.md`, `references/charts-accessibility.md`)
+- For macOS targets: use macOS-specific scenes, window styling, and views (see `references/macos-scenes.md`, `references/macos-window-styling.md`, `references/macos-views.md`)
 - Apply glass effects after layout/appearance modifiers (see `references/liquid-glass.md`)
 - Gate iOS 26+ features with `#available` and provide fallbacks
 
@@ -256,6 +268,25 @@ Button("Confirm") { }
 - [ ] Keyframe animations for precise timing (iOS 17+)
 - [ ] Completion handlers use `.transaction(value:)` for reexecution
 
+### Accessibility (see `references/accessibility-patterns.md`)
+- [ ] Using `Button` over `onTapGesture` for tappable elements
+- [ ] `@ScaledMetric` for custom values that should scale with Dynamic Type
+- [ ] Related elements grouped with `accessibilityElement(children: .combine)`
+- [ ] `accessibilityLabel` provided when default labels are unclear
+- [ ] Custom controls use `accessibilityRepresentation`
+
+### Charts (see `references/charts.md`, `references/charts-accessibility.md`)
+- [ ] Correct mark types for the data (Bar, Line, Point, Area, Rule, Sector)
+- [ ] Stable data identity for chart data
+- [ ] Availability gating for iOS 17+/18+/26+ chart APIs
+- [ ] Accessibility labels and audio graph support
+
+### macOS (see `references/macos-scenes.md`, `references/macos-views.md`, `references/macos-window-styling.md`)
+- [ ] Using macOS-specific scenes (MenuBarExtra, Settings, etc.)
+- [ ] Correct window styling (title bar, toolbar)
+- [ ] Table for tabular data, HSplitView for split layouts
+- [ ] Commands for menu bar customization
+
 ### Liquid Glass (iOS 26+)
 - [ ] `#available(iOS 26, *)` with fallback for Liquid Glass
 - [ ] Multiple glass views wrapped in `GlassEffectContainer`
@@ -278,6 +309,13 @@ Button("Confirm") { }
 - `references/text-formatting.md` - Modern text formatting and string operations
 - `references/image-optimization.md` - AsyncImage, image downsampling, and optimization
 - `references/liquid-glass.md` - iOS 26+ Liquid Glass API
+- `references/accessibility-patterns.md` - VoiceOver, Dynamic Type, grouping, labels
+- `references/charts.md` - Swift Charts marks, axes, selection, styling
+- `references/charts-accessibility.md` - Chart accessibility and fallback strategies
+- `references/latest-apis.md` - Quick lookup: deprecated vs current API replacements
+- `references/macos-scenes.md` - macOS scenes: MenuBarExtra, Settings, WindowGroup
+- `references/macos-views.md` - macOS views: Table, HSplitView, AppKit interop
+- `references/macos-window-styling.md` - macOS window styling, toolbars, title bars
 
 ## Philosophy
 
