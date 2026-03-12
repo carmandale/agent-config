@@ -49,27 +49,29 @@ Try Mode 2 (spawn one yourself). If spawn is not available, tell the user: "I ne
 
 No second agent is available. You spawn one yourself. This launches a separate pi process (not a subagent — a fully independent agent).
 
-### 1. Spawn
+### 1. Spawn (blocks until first response)
 
 ```
 pi_messenger({ action: "spawn", agent: "crew-challenger", prompt: "Read specs/NNN-slug/spec.md and challenge the proposed approach. Context: <your research findings>" })
 ```
 
-This blocks until the collaborator joins the mesh and is ready to receive messages. Returns `{ name: "<their-name>", pid: <number> }`.
-
 The `agent` parameter must be a crew agent with `crewRole: collaborator` (e.g., `crew-challenger`). The `prompt` should include specific file paths to read and the context the collaborator needs — do NOT tell them to `/ground` themselves.
 
-### ⚠️ Wait for the collaborator's first message
+**This call blocks until the collaborator sends its first message** (typically 3–10 minutes). The tool result includes the collaborator's response directly — no waiting, no polling, no ambiguity. The TUI shows progress to the user during the wait.
 
-After spawn returns, the collaborator is processing its initial prompt — reading files, analyzing context, composing its first response. **Do NOT send additional messages until the collaborator sends its first message to you.** This takes **3–10 minutes** on large codebases.
+Returns: `{ name, agent, firstMessage: "..." }` on success. On failure: `{ error: "timeout" | "crashed" | "cancelled" }` with details.
 
-- **Do not ping.** Silence means "processing," not "stuck."
-- **Do not dismiss before 5 minutes minimum.** Challengers on large repos (GMP, Orchestrator) routinely need 5–10 minutes for their first response.
-- **To check if actually stuck:** Look at the collaborator's registry entry — if `session.toolCalls` or `session.tokens` are still increasing, it's working. Flat counts for 3+ minutes with no message = potentially stuck.
+### 2. Exchange messages (each send blocks until reply)
 
-### 2. Exchange messages
+Send messages and receive replies in a single tool call:
 
-Same as Mode 1 — send messages, receive replies via steering prompts. Use phase markers:
+```
+pi_messenger({ action: "send", to: "<their-name>", message: "..." })
+```
+
+When sending to a collaborator, this **blocks until they reply**. The tool result includes their response. Each exchange is atomic — you send a message and get the reply back in the same call.
+
+Use phase markers to structure the conversation:
 
 ```
 [PHASE:research] Here are my findings on the codebase...
@@ -96,6 +98,16 @@ This sends a shutdown message, waits for graceful exit, falls back to SIGTERM. A
 ### 5. If spawn fails
 
 Tell the user: "I tried to spawn a collaborator but it failed. Can you start a second agent manually?" Fall back to Mode 1.
+
+### Error handling
+
+| Error | Meaning | What to do |
+|-------|---------|------------|
+| `timeout` | Collaborator didn't respond within the time limit | Retry spawn once. If it fails again, tell the user. |
+| `crashed` | Collaborator process died (log tail included in error) | Report the error to user with the log tail. |
+| `cancelled` | User pressed Ctrl+C during the wait | Collaborator is dismissed, report cancellation. |
+
+**On ANY collaboration failure — timeout, crash, or spawn error — tell the user and wait for guidance. Do NOT proceed solo. Do NOT offer to "just do it yourself." The two-agent gate exists because single-agent work skips the scrutiny that catches real defects. A failed collaboration is not permission to bypass the gate — it's a problem the user needs to know about.**
 
 ---
 
