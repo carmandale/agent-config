@@ -98,6 +98,57 @@ for pkg in data.get('packages', []):
 }
 
 #==============================================================================
+# fix_extension_collisions - Auto-trash extensions/ dirs that collide with packages
+#
+# Call from install.sh (preventive). Moves colliding dirs to ~/.Trash/.
+# Returns the number of collisions fixed.
+#==============================================================================
+fix_extension_collisions() {
+  if [[ ! -f "$PI_SETTINGS" ]]; then
+    return
+  fi
+
+  if [[ ! -d "$PI_EXTENSIONS" ]]; then
+    return
+  fi
+
+  local pkg_names
+  pkg_names=$(get_pi_package_names 2>/dev/null) || return
+
+  local fixed=0
+
+  for ext_dir in "$PI_EXTENSIONS"/*/; do
+    [[ -d "$ext_dir" ]] || continue
+    local ext_name
+    ext_name=$(basename "$ext_dir")
+
+    if echo "$pkg_names" | grep -qx "$ext_name"; then
+      local ext_version="unknown"
+      if [[ -f "$ext_dir/package.json" ]] && command -v python3 &>/dev/null; then
+        ext_version=$(python3 -c "
+import json
+with open('$ext_dir/package.json') as f:
+    print(json.load(f).get('version', 'unknown'))
+" 2>/dev/null || echo "unknown")
+      fi
+
+      local trash_name="${ext_name}-collision-$(date +%Y%m%d-%H%M%S)"
+      if mv "$ext_dir" "$HOME/.Trash/$trash_name" 2>/dev/null; then
+        log_ok "Auto-fixed collision: $ext_name (v$ext_version) → ~/.Trash/$trash_name"
+        fixed=$((fixed + 1))
+      else
+        log_err "COLLISION: $ext_name — auto-fix failed (could not move to Trash)"
+        DRIFT=$((DRIFT + 1))
+      fi
+    fi
+  done
+
+  if [[ $fixed -gt 0 ]]; then
+    log_ok "Fixed $fixed extension collision(s)"
+  fi
+}
+
+#==============================================================================
 # check_extension_collisions - Compare package names vs extensions/ dirs
 #==============================================================================
 check_extension_collisions() {

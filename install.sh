@@ -200,6 +200,7 @@ log_err() { echo -e "${RED}✗${NC} $1"; }  # stdout, not stderr — matches boo
 source "$SCRIPT_DIR/scripts/lib/collision-check.sh"
 
 _collision_drift=$DRIFT
+fix_extension_collisions
 check_extension_collisions
 check_skill_collisions
 if [[ $DRIFT -gt $_collision_drift ]]; then
