@@ -1,0 +1,69 @@
+---
+schema_version: "1.0.0"
+mode: finalize
+date: 2026-03-12T22:53:10.846Z
+session: ".agent-config-ef7-deterministic-collab"
+outcome: "SUCCEEDED"
+primary_bead: ".agent-config-ef7"
+---
+
+goal: "Make multi-agent collaboration (/shape, /plan, /implement) deterministic — eliminate agent abandonment caused by async spawn/send gap"
+now: "Blocking spawn+send implemented in pi-messenger v0.14.0, installed locally, 443 tests passing. agent-collaboration.md updated. Extension collision guard hardened. Timeout error messages prohibit solo bypass. Remaining: live E2E test of /shape, /plan, /implement in fresh session."
+
+done_this_session:
+  - "Root-caused agent abandonment: async collaboration API exposed to synchronous LLM consumer"
+  - "Full shaping session with JadeDragon (pi-messenger repo agent): 9 requirements (R0-R9), 2 shapes explored, Shape A selected (blocking inbox polling), 6 flows breadboarded"
+  - "pi-messenger spec 004 implemented by JadeDragon/QuickWolf: blocking spawn + blocking send for collaborators, 443 tests passing"
+  - "pi-messenger v0.14.0 installed locally from dev repo via settings.json packages"
+  - "Code-reviewed implementation against all 9 requirements and 7 design parts (A1-A7)"
+  - "Updated docs/agent-collaboration.md: removed patience-policing language, documented synchronous blocking behavior, added solo-bypass prohibition on failure"
+  - "Hardened timeout error messages in pi-messenger to say 'Do NOT proceed without a collaborator'"
+  - "Fixed recurring extension collision (spec 012 follow-up): added fix_extension_collisions() to auto-trash colliding extensions/ dirs in install.sh"
+  - "QuickWolf added settings.json check to install.mjs — prevents collision at creation"
+  - "Created bead .agent-config-ef7 and specs/016-deterministic-collab/ with full spec"
+
+next:
+  - "Test /shape, /plan, /implement in fresh pi session (v0.14.0 loaded) — verify blocking behavior end-to-end"
+  - "Update mini-ts with pi-messenger v0.14.0 when convenient"
+  - "Archive napkin collaboration items once E2E testing confirms the fix"
+
+final_decisions:
+  - "Shape A (blocking inbox polling) over Shape B (RPC stdin/stdout) — B violates mesh coherence (R9) and concurrent collaborator isolation (R8)"
+  - "Default-block for collaborators, async for peers — routing via CollaboratorEntry type, no new params needed (R5)"
+  - "Watcher filter per-call (active only during blocking polls), not per-collaborator-lifetime"
+  - "Timeout errors prohibit solo bypass — agents must escalate to user on failure"
+  - "Two-layer collision guard: upstream prevention (install.mjs) + downstream auto-fix (install.sh)"
+
+final_solutions:
+  - problem: "Agents abandon multi-agent sessions because spawn returns in 30s and they can't wait 3-10 min"
+    solution: "Blocking tool calls — spawn blocks until first message, send-to-collaborator blocks until reply. Each exchange is atomic."
+    evidence: "443 tests passing including 22 blocking-specific tests. Code reviewed against all 9 shaped requirements."
+  - problem: "Timeout errors give agents an off-ramp to proceed solo"
+    solution: "Error messages now explicitly say 'Do NOT proceed without a collaborator'. agent-collaboration.md has bold rule prohibiting solo bypass."
+    evidence: "Committed to both pi-messenger (09a7cf6) and agent-config (7d089ee9)"
+  - problem: "Extension collision recurs when install.mjs recreates extensions/ copy"
+    solution: "install.mjs checks settings.json packages first (upstream). install.sh auto-trashes collisions (downstream)."
+    evidence: "Tested: fake collision created, install.sh auto-trashes, bootstrap.sh reports only"
+
+artifacts_produced:
+  - "specs/016-deterministic-collab/spec.md — full spec with requirements, shape, breadboard"
+  - "specs/016-deterministic-collab/log.md — audit trail"
+  - "docs/agent-collaboration.md — updated for synchronous blocking behavior"
+  - "scripts/lib/collision-check.sh — fix_extension_collisions() added"
+  - "install.sh — calls fix_extension_collisions before check"
+
+files:
+  - "docs/agent-collaboration.md"
+  - "scripts/lib/collision-check.sh"
+  - "install.sh"
+  - "specs/016-deterministic-collab/spec.md"
+  - "specs/016-deterministic-collab/log.md"
+
+git:
+  branch: "fix/015-skill-collision-architecture"
+  commits:
+    - "6c99674c — fix(012): auto-trash extension collisions in install.sh + spec 016"
+    - "7d089ee9 — fix(016): harden collaboration failure handling — no solo bypass"
+  pi_messenger_commits:
+    - "09a7cf6 — fix: timeout messages prohibit proceeding solo"
+  remote: "https://github.com/carmandale/agent-config.git"

@@ -1,0 +1,40 @@
+---
+schema_version: "1.0.0"
+mode: finalize
+date: 2026-03-12T23:17:35.098Z
+session: ".agent-config-1kr-swift-skills-integration"
+outcome: "SUCCEEDED"
+primary_bead: ".agent-config-1kr"
+---
+
+goal: "Evaluate and integrate AvdLee + Paul Hudson (twostraws) Swift agent skills to improve SwiftUI, concurrency, and testing guidance"
+now: "All skills integrated, committed, and pushed. Swift reference material went from ~5,000 lines to 27,526 lines across 8 skills."
+
+done_this_session:
+  - "Evaluated AvdLee (Antoine van der Lee) SwiftUI, Concurrency, and Testing skills"
+  - "Evaluated twostraws (Paul Hudson) SwiftUI Pro, Concurrency, and Testing skills"
+  - "Compared all against our existing skills — identified gaps and unique content"
+  - "SwiftUI Expert: added 7 missing references (accessibility, charts x2, latest-apis, macOS x3), updated 3 with deeper content"
+  - "Swift Concurrency: replaced 37-line SKILL.md with 238-line version, added 24 new reference files from both sources"
+  - "Swift Testing: added complete new skill with 13 reference files"
+  - "SwiftUI Pro: added Paul Hudson's concise review skill as separate skill"
+  - "Total Swift references: ~5,000 → 27,526 lines (5.5x increase)"
+
+final_decisions:
+  - "Keep AvdLee and Paul Hudson skills as complementary, not competing — AvdLee is deep reference, Paul is concise review"
+  - "swiftui-expert-skill (implementation) and swiftui-pro (review) serve different triggers"
+  - "Merged unique references from both sources into concurrency and testing skills rather than keeping separate skills"
+  - "Kept our custom references (swift-6-2-concurrency.md, text-formatting.md, modern-apis.md) alongside external content"
+
+artifacts_produced:
+  - "skills/domain/swift/swiftui-pro/ — new review-focused SwiftUI skill (Paul Hudson)"
+  - "skills/domain/swift/swift-testing-expert/ — new testing skill (AvdLee + Paul Hudson)"
+  - "skills/domain/swift/swiftui-expert-skill/ — supplemented with 10 new reference files"
+  - "skills/domain/swift/swift-concurrency-expert/ — major upgrade, 26 reference files"
+
+git:
+  branch: "main"
+  commits:
+    - "9431aab9 — feat(swift): integrate AvdLee's Swift agent skills"
+    - "4ac5b0b9 — feat(swift): add Paul Hudson's SwiftUI Pro + merge unique references"
+  remote: "https://github.com/carmandale/agent-config.git"

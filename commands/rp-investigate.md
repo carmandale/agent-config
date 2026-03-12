@@ -2,7 +2,7 @@
 name: rp-investigate
 description: Deep investigation with RepoPrompt MCP tools: tools gather evidence, follow-up reasoning synthesizes selected context
 repoprompt_managed: true
-repoprompt_skills_version: 15
+repoprompt_skills_version: 23
 repoprompt_variant: mcp
 ---
 
