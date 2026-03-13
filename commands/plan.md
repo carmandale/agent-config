@@ -9,6 +9,18 @@ Build the implementation plan for the specified spec. This is a two-agent sessio
 
 **Target:** $ARGUMENTS
 
+## HARD CONSTRAINT — Gate Check
+
+Run `scripts/gate.sh gate plan specs/<NNN>-<slug>/` before any work.
+
+- **Exit 1 (FAIL):** STOP COMPLETELY. Do NOT create the missing files. Do NOT offer to create them. Do NOT proceed with workarounds. Show the output to the user and wait.
+- **Exit 2 (WARN):** Show the warning to the user and ask THEM whether to proceed. This is the USER's decision, not yours. Do NOT silently ignore. Do NOT decide for the user that "it's probably fine."
+- **Exit 0 (PASS):** Proceed.
+
+Do NOT create spec.md or codex-review.md — those belong to /issue and /codex-review. If spec.md is missing, /issue was not run. Stop and tell the user to run /issue.
+
+If you catch yourself about to rationalize past a FAIL result, STOP — you are doing the exact thing this gate exists to prevent.
+
 ## Before anything else
 
 Check that the target spec directory has a `spec.md` with a `bead:` in its YAML frontmatter. If there's no spec.md, or no bead, stop. Tell the user to run `/issue` first — the bead and numbered spec directory are non-negotiable tracking infrastructure. Do not create them yourself. Do not proceed without them.

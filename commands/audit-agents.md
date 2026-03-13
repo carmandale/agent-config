@@ -1,5 +1,8 @@
 ---
 description: Skeptical deep review of code written by other AI agents — find issues, diagnose root causes, and fix them
+# checked — no gate_* keys needed: /audit-agents is an entry point that either
+# fixes code directly or routes to /issue. It does not consume or create spec
+# artifacts in a way that needs gate enforcement.
 ---
 
 Turn your attention to reviewing the code written by your fellow agents and checking for any issues, bugs, errors, problems, inefficiencies, security problems, reliability issues, etc. Agents make characteristic mistakes — plausible-looking code that's subtly wrong, happy-path-only logic, copy-paste that wasn't adapted, boilerplate that was never customized, silent failures, overengineering, zombie code that's not wired into anything.

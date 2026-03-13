@@ -11,6 +11,18 @@ Implement the specified plan. Read the full spec, plan, and tasks end to end and
 
 **Target:** $ARGUMENTS
 
+## HARD CONSTRAINT — Gate Check
+
+Run `scripts/gate.sh gate implement specs/<NNN>-<slug>/` before any work.
+
+- **Exit 1 (FAIL):** STOP COMPLETELY. Do NOT create the missing files. Do NOT offer to create them. Do NOT proceed with workarounds. Show the output to the user and wait.
+- **Exit 2 (WARN):** Show the warning to the user and ask THEM whether to proceed. This is the USER's decision, not yours. Do NOT silently ignore. Do NOT decide for the user that "it's probably fine."
+- **Exit 0 (PASS):** Proceed.
+
+Do NOT create spec.md, plan.md, tasks.md, or codex-review.md — those belong to /issue, /plan, and /codex-review. If tasks.md is missing, /plan was not run. Stop and tell the user to run /plan.
+
+If you catch yourself about to rationalize past a FAIL result, STOP — you are doing the exact thing this gate exists to prevent.
+
 ## Before anything else
 
 Check that the target spec directory has `spec.md`, `plan.md`, and `tasks.md`, and that `spec.md` has a `bead:` in its YAML frontmatter. If any are missing, stop. Tell the user what's missing — typically `/issue` for the bead+spec, `/plan` for the plan+tasks. Do not create them yourself. Do not proceed without them.

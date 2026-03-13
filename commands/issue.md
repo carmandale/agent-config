@@ -52,4 +52,8 @@ YYYY-MM-DD HH:MM | <mesh-name or "—"> | <harness>/<model> | /issue | bead <id>
 
 Harness is what's running you (pi, claude-code, codex, gemini, etc.). Model is your current model (claude-opus-4-6, gpt-5.3-codex, etc.). Mesh name is your pi_messenger identity if you've joined the mesh, or `—` if not.
 
+## After completion
+
+Run `scripts/gate.sh record issue specs/<NNN>-<slug>/ --harness "<harness>/<model>"` to write provenance sentinel into spec.md and update the pipeline state trail.
+
 $ARGUMENTS

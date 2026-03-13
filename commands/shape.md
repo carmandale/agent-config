@@ -60,6 +60,10 @@ YYYY-MM-DD HH:MM | <mesh-name or "—"> | <harness>/<model> | /shape | completed
 
 Harness is what's running you (pi, claude-code, codex, gemini, etc.). Model is your current model. Mesh name is your pi_messenger identity if joined, or `—` if not.
 
+## After completion
+
+If a spec directory exists, run `scripts/gate.sh record shape specs/<NNN>-<slug>/ --harness "<harness>/<model>"` to write provenance sentinel into shaping-transcript.md and update the pipeline state trail.
+
 ## How this ends
 
 When shaping is done — shape selected, fit check passes, we both feel good about it — tell me to run `/issue` to create the bead and spec. The spec will be built on the foundation shaping produced. Don't create the spec yourself, don't create a bead, don't transition into planning mode. Shaping shapes. That's it.

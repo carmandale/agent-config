@@ -1,5 +1,10 @@
 ---
 description: Deep code exploration and bug hunting — randomly investigate code files, trace execution flows, find issues, then create a numbered spec with plan and tasks
+gate_creates: spec.md, plan.md, tasks.md, log.md
+gate_must_not_create: codex-review.md
+# Note: /sweep is a combined entry point — it creates both spec and plan artifacts.
+# The usual /issue → /plan pipeline is collapsed into one command.
+# After /sweep, the next step is /codex-review, not /plan.
 ---
 
 Strictly adhere to the `specs/` artifact rules defined in README.md.
