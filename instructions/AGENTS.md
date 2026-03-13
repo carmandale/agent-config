@@ -297,7 +297,7 @@ Do NOT try to run slash commands as bash commands, interactive shells, or subage
 
 ## 10) Tooling Defaults
 
-- Prefer `rg` / `rg --files` for search.
+- Prefer `rg` / `rg --files` for search, `fd` for file discovery. Do not use `find` or `grep`.
 - Do not add arbitrary command timeouts to normal CLI tools.
 - Use skills/docs for detailed procedures; keep AGENTS focused on constraints and decision rules.
 

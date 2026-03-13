@@ -110,5 +110,15 @@ for d in "$SKILLS_DIR"/*/; do
     fi
 done
 
+# Check for skill name/directory mismatches
+# YAML 'name:' field must match parent directory name
+while IFS= read -r skill_file; do
+    skill_dir="$(basename "$(dirname "$skill_file")")"
+    yaml_name="$(awk '/^name:/{gsub(/[\r"'"'"']/, "", $2); print $2; exit}' "$skill_file" 2>/dev/null)"
+    if [[ -n "$yaml_name" ]] && [[ "$yaml_name" != "$skill_dir" ]]; then
+        warn "Skill name mismatch: $skill_dir/SKILL.md has name: $yaml_name"
+    fi
+done < <(fd -t f -g 'SKILL.md' "$SKILLS_DIR" 2>/dev/null)
+
 ok "Post-commit checks complete"
 exit 0
