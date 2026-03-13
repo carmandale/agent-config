@@ -25,3 +25,8 @@
   8. Hook output contract locked to existing patterns (result:'block' for exit 1, hookSpecificOutput for exit 2)
   9. Claude Code: hard-blocks on exit 1, advises on exit 2. Pi: detect/warn only.
   10. All internal consistency gaps resolved across spec and plan
+
+## 2026-03-12T18:43 — Implementation
+
+2026-03-12 18:43 | IronQuartz | pi/claude-sonnet-4 | /implement | started (driver, user as navigator)
+2026-03-12 20:10 | IronQuartz | pi/claude-sonnet-4 | /implement | completed — 5 commits (gate.sh, frontmatter, HARD CONSTRAINT, sentinels, hooks)
