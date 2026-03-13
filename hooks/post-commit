@@ -93,7 +93,7 @@ for d in "$SKILLS_DIR"/*/; do
     elif [[ -d "$d" ]]; then
         # Category dir (domain/, meta/, tools/, etc.) — check leaf subdirs only
         for sub in "$d"*/; do
-            if [[ -d "$sub" ]] && [[ ! -L "${sub%/}" ]] && [[ "$(basename "$sub")" != .* ]]; then
+            if [[ -d "$sub" ]] && [[ ! -L "${sub%/}" ]] && [[ "$(basename "$sub")" != .* ]] && [[ "$(basename "$sub")" != _* ]]; then
                 # Check if this is a leaf (has no subdirs) or a sub-category
                 has_subdirs=false
                 for subsub in "$sub"*/; do
