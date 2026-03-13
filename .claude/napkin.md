@@ -20,6 +20,8 @@
 | 2026-03-10 | Self | Beads worktree (`.git/beads-worktrees/main`) locked `main` branch — `git checkout main` failed with "already used by worktree." Had to `git worktree remove --force` before checking out main. | If `git checkout main` fails with "already used by worktree," check `git worktree list`. The beads worktree from `br sync` may be holding main. Remove it with `git worktree remove .git/beads-worktrees/main --force`. |
 | 2026-03-10 | Self | Read intermediate output of a multi-command SSH pipeline ("ahead by 16 commits") and reported it as final state. The next line (fast-forward pull) had already fixed it. Alarmed the user unnecessarily. | Read the FULL output of a command before commenting on any part of it. Intermediate state during a pipeline is not the final state. |
 | 2026-03-12 | User | Used `find` for file discovery in grounding script — `find` is slow | Use `fd` (Homebrew) instead of `find` for all file discovery. Agents default to `find` but `fd` is faster and preferred. |
+| 2026-03-12 | Self | pi-messenger extension conflict kept recurring — fixed symlink/copy but conflict returned | Root cause: extension registered in TWO discovery paths (packages[] in settings.json AND ~/.pi/agent/extensions/). Fix: remove extensions/ entry, keep packages[] as canonical source. |
+| 2026-03-12 | Self | .git/hooks/post-commit was stale copy of hooks/post-commit — edits to hooks/ didn't take effect | Set `git config core.hooksPath hooks` so git reads hooks directly from repo. No copy = no drift. |
 
 ## Agent Collaboration (Critical)
 1. **[2026-03-07] Agents will try subagent, interactive_shell, or bash to spawn collaborators — they MUST be told to use pi_messenger**
