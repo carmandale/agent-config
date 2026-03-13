@@ -36,6 +36,15 @@ Revisions must be substantive. If Codex raised a specific technical concern, the
 
 ---
 
+## INVOCATION ANTI-PATTERNS — Do Not Do These
+
+- ❌ **Do NOT pass the review prompt as an inline bash argument.** Write it to a file using your file-write tool and use `- < file` to feed it to codex via stdin. Inline prompts break on shell metacharacters.
+- ❌ **Do NOT wrap `codex exec` in `timeout`.** Codex manages its own execution. Shell timeouts kill the process before `-o` can write the output file.
+- ❌ **Do NOT pipe codex output through `| tail -N`.** This discards the session ID and diagnostic information. Use `-o` to capture output to a file.
+- ❌ **Do NOT use heredocs (`<<PROMPT`).** Agents frequently mangle closing delimiters. Write the prompt to a file instead.
+
+---
+
 ## When to Invoke
 
 - When the user runs `/codex-review` during or after plan mode
@@ -53,7 +62,9 @@ Generate a unique ID to avoid conflicts with other concurrent Claude Code sessio
 REVIEW_ID=$(uuidgen | tr '[:upper:]' '[:lower:]' | head -c 8)
 ```
 
-Use this for all temp file paths: `/tmp/claude-plan-${REVIEW_ID}.md` and `/tmp/codex-review-${REVIEW_ID}.md`.
+Use this for all temp file paths: `/tmp/claude-plan-${REVIEW_ID}.md`, `/tmp/codex-review-${REVIEW_ID}.md`, and `/tmp/codex-prompt-${REVIEW_ID}.md`.
+
+**Note:** Plan content may contain sensitive information. Consider running `umask 077` before creating temp files to restrict permissions to the current user.
 
 ### Step 2: Locate and Capture the Plan
 
@@ -89,14 +100,10 @@ Include relevant source code context if the plan references specific files — C
 
 ### Step 3: Submit to Codex (Round 1)
 
-Run Codex CLI in non-interactive mode to review the plan:
+**Step A — Write the review prompt to a file.** Using your file-write tool (not bash), write the following content to `/tmp/codex-prompt-${REVIEW_ID}.md`:
 
-```bash
-codex exec \
-  -m gpt-5.3-codex \
-  -s read-only \
-  -o /tmp/codex-review-${REVIEW_ID}.md \
-  "Review the spec and implementation plan in /tmp/claude-plan-${REVIEW_ID}.md. The file contains two sections: the Spec (requirements/problem definition) and the Plan (proposed implementation).
+```markdown
+Review the spec and implementation plan in /tmp/claude-plan-${REVIEW_ID}.md. The file contains two sections: the Spec (requirements/problem definition) and the Plan (proposed implementation).
 
 Review the plan AGAINST the spec. Focus on:
 1. Completeness - Does the plan address every requirement in the spec?
@@ -116,10 +123,34 @@ If you found no issues with the plan, do not just say APPROVED — show your wor
 
 Be specific and actionable. If the plan is solid and ready to implement, end your review with exactly: VERDICT: APPROVED
 
-If changes are needed, end with exactly: VERDICT: REVISE"
+If changes are needed, end with exactly: VERDICT: REVISE
 ```
 
-**Capture the Codex session ID** from the output line that says `session id: <uuid>`. Store this as `CODEX_SESSION_ID`. You MUST use this exact ID to resume in subsequent rounds (do NOT use `--last`, which would grab the wrong session if multiple reviews are running concurrently).
+**Step B — Run Codex.** Execute this one-liner:
+
+```bash
+rm -f /tmp/codex-review-${REVIEW_ID}.md
+codex exec -m gpt-5.3-codex -s read-only -o /tmp/codex-review-${REVIEW_ID}.md - < /tmp/codex-prompt-${REVIEW_ID}.md
+```
+
+**Step C — Verify the invocation succeeded:**
+
+```bash
+CODEX_EXIT=$?
+if [ "$CODEX_EXIT" -ne 0 ] || [ ! -s /tmp/codex-review-${REVIEW_ID}.md ]; then
+  echo "ERROR: Codex invocation failed."
+  echo "Exit code: $CODEX_EXIT"
+  echo "Output file exists: $([ -f /tmp/codex-review-${REVIEW_ID}.md ] && echo yes || echo no)"
+  echo "Check: Is codex installed? Is OPENAI_API_KEY set? Did the prompt file get written to /tmp/codex-prompt-${REVIEW_ID}.md?"
+  echo "STOP: Do not proceed to Step 4. Diagnose the failure first."
+fi
+```
+
+**If the error check fires, STOP.** Do not proceed to Step 4 with missing or empty output. Diagnose the failure and retry the invocation.
+
+**Capture the Codex session ID** from the bash tool's stdout/stderr output — look for the line that says `session id: <uuid>`. Store this as `CODEX_SESSION_ID`. You MUST use this exact ID to resume in subsequent rounds (do NOT use `--last`, which would grab the wrong session if multiple reviews are running concurrently).
+
+**Note:** The session ID appears in the bash tool's stdout/stderr output. It is NOT in the `-o` output file — that file contains only Codex's review text.
 
 **Notes:**
 - Use `-m gpt-5.3-codex` as the default model (configured in `~/.codex/config.toml`). If the user specifies a different model (e.g., `/codex-review o4-mini`), use that instead.
