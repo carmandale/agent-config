@@ -266,6 +266,11 @@
         "hooks": [
           {
             "type": "command",
+            "command": "node \"$HOME/.claude/hooks/dist/gate-check.mjs\"",
+            "timeout": 10
+          },
+          {
+            "type": "command",
             "command": "uv run \"$HOME/.claude/hooks/hook_launcher.py\" premortem-suggest",
             "timeout": 5
           }
