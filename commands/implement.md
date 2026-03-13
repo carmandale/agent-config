@@ -85,4 +85,10 @@ Harness is what's running you (pi, claude-code, codex, gemini, etc.). Model is y
 
 Be sure to comply with ALL rules in AGENTS.md and ensure that any code you write or revise conforms to the best practices referenced in the AGENTS.md file. When all tasks are checked off, tests pass, and the PR is up — you're done.
 
+## After completion
+
+Run `scripts/gate.sh record implement specs/<NNN>-<slug>/ --harness "<harness>/<model>"` to update the pipeline state trail.
+
+Then run `scripts/gate.sh verify implement specs/<NNN>-<slug>/` to confirm no anti-fabrication violations (you should not have created spec.md, plan.md, tasks.md, or codex-review.md).
+
 $ARGUMENTS

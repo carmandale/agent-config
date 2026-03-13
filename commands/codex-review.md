@@ -329,6 +329,16 @@ rm -f /tmp/claude-plan-${REVIEW_ID}.md /tmp/codex-review-${REVIEW_ID}.md /tmp/co
 
 The `codex-review.md` file in the spec directory is the receipt. It contains Codex's review text and verdict. The session ID appears in the bash tool's stdout during invocation. Round-by-round feedback is captured by the orchestrating agent throughout the loop and presented to the user in conversation. Commit it with the spec. If this file doesn't exist, the review didn't happen.
 
+**Record provenance and verify anti-fabrication:**
+
+```bash
+# Write sentinel into codex-review.md and update pipeline state trail
+scripts/gate.sh record codex-review specs/<NNN>-<slug>/ --harness "codex/<model>" --extra "rounds: N"
+
+# Verify no forbidden files were created
+scripts/gate.sh verify codex-review specs/<NNN>-<slug>/
+```
+
 ## Loop Summary
 
 ```

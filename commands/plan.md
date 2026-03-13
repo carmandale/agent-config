@@ -87,6 +87,12 @@ YYYY-MM-DD HH:MM | <mesh-name or "—"> | <harness>/<model> | /plan | completed 
 
 Harness is what's running you (pi, claude-code, codex, gemini, etc.). Model is your current model. Mesh name is your pi_messenger identity if joined, or `—` if not.
 
+## After completion
+
+Run `scripts/gate.sh record plan specs/<NNN>-<slug>/ --harness "<harness>/<model>"` to write provenance sentinels into plan.md and tasks.md, and update the pipeline state trail.
+
+Then run `scripts/gate.sh verify plan specs/<NNN>-<slug>/` to confirm no anti-fabrication violations.
+
 ## How this ends
 
 When the plan is done — both agents agree it's solid, research is grounded, tasks are concrete — tell me to run `/codex-review <spec>` for an independent review before implementation.
