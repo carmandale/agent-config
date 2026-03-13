@@ -1,8 +1,8 @@
 ---
 name: codex-review
 description: Send the current plan to OpenAI Codex CLI for iterative review. Claude and Codex go back-and-forth until Codex approves the plan.
-revision: 2
-revision_date: 2026-03-07
+revision: 3
+revision_date: 2026-03-12
 user_invocable: true
 ---
 
@@ -161,7 +161,7 @@ Then go to **Step 4**.
 
 ### Step 4: Read Codex's Response & Branch on Verdict
 
-1. Read `/tmp/codex-review-${REVIEW_ID}.md` (or stdout for resumed sessions)
+1. Read `/tmp/codex-review-${REVIEW_ID}.md`
 2. Present Codex's review to the user:
 
 ```
@@ -201,22 +201,43 @@ If a revision contradicts the user's explicit requirements, skip that revision a
 
 Do this now. Do not present the revisions as final. Do not ask the user if they want to continue. Do not say the plan is approved.
 
-Resume the existing Codex session:
+Resume the existing Codex session using the same prompt-file pattern as Step 3:
 
-```bash
-codex exec resume ${CODEX_SESSION_ID} \
-  "I've revised the plan based on your feedback. The updated plan is in /tmp/claude-plan-${REVIEW_ID}.md.
+**Step A — Write the resume prompt to a file.** Using your file-write tool (not bash), write the following content to `/tmp/codex-prompt-${REVIEW_ID}.md` (this overwrites the previous prompt file):
+
+```markdown
+I've revised the plan based on your feedback. The updated plan is in /tmp/claude-plan-${REVIEW_ID}.md.
 
 Here's what I changed:
 [List the specific changes made]
 
 Please re-review. If the plan is now solid and ready to implement, end with: VERDICT: APPROVED
-If more changes are needed, end with: VERDICT: REVISE" 2>&1 | tail -80
+If more changes are needed, end with: VERDICT: REVISE
 ```
 
-**Note:** `codex exec resume` does NOT support `-o` flag. Capture output from stdout instead (pipe through `tail` to skip startup lines). Read the Codex response directly from the command output.
+**Step B — Run Codex resume:**
 
-**If `resume ${CODEX_SESSION_ID}` fails** (e.g., session expired), fall back to a fresh `codex exec` call with context about the prior rounds included in the prompt.
+```bash
+rm -f /tmp/codex-review-${REVIEW_ID}.md
+codex exec resume ${CODEX_SESSION_ID} -o /tmp/codex-review-${REVIEW_ID}.md - < /tmp/codex-prompt-${REVIEW_ID}.md
+```
+
+**Step C — Verify the invocation succeeded** (same check as Step 3):
+
+```bash
+CODEX_EXIT=$?
+if [ "$CODEX_EXIT" -ne 0 ] || [ ! -s /tmp/codex-review-${REVIEW_ID}.md ]; then
+  echo "ERROR: Codex resume invocation failed."
+  echo "Exit code: $CODEX_EXIT"
+  echo "Output file exists: $([ -f /tmp/codex-review-${REVIEW_ID}.md ] && echo yes || echo no)"
+  echo "Check: Did the prompt file get written to /tmp/codex-prompt-${REVIEW_ID}.md? Is the session ID correct?"
+  echo "STOP: Do not proceed to Step 4. Diagnose the failure first."
+fi
+```
+
+**If the error check fires, STOP.** Do not proceed to Step 4 with missing or empty output. Diagnose the failure and retry.
+
+**If `resume ${CODEX_SESSION_ID}` fails** (e.g., session expired), fall back to a fresh `codex exec` call with context about the prior rounds included in the prompt. The fallback ALSO uses the prompt-file pattern: write the fallback prompt (including prior round context) to `/tmp/codex-prompt-${REVIEW_ID}.md`, then run the standard Step 3 one-liner with the same error check.
 
 After Codex responds, go back to **Step 4**.
 
@@ -285,10 +306,10 @@ If yes to any, disclose it: "Note: I took a shortcut on [X] — here's what a pr
 cp /tmp/codex-review-${REVIEW_ID}.md specs/<NNN>-<slug>/codex-review.md
 
 # Clean up temp files
-rm -f /tmp/claude-plan-${REVIEW_ID}.md /tmp/codex-review-${REVIEW_ID}.md
+rm -f /tmp/claude-plan-${REVIEW_ID}.md /tmp/codex-review-${REVIEW_ID}.md /tmp/codex-prompt-${REVIEW_ID}.md
 ```
 
-The `codex-review.md` file in the spec directory is the receipt. It contains Codex's actual words, session ID, verdict, and round-by-round feedback. Commit it with the spec. If this file doesn't exist, the review didn't happen.
+The `codex-review.md` file in the spec directory is the receipt. It contains Codex's review text and verdict. The session ID appears in the bash tool's stdout during invocation. Round-by-round feedback is captured by the orchestrating agent throughout the loop and presented to the user in conversation. Commit it with the spec. If this file doesn't exist, the review didn't happen.
 
 ## Loop Summary
 
