@@ -59,7 +59,7 @@ The `agent` parameter must be a crew agent with `crewRole: collaborator` (e.g., 
 
 **This call blocks until the collaborator sends its first message** (typically 3–10 minutes). The tool result includes the collaborator's response directly — no waiting, no polling, no ambiguity. The TUI shows progress to the user during the wait.
 
-Returns: `{ name, agent, firstMessage: "..." }` on success. On failure: `{ error: "timeout" | "crashed" | "cancelled" }` with details.
+Returns: `{ name, agent, firstMessage: "..." }` on success. On failure: `{ error: "stalled" | "collaborator_crashed" | "mesh_timeout" | "cancelled", name }` with details.
 
 ### 2. Exchange messages (each send blocks until reply)
 
@@ -97,17 +97,65 @@ This sends a shutdown message, waits for graceful exit, falls back to SIGTERM. A
 
 ### 5. If spawn fails
 
-Tell the user: "I tried to spawn a collaborator but it failed. Can you start a second agent manually?" Fall back to Mode 1.
+Follow the recovery protocol in § Error handling and recovery below. For `stalled`, `collaborator_crashed`, or `mesh_timeout` errors, the protocol retries once automatically before escalating to the user. For configuration errors (`agent_not_found`, `not_collaborator_role`), retrying won't help — tell the user and fall back to Mode 1.
 
-### Error handling
+### Error handling and recovery
 
-| Error | Meaning | What to do |
-|-------|---------|------------|
-| `timeout` | Collaborator didn't respond within the time limit | Retry spawn once. If it fails again, tell the user. |
-| `crashed` | Collaborator process died (log tail included in error) | Report the error to user with the log tail. |
-| `cancelled` | User pressed Ctrl+C during the wait | Collaborator is dismissed, report cancellation. |
+When a `spawn` or `send` returns an error, follow the graduated recovery protocol below. The principle: **one automatic recovery attempt before user escalation. Never proceed solo.**
 
-**On ANY collaboration failure — timeout, crash, or spawn error — tell the user and wait for guidance. Do NOT proceed solo. Do NOT offer to "just do it yourself." The two-agent gate exists because single-agent work skips the scrutiny that catches real defects. A failed collaboration is not permission to bypass the gate — it's a problem the user needs to know about.**
+| Error | Context | Automatic recovery | If recovery fails |
+|-------|---------|-------------------|-------------------|
+| `stalled` | spawn | Dismiss stalled collaborator (`result.name`). Retry spawn once (same prompt). | Ask user — include stall duration. |
+| `stalled` | send | Dismiss stalled collaborator (`result.name`). Spawn fresh collaborator with same role + accumulated context (see below). Resume from last completed phase. | Ask user — include stall duration and phase reached. |
+| `collaborator_crashed` | spawn | Retry spawn once. | Ask user — include log tail from both attempts. |
+| `collaborator_crashed` | send | Spawn fresh collaborator with same role + accumulated context. Resume from last completed phase. | Ask user — include log tail and phase reached. |
+| `mesh_timeout` | spawn | Retry spawn once. | Ask user — the collaborator failed to join the mesh. |
+| `cancelled` | any | No recovery — user initiated. Report and stop. | — |
+
+**Recovery is not proceeding solo.** Dismiss + respawn gets a fresh second perspective with accumulated context — the two-agent gate is preserved. After one automatic recovery attempt, if the replacement collaborator also fails, tell the user and wait for guidance. Do NOT proceed with work using only one perspective. Do NOT offer to "just do it yourself." The gate exists because single-agent work skips the scrutiny that catches real defects.
+
+**Max rounds guard on respawn:** The 5-exchange limit before escalation (§ Max rounds guard) applies per-collaborator. Respawning resets the count — the fresh collaborator hasn't seen the prior exchanges and needs a full round budget to be effective.
+
+### Context accumulation for respawn
+
+When respawning after a stall or crash mid-conversation, include accumulated context so the replacement doesn't redo completed work.
+
+**Phase completion rules:**
+- A phase is **completed** if the collaborator sent a message with a `[PHASE:X]` marker AND the driver incorporated the content (responded to it, used it in decisions, or built on it).
+- A phase is **partial** if the collaborator stalled mid-response or sent incomplete content. Include partial content verbatim — don't summarize what might be truncated.
+- If no phases were completed (stall on first response), no context accumulation is needed — retry with the original prompt.
+
+**Summary construction:** Each completed phase gets 2–4 bullet points capturing key conclusions and decisions — not the full transcript, not a single sentence.
+
+**Worked example — stall at challenge phase:**
+
+The driver completed research and sent findings to the collaborator. The collaborator sent a `[PHASE:challenge]` response raising three concerns, then the driver sent a revision addressing those concerns. The collaborator stalled while reviewing the revision (no `[PHASE:agree]` received).
+
+Respawn prompt:
+
+```
+You are replacing a previous collaborator who became unresponsive during a /plan session.
+
+Completed phases:
+- [PHASE:research] Driver found 3 insertion points in handlers.ts (lines 45, 112, 189),
+  existing retry pattern in crew/utils/retry.ts, and no tests covering the error path.
+- [PHASE:challenge] Previous collaborator raised:
+  1. The retry pattern in retry.ts uses exponential backoff but the recovery table
+     specifies immediate retry — inconsistent.
+  2. No rollback path if the respawn succeeds but produces incompatible output.
+  3. Line 189 insertion conflicts with a concurrent PR (#47) touching the same function.
+- [PHASE:revise] Driver revised the approach: adopted exponential backoff from retry.ts
+  (concern 1), added output validation step after respawn (concern 2), rebased on #47
+  (concern 3).
+
+The previous collaborator stalled while reviewing the revision. Resume from [PHASE:agree] —
+evaluate whether the revision adequately addresses the three concerns above. If not,
+raise new challenges.
+
+Spec: specs/NNN-slug/spec.md
+```
+
+Note: the summary includes the specific concerns verbatim (not "the collaborator had some concerns") so the replacement can evaluate whether the revision actually addressed them.
 
 ---
 
