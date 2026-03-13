@@ -1,5 +1,8 @@
 ---
 description: Build a real implementation plan using two agents and the workflows-plan skill — research the codebase, propose a plan, stress-test it
+gate_requires: spec.md
+gate_creates: plan.md, tasks.md, planning-transcript.md
+gate_must_not_create: spec.md, codex-review.md
 ---
 
 Build the implementation plan for the specified spec. This is a two-agent session — one agent researches and proposes, the other stress-tests and validates. Neither agent works alone.

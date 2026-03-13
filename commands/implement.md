@@ -1,5 +1,10 @@
 ---
 description: Execute a plan with two agents — one implements following the workflows-work protocol, one validates every step
+gate_requires: spec.md, plan.md, tasks.md
+gate_sentinels: plan:complete:v1
+gate_warn_sentinels: codex-review:approved:v1
+gate_creates: code changes, commits
+gate_must_not_create: spec.md, plan.md, tasks.md, codex-review.md
 ---
 
 Implement the specified plan. Read the full spec, plan, and tasks end to end and understand the intent behind them, not just the steps.

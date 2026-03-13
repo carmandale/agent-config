@@ -4,6 +4,10 @@ description: Send the current plan to OpenAI Codex CLI for iterative review. Cla
 revision: 3
 revision_date: 2026-03-12
 user_invocable: true
+gate_requires: spec.md, plan.md
+gate_sentinels: plan:complete:v1
+gate_creates: codex-review.md
+gate_must_not_create: spec.md, plan.md, tasks.md
 ---
 
 # Codex Plan Review (Iterative)

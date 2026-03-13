@@ -1,5 +1,7 @@
 ---
 description: Create a bead and numbered spec for an issue or feature — the canonical way to start tracked work
+gate_creates: spec.md, log.md
+gate_must_not_create: plan.md, tasks.md, codex-review.md, shaping-transcript.md, planning-transcript.md
 ---
 
 Create a bead for this work and a numbered spec in `specs/`. This is non-negotiable structure — every piece of tracked work gets a bead and a spec directory.
