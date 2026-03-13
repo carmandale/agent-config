@@ -1,0 +1,92 @@
+---
+schema_version: "1.0.0"
+mode: finalize
+date: 2026-03-13T14:44:29.867Z
+session: ".agent-config-1v4-019-command-compliance-gates"
+outcome: "SUCCEEDED"
+primary_bead: ".agent-config-1v4"
+---
+
+goal: "Implement structural enforcement for workflow command pipeline to prevent agents from bypassing gates, fabricating artifacts, and self-approving work"
+now: "Fully implemented and merged. gate.sh, frontmatter keys, HARD CONSTRAINT blocks, sentinel recording, Claude Code hook, Pi extension all shipped. Bead closed."
+
+done_this_session:
+  - "Shaped solution (Shape D) with user + RedGrove crew-challenger"
+  - "Planned with EpicIce crew-challenger — 7 challenges raised, all resolved"
+  - "Codex review — 6 rounds (gpt-5.3-codex, 647K tokens), APPROVED"
+  - "Implemented gate.sh with gate/record/verify subcommands (portable bash)"
+  - "Added gate_* frontmatter keys to all 5 pipeline commands"
+  - "Added HARD CONSTRAINT gate check blocks to plan, codex-review, implement"
+  - "Added sentinel recording + verify instructions to all commands"
+  - "Created Claude Code UserPromptSubmit hook (hard-blocks exit 1, advisory exit 2)"
+  - "Created Pi extension (detect/warn, does not block)"
+  - "Reviewed sweep.md and audit-agents.md for gate_* applicability"
+  - "End-to-end tested: PASS/FAIL/WARN/record/verify/backward-compat"
+  - "Merged to main, pushed to GitHub + mini-ts, closed bead"
+
+final_solutions:
+  - problem: "Agents bypass workflow gates despite documentation"
+    solution: "scripts/gate.sh — deterministic bash script that reads gate_* frontmatter keys from command files and exits 0/1/2. Code is deterministic, language isn't."
+  - problem: "No way to verify prior-stage artifacts were produced by the correct command"
+    solution: "Provenance sentinels (<!-- command:complete:v1 | harness: ... | date: ... -->) written by gate.sh record, checked by gate.sh gate via gate_sentinels key"
+  - problem: "Agents fabricate missing artifacts instead of stopping"
+    solution: "Three-layer anti-fabrication: (A) gate_must_not_create frontmatter + HARD CONSTRAINT text, (B) gate.sh verify with timestamp-based mtime comparison, (C) PostToolUse hook (deferred stretch goal)"
+  - problem: "Enforcement only works if agents cooperate"
+    solution: "Layer 2a: Claude Code UserPromptSubmit hook runs gate.sh automatically and hard-blocks via result:'block'. Layer 2b: Pi extension detects/warns. Layer 3: sentinel verification at next stage catches bypass."
+
+final_decisions:
+  - decision: "Exit 2 (WARN) is user-delegated, not agent-delegated"
+    rationale: "WARN exists solely for gate_warn_sentinels (codex-review soft enforcement). Agent cannot proceed past WARN on its own — must surface warning and let user decide."
+  - decision: "Phase 5b (PostToolUse anti-fabrication hook) deferred"
+    rationale: "Requires session state tracking. Plan ships without it. Layers A+B sufficient for v1."
+  - decision: "/shape has no gate_requires — remains valid entry point before /issue"
+    rationale: "Preserves existing flow (shape → issue → plan). gate.sh not invoked when no spec dir provided."
+  - decision: "Backward compatible — existing specs without sentinels get WARN not FAIL"
+    rationale: "R6: no retroactive enforcement. Specs 001-018 remain implementable."
+  - decision: "Sentinel chain starts at /plan, not /issue"
+    rationale: "/issue is new — existing specs lack issue sentinels. Starting at /plan avoids breaking all existing specs."
+
+artifacts_produced:
+  - "scripts/gate.sh (561 lines, executable)"
+  - "configs/claude/hooks/src/gate-check.ts (159 lines)"
+  - "configs/pi/extensions/gate-check.ts (110 lines)"
+  - "commands/{issue,shape,plan,codex-review,implement}.md (gate_* frontmatter + HARD CONSTRAINT blocks)"
+  - "commands/sweep.md (gate_creates frontmatter)"
+  - "commands/audit-agents.md (documented: no gate_* keys needed)"
+  - "specs/019-command-compliance-gates/codex-review.md (6-round review transcript)"
+
+files:
+  - "scripts/gate.sh"
+  - "commands/issue.md"
+  - "commands/shape.md"
+  - "commands/plan.md"
+  - "commands/codex-review.md"
+  - "commands/implement.md"
+  - "commands/sweep.md"
+  - "commands/audit-agents.md"
+  - "configs/claude/hooks/src/gate-check.ts"
+  - "configs/claude/settings.json"
+  - "configs/pi/extensions/gate-check.ts"
+  - ".gitignore"
+
+test:
+  - "gate.sh gate: all 5 commands PASS against spec 019"
+  - "gate.sh gate: FAIL (exit 1) when plan.md/tasks.md missing"
+  - "gate.sh gate: WARN (exit 2) for pre-existing specs without sentinels (017, 018)"
+  - "gate.sh record: writes sentinels, creates workflow-state.md"
+  - "gate.sh verify: catches fabricated files by mtime comparison"
+  - "Claude Code hook: PASS (silent), WARN (advisory JSON), pass-through (unresolvable)"
+  - "TypeScript compilation: 0 errors for gate-check.ts with project tsconfig"
+
+git:
+  branch: "main"
+  commits:
+    - "febf37c6 — gate.sh + frontmatter keys on all 5 pipeline commands"
+    - "760c5532 — HARD CONSTRAINT gate check blocks + anti-fabrication text"
+    - "f1645f9b — sentinel recording + verify instructions"
+    - "42e881db — Claude Code UserPromptSubmit gate-check hook"
+    - "13cb1b02 — Pi gate-check extension (detect/warn)"
+    - "c1a3770d — check off all tasks, update log"
+    - "33ac1679 — merge to main"
+  pr: "https://github.com/carmandale/agent-config/pull/5"
+  remote: "https://github.com/carmandale/agent-config.git"
