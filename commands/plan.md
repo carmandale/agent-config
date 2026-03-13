@@ -74,6 +74,6 @@ Harness is what's running you (pi, claude-code, codex, gemini, etc.). Model is y
 
 ## How this ends
 
-When the plan is done — both agents agree it's solid, research is grounded, tasks are concrete — tell me to run `/codex-review <spec>` for an independent review, or `/implement <spec>` if it's straightforward enough to skip review.
+When the plan is done — both agents agree it's solid, research is grounded, tasks are concrete — tell me to run `/codex-review <spec>` for an independent review before implementation.
 
 $ARGUMENTS
