@@ -4,11 +4,29 @@ description: Send the current plan to OpenAI Codex CLI for iterative review. Cla
 revision: 3
 revision_date: 2026-03-12
 user_invocable: true
+gate_requires: spec.md, plan.md
+gate_sentinels: plan:complete:v1
+gate_creates: codex-review.md
+gate_must_not_create: spec.md, plan.md, tasks.md
 ---
 
 # Codex Plan Review (Iterative)
 
 Send the current implementation plan to OpenAI Codex for review. Claude revises the plan based on Codex's feedback and re-submits until Codex approves. Max 5 rounds.
+
+---
+
+## HARD CONSTRAINT — Gate Check
+
+Run `scripts/gate.sh gate codex-review specs/<NNN>-<slug>/` before any work.
+
+- **Exit 1 (FAIL):** STOP COMPLETELY. Do NOT create the missing files. Do NOT offer to create them. Do NOT proceed with workarounds. Show the output to the user and wait.
+- **Exit 2 (WARN):** Show the warning to the user and ask THEM whether to proceed. This is the USER's decision, not yours. Do NOT silently ignore. Do NOT decide for the user that "it's probably fine."
+- **Exit 0 (PASS):** Proceed.
+
+Do NOT create or modify spec.md, plan.md, or tasks.md — those belong to /issue and /plan. If plan.md is missing or lacks a plan:complete:v1 sentinel, /plan was not run. Stop and tell the user to run /plan.
+
+If you catch yourself about to rationalize past a FAIL result, STOP — you are doing the exact thing this gate exists to prevent.
 
 ---
 
@@ -310,6 +328,16 @@ rm -f /tmp/claude-plan-${REVIEW_ID}.md /tmp/codex-review-${REVIEW_ID}.md /tmp/co
 ```
 
 The `codex-review.md` file in the spec directory is the receipt. It contains Codex's review text and verdict. The session ID appears in the bash tool's stdout during invocation. Round-by-round feedback is captured by the orchestrating agent throughout the loop and presented to the user in conversation. Commit it with the spec. If this file doesn't exist, the review didn't happen.
+
+**Record provenance and verify anti-fabrication:**
+
+```bash
+# Write sentinel into codex-review.md and update pipeline state trail
+scripts/gate.sh record codex-review specs/<NNN>-<slug>/ --harness "codex/<model>" --extra "rounds: N"
+
+# Verify no forbidden files were created
+scripts/gate.sh verify codex-review specs/<NNN>-<slug>/
+```
 
 ## Loop Summary
 

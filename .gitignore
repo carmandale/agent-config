@@ -1,7 +1,8 @@
-.DS_Store
-*.backup.*
 .aligner/
-.claude/settings.local.json
 .claude/ground-cache
 .claude/ground-cache.tmp
+.claude/settings.local.json
+.DS_Store
+.gate-*-timestamp
 .pi/messenger/
+*.backup.*

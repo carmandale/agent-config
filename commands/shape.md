@@ -1,5 +1,7 @@
 ---
 description: Deep collaborative shaping session — work through the problem and solution space using the full shaping methodology before speccing
+gate_creates: shaping-transcript.md
+gate_must_not_create: spec.md, plan.md, tasks.md, codex-review.md
 ---
 
 We're going to shape this properly. Not a quick brainstorm, not "ask 3 questions and write a plan." The real thing — requirements, shapes, fit checks, the works.
@@ -57,6 +59,10 @@ YYYY-MM-DD HH:MM | <mesh-name or "—"> | <harness>/<model> | /shape | completed
 ```
 
 Harness is what's running you (pi, claude-code, codex, gemini, etc.). Model is your current model. Mesh name is your pi_messenger identity if joined, or `—` if not.
+
+## After completion
+
+If a spec directory exists, run `scripts/gate.sh record shape specs/<NNN>-<slug>/ --harness "<harness>/<model>"` to write provenance sentinel into shaping-transcript.md and update the pipeline state trail.
 
 ## How this ends
 

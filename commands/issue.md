@@ -1,5 +1,7 @@
 ---
 description: Create a bead and numbered spec for an issue or feature — the canonical way to start tracked work
+gate_creates: spec.md, log.md
+gate_must_not_create: plan.md, tasks.md, codex-review.md, shaping-transcript.md, planning-transcript.md
 ---
 
 Create a bead for this work and a numbered spec in `specs/`. This is non-negotiable structure — every piece of tracked work gets a bead and a spec directory.
@@ -49,5 +51,9 @@ YYYY-MM-DD HH:MM | <mesh-name or "—"> | <harness>/<model> | /issue | bead <id>
 ```
 
 Harness is what's running you (pi, claude-code, codex, gemini, etc.). Model is your current model (claude-opus-4-6, gpt-5.3-codex, etc.). Mesh name is your pi_messenger identity if you've joined the mesh, or `—` if not.
+
+## After completion
+
+Run `scripts/gate.sh record issue specs/<NNN>-<slug>/ --harness "<harness>/<model>"` to write provenance sentinel into spec.md and update the pipeline state trail.
 
 $ARGUMENTS

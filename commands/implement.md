@@ -1,10 +1,27 @@
 ---
 description: Execute a plan with two agents — one implements following the workflows-work protocol, one validates every step
+gate_requires: spec.md, plan.md, tasks.md
+gate_sentinels: plan:complete:v1
+gate_warn_sentinels: codex-review:approved:v1
+gate_creates: code changes, commits
+gate_must_not_create: spec.md, plan.md, tasks.md, codex-review.md
 ---
 
 Implement the specified plan. Read the full spec, plan, and tasks end to end and understand the intent behind them, not just the steps.
 
 **Target:** $ARGUMENTS
+
+## HARD CONSTRAINT — Gate Check
+
+Run `scripts/gate.sh gate implement specs/<NNN>-<slug>/` before any work.
+
+- **Exit 1 (FAIL):** STOP COMPLETELY. Do NOT create the missing files. Do NOT offer to create them. Do NOT proceed with workarounds. Show the output to the user and wait.
+- **Exit 2 (WARN):** Show the warning to the user and ask THEM whether to proceed. This is the USER's decision, not yours. Do NOT silently ignore. Do NOT decide for the user that "it's probably fine."
+- **Exit 0 (PASS):** Proceed.
+
+Do NOT create spec.md, plan.md, tasks.md, or codex-review.md — those belong to /issue, /plan, and /codex-review. If tasks.md is missing, /plan was not run. Stop and tell the user to run /plan.
+
+If you catch yourself about to rationalize past a FAIL result, STOP — you are doing the exact thing this gate exists to prevent.
 
 ## Before anything else
 
@@ -67,5 +84,11 @@ Harness is what's running you (pi, claude-code, codex, gemini, etc.). Model is y
 ## How this ends
 
 Be sure to comply with ALL rules in AGENTS.md and ensure that any code you write or revise conforms to the best practices referenced in the AGENTS.md file. When all tasks are checked off, tests pass, and the PR is up — you're done.
+
+## After completion
+
+Run `scripts/gate.sh record implement specs/<NNN>-<slug>/ --harness "<harness>/<model>"` to update the pipeline state trail.
+
+Then run `scripts/gate.sh verify implement specs/<NNN>-<slug>/` to confirm no anti-fabrication violations (you should not have created spec.md, plan.md, tasks.md, or codex-review.md).
 
 $ARGUMENTS

@@ -1,10 +1,25 @@
 ---
 description: Build a real implementation plan using two agents and the workflows-plan skill — research the codebase, propose a plan, stress-test it
+gate_requires: spec.md
+gate_creates: plan.md, tasks.md, planning-transcript.md
+gate_must_not_create: spec.md, codex-review.md
 ---
 
 Build the implementation plan for the specified spec. This is a two-agent session — one agent researches and proposes, the other stress-tests and validates. Neither agent works alone.
 
 **Target:** $ARGUMENTS
+
+## HARD CONSTRAINT — Gate Check
+
+Run `scripts/gate.sh gate plan specs/<NNN>-<slug>/` before any work.
+
+- **Exit 1 (FAIL):** STOP COMPLETELY. Do NOT create the missing files. Do NOT offer to create them. Do NOT proceed with workarounds. Show the output to the user and wait.
+- **Exit 2 (WARN):** Show the warning to the user and ask THEM whether to proceed. This is the USER's decision, not yours. Do NOT silently ignore. Do NOT decide for the user that "it's probably fine."
+- **Exit 0 (PASS):** Proceed.
+
+Do NOT create spec.md or codex-review.md — those belong to /issue and /codex-review. If spec.md is missing, /issue was not run. Stop and tell the user to run /issue.
+
+If you catch yourself about to rationalize past a FAIL result, STOP — you are doing the exact thing this gate exists to prevent.
 
 ## Before anything else
 
@@ -71,6 +86,12 @@ YYYY-MM-DD HH:MM | <mesh-name or "—"> | <harness>/<model> | /plan | completed 
 ```
 
 Harness is what's running you (pi, claude-code, codex, gemini, etc.). Model is your current model. Mesh name is your pi_messenger identity if joined, or `—` if not.
+
+## After completion
+
+Run `scripts/gate.sh record plan specs/<NNN>-<slug>/ --harness "<harness>/<model>"` to write provenance sentinels into plan.md and tasks.md, and update the pipeline state trail.
+
+Then run `scripts/gate.sh verify plan specs/<NNN>-<slug>/` to confirm no anti-fabrication violations.
 
 ## How this ends
 
