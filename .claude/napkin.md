@@ -19,6 +19,7 @@
 | 2026-03-07 | Self | Spec 005 fix (9815a9d) was committed on feature branch but never merged to main. Spec marked "all tasks complete" while fix was stranded. Collision recurred on branch switch. | A fix isn't done until it's on the branch that runs. For gj-tool: main is the install source. Cherry-pick isolated fixes to main immediately — don't leave them stranded on feature branches. Also: `bead: TBD` in a spec = skipped gate, catch it. |
 | 2026-03-10 | Self | Beads worktree (`.git/beads-worktrees/main`) locked `main` branch — `git checkout main` failed with "already used by worktree." Had to `git worktree remove --force` before checking out main. | If `git checkout main` fails with "already used by worktree," check `git worktree list`. The beads worktree from `br sync` may be holding main. Remove it with `git worktree remove .git/beads-worktrees/main --force`. |
 | 2026-03-10 | Self | Read intermediate output of a multi-command SSH pipeline ("ahead by 16 commits") and reported it as final state. The next line (fast-forward pull) had already fixed it. Alarmed the user unnecessarily. | Read the FULL output of a command before commenting on any part of it. Intermediate state during a pipeline is not the final state. |
+| 2026-03-12 | User | Used `find` for file discovery in grounding script — `find` is slow | Use `fd` (Homebrew) instead of `find` for all file discovery. Agents default to `find` but `fd` is faster and preferred. |
 
 ## Agent Collaboration (Critical)
 1. **[2026-03-07] Agents will try subagent, interactive_shell, or bash to spawn collaborators — they MUST be told to use pi_messenger**
@@ -52,6 +53,7 @@
    Do instead: When reviewing, the anti-rubber-stamp mechanism is concrete verification (counts, diffs, file checks) — not "raise one concern." Requiring concerns produces theater. Requiring evidence produces investigation. The "What I Verified" section must contain specifics from the implementation. Reference case: RedEagle said 9/9 PASS but never diffed flake-skip.conf against the committed version — would have caught 74 suppressed methods. See spec 009.
 
 ## User Preferences
+- **Use `fd` instead of `find`** — `find` is slow; `fd` is installed via Homebrew and preferred for all file discovery
 - Uses `~/.agent-config` as central distribution hub for all agents (pi-agent, codex, opencode, claude code)
 - Prefers symlinks to repo for instant `git pull` updates over native plugin systems
 - Wants unified architecture - all agents should get content from same source
