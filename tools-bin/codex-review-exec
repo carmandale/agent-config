@@ -1,0 +1,156 @@
+#!/usr/bin/env bash
+# codex-review-exec — wrapper for codex exec invocations during /codex-review
+# Part of spec 022 (Codex review timeout resistance)
+#
+# Encapsulates the codex exec invocation so agents never run codex directly.
+# Handles: input validation, stale output cleanup, codex execution, output validation.
+# Does NOT: set timeouts, parse session IDs, capture stderr, default model.
+#
+# Usage:
+#   codex-review-exec --prompt FILE --output FILE [--model MODEL] [--session SESSION_ID]
+
+set -euo pipefail
+
+# --- Argument parsing ---
+
+PROMPT_FILE=""
+OUTPUT_FILE=""
+MODEL=""
+SESSION_ID=""
+
+usage() {
+    cat >&2 <<'USAGE'
+Usage: codex-review-exec --prompt FILE --output FILE [--model MODEL] [--session ID]
+
+Required:
+  --prompt FILE     Path to the review prompt file (read via stdin)
+  --output FILE     Path where codex writes its review output (-o flag)
+
+Optional:
+  --model MODEL     Override codex model (omit to use ~/.codex/config.toml default)
+  --session ID      Resume an existing codex session (for multi-round reviews)
+
+Examples:
+  codex-review-exec --prompt /tmp/codex-prompt-abc123.md --output /tmp/codex-review-abc123.md
+  codex-review-exec --prompt /tmp/codex-prompt-abc123.md --output /tmp/codex-review-abc123.md --model o4-mini
+  codex-review-exec --prompt /tmp/codex-prompt-abc123.md --output /tmp/codex-review-abc123.md --session 550e8400-e29b-41d4-a716-446655440000
+USAGE
+    exit 1
+}
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --prompt)
+            PROMPT_FILE="$2"
+            shift 2
+            ;;
+        --output)
+            OUTPUT_FILE="$2"
+            shift 2
+            ;;
+        --model)
+            MODEL="$2"
+            shift 2
+            ;;
+        --session)
+            SESSION_ID="$2"
+            shift 2
+            ;;
+        -h|--help)
+            usage
+            ;;
+        *)
+            echo "ERROR: Unknown argument: $1" >&2
+            usage
+            ;;
+    esac
+done
+
+# --- Input validation ---
+
+if [[ -z "$PROMPT_FILE" ]]; then
+    echo "ERROR: --prompt is required." >&2
+    usage
+fi
+
+if [[ -z "$OUTPUT_FILE" ]]; then
+    echo "ERROR: --output is required." >&2
+    usage
+fi
+
+if [[ ! -f "$PROMPT_FILE" ]]; then
+    echo "ERROR: Prompt file does not exist: $PROMPT_FILE" >&2
+    exit 1
+fi
+
+if [[ ! -s "$PROMPT_FILE" ]]; then
+    echo "ERROR: Prompt file is empty: $PROMPT_FILE" >&2
+    exit 1
+fi
+
+# --- Pre-flight ---
+
+# Check codex is installed
+if ! command -v codex &>/dev/null; then
+    echo "ERROR: codex is not installed or not on PATH." >&2
+    echo "Install with: npm install -g @openai/codex" >&2
+    exit 1
+fi
+
+# Remove stale output from previous runs
+rm -f "$OUTPUT_FILE"
+
+# --- Build and run codex command ---
+# NO timeout. Codex reviews take 5-30 minutes. This is normal.
+# Stderr flows to caller unchanged (session ID appears there).
+
+# Disable errexit so we can capture codex's exit code and produce diagnostics
+set +e
+
+if [[ -n "$SESSION_ID" ]]; then
+    # Resume mode
+    if [[ -n "$MODEL" ]]; then
+        echo "WARNING: --model ignored in resume mode (codex resume uses the original session's model)" >&2
+    fi
+    codex exec resume "$SESSION_ID" -s read-only -o "$OUTPUT_FILE" - < "$PROMPT_FILE"
+else
+    # Fresh exec
+    if [[ -n "$MODEL" ]]; then
+        codex exec -m "$MODEL" -s read-only -o "$OUTPUT_FILE" - < "$PROMPT_FILE"
+    else
+        # No model specified — let codex use its config.toml default
+        codex exec -s read-only -o "$OUTPUT_FILE" - < "$PROMPT_FILE"
+    fi
+fi
+
+CODEX_EXIT=$?
+
+# Re-enable errexit
+set -e
+
+# --- Output validation ---
+
+if [[ $CODEX_EXIT -ne 0 ]]; then
+    echo "ERROR: Codex exited with code $CODEX_EXIT." >&2
+    echo "Output file exists: $([ -f "$OUTPUT_FILE" ] && echo yes || echo no)" >&2
+    echo "Check: Is OPENAI_API_KEY set? Is the codex model available? Was the prompt valid?" >&2
+    exit 1
+fi
+
+if [[ ! -f "$OUTPUT_FILE" ]]; then
+    echo "ERROR: Codex exited successfully but output file was not created: $OUTPUT_FILE" >&2
+    echo "This may indicate codex wrote no response. Check the prompt content." >&2
+    exit 1
+fi
+
+if [[ ! -s "$OUTPUT_FILE" ]]; then
+    echo "ERROR: Codex exited successfully but output file is empty: $OUTPUT_FILE" >&2
+    echo "This may indicate codex produced an empty response. Check the prompt content." >&2
+    exit 1
+fi
+
+# --- Success ---
+
+BYTES=$(wc -c < "$OUTPUT_FILE" | tr -d ' ')
+echo "SUCCESS: ${BYTES} bytes written to ${OUTPUT_FILE}"
+exit 0
