@@ -60,6 +60,7 @@ Revisions must be substantive. If Codex raised a specific technical concern, the
 - ❌ **Do NOT wrap `codex exec` in `timeout`.** Codex manages its own execution. Shell timeouts kill the process before `-o` can write the output file.
 - ❌ **Do NOT pipe codex output through `| tail -N`.** This discards the session ID and diagnostic information. Use `-o` to capture output to a file.
 - ❌ **Do NOT use heredocs (`<<PROMPT`).** Agents frequently mangle closing delimiters. Write the prompt to a file instead.
+- ❌ **Do NOT set a `timeout` parameter on the bash tool call.** Not 300 seconds, not 600, not any value. Codex reviews take 5-30 minutes depending on codebase size. This is normal — there is no hang to protect against.
 
 ---
 
