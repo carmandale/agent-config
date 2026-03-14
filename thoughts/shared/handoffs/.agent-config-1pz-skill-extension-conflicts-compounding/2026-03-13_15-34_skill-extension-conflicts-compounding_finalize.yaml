@@ -1,0 +1,73 @@
+---
+schema_version: "1.0.0"
+mode: finalize
+date: 2026-03-13T15:34:59.615Z
+session: ".agent-config-1pz-skill-extension-conflicts-compounding"
+outcome: "SUCCEEDED"
+primary_bead: ".agent-config-1pz"
+---
+
+goal: "Fix recurring skill and extension conflicts, compound learnings into permanent rules and hook improvements"
+now: "All conflicts resolved. 2 rules created (single-source, verify-dependencies). AGENTS.md updated with fd preference. Post-commit hook enhanced with name/dir mismatch detection. No remaining skill or extension conflicts."
+
+final_solutions:
+  - issue: "swift-concurrency skill name/dir mismatch"
+    solution: "Renamed directory swift-concurrency-expert → swift-concurrency to match YAML name field"
+    commit: "5a8475f6"
+
+  - issue: "pi-messenger extension conflict (recurring)"
+    root_cause: "Extension registered in TWO discovery paths — packages[] in settings.json AND ~/.pi/agent/extensions/ directory"
+    solution: "Removed extensions/ entry. packages[] is the canonical single source."
+    commit: "n/a (runtime config, not tracked in git)"
+
+  - issue: "post-commit hook _sandbox false positive"
+    solution: "Added _-prefix exclusion to skill dir scanner, matching . prefix convention"
+    commit: "d4e21c97"
+
+  - issue: ".git/hooks/post-commit stale copy"
+    root_cause: "hooks/ dir in repo and .git/hooks/ were independent copies with no sync mechanism"
+    solution: "Set git config core.hooksPath hooks — git now reads hooks directly from repo"
+    commit: "03543f4c"
+
+  - issue: "gitnexus SKILL.md files had Windows line endings (\\r)"
+    solution: "Stripped \\r from 4 files; hook awk now strips quotes and \\r for robust comparison"
+    commit: "c9cebcb5"
+
+final_decisions:
+  - decision: "Use fd over find globally"
+    rationale: "User preference; fd is faster. Added to AGENTS.md §10 alongside existing rg preference."
+  - decision: "Compound 6+ session patterns into permanent rules"
+    rationale: "single-source (7 source sessions) and verify-dependencies (2 critical failures) patterns were recurring enough to warrant permanent rules"
+  - decision: "Add skill name/dir mismatch detection to post-commit hook"
+    rationale: "Structural enforcement catches mismatches at commit time rather than runtime conflicts"
+
+artifacts_produced:
+  - path: ".claude/rules/single-source.md"
+    description: "Rule: one canonical source, reference don't copy (7 source sessions)"
+  - path: ".claude/rules/verify-dependencies.md"
+    description: "Rule: verify dependency graph, not just the artifact (2 source sessions)"
+  - path: "instructions/AGENTS.md"
+    description: "Updated §10 Tooling Defaults — added fd over find"
+  - path: "hooks/post-commit"
+    description: "Enhanced: _-prefix exclusion + skill name/dir mismatch detection"
+  - path: ".claude/napkin.md"
+    description: "Updated with fd preference, pi-messenger root cause, hooksPath fix"
+
+files:
+  - "skills/domain/swift/swift-concurrency/SKILL.md (renamed from swift-concurrency-expert)"
+  - ".claude/rules/single-source.md (new)"
+  - ".claude/rules/verify-dependencies.md (new)"
+  - "instructions/AGENTS.md (updated)"
+  - "hooks/post-commit (updated)"
+  - "skills/domain/gitnexus/*/SKILL.md (4 files, \\r stripped)"
+  - ".claude/napkin.md (updated)"
+
+git:
+  branch: "main"
+  commits:
+    - "5a8475f6 — fix: rename swift-concurrency-expert dir to match YAML name"
+    - "d4e21c97 — fix(hook): exclude _-prefixed dirs from SKILL.md check"
+    - "03543f4c — chore: verify core.hooksPath hooks"
+    - "8ef242a6 — chore: napkin updates"
+    - "c9cebcb5 — feat: compound learnings — 2 rules, AGENTS.md fd preference, skill name/dir hook"
+  remote: "https://github.com/carmandale/agent-config.git"
