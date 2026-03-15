@@ -37,7 +37,7 @@ When you see these in user prompts, use the commit skill:
 
 The skill will prompt you to run:
 ```bash
-bash .claude/scripts/generate-reasoning.sh <hash> "<message>"
+generate-reasoning.sh <hash> "<message>"
 ```
 
 Then push if requested:
