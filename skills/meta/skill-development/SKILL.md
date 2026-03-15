@@ -3,6 +3,8 @@ name: skill-development
 description: Skill Development Rules
 ---
 
+> ⚠️ **Deprecated.** This skill is Claude Code-specific. For agent-agnostic skill creation, use the [`create-skill`](../create-skill/SKILL.md) skill.
+
 # Skill Development Rules
 
 When working with files in `.claude/skills/`:
