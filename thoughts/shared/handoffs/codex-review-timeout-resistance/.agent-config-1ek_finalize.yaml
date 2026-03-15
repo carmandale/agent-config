@@ -1,0 +1,109 @@
+---
+mode: finalize
+primary_bead: ".agent-config-1ek"
+session_title: "codex-review-timeout-resistance"
+date: "2026-03-14"
+agent: "WildStorm"
+harness: "pi/claude-opus-4-6"
+---
+
+goal: >
+  Eliminate bash tool timeout kills during /codex-review by replacing raw codex exec
+  invocations with a wrapper script that agents call instead — removing the opportunity
+  to add timeout parameters, | tail pipes, or other invocation mangling.
+
+now: >
+  Wrapper script `tools-bin/codex-review-exec` is live on PATH. `commands/codex-review.md`
+  (rev 4) references it in Steps 3 and 5. All raw codex exec blocks replaced. 5 anti-patterns
+  cover all timeout mechanisms. Merged to main, pushed to GitHub. Bead closed.
+
+outcome: SUCCEEDED
+
+final_solutions:
+  - title: "Wrapper script in tools-bin"
+    description: >
+      Created `tools-bin/codex-review-exec` — a portable bash script that encapsulates
+      the entire codex exec invocation. Agents write the prompt file (their strength),
+      call the script (one short command), and read the output. The script handles input
+      validation, stale output cleanup, set +e for exit code capture, output file
+      validation, and diagnostics. No timeout of any kind. Stderr passes through
+      unchanged so agents can still extract session IDs from bash tool output.
+    files:
+      - tools-bin/codex-review-exec
+
+  - title: "Command template update (rev 3 → 4)"
+    description: >
+      Replaced Steps 3B/3C and 5B/5C in codex-review.md with single wrapper calls.
+      Error check blocks eliminated (script handles validation internally). Added 5th
+      anti-pattern explicitly covering bash tool timeout parameter. Model default
+      deferred to codex config.toml.
+    files:
+      - commands/codex-review.md
+
+final_decisions:
+  - decision: "Wrapper script over template-only fix"
+    rationale: >
+      Spec 017 tried template-only (anti-patterns saying "don't use timeout").
+      MintWolf's session proved it insufficient — agent set timeout on bash tool
+      parameter, technically different layer from the shell timeout command the
+      anti-pattern prohibited. Template-only fixes cannot control tool call parameters.
+
+  - decision: "Script does NOT parse session IDs"
+    rationale: >
+      RedViper's adversarial review caught this — parsing stderr for session ID via
+      grep/sed adds fragility. Script passes stderr through unchanged. Agent extracts
+      session ID from bash tool output as before. One less thing to break.
+
+  - decision: "No model default in script"
+    rationale: >
+      RedViper catch — if --model omitted, script doesn't pass -m to codex. Codex uses
+      its own config.toml default. Prevents conflicts between script and codex config.
+
+  - decision: "set +e around codex invocation"
+    rationale: >
+      RedViper catch — with set -euo pipefail, a codex non-zero exit would kill the
+      script before reaching exit code capture or diagnostics. Exactly the opposite
+      of what we want. set +e before codex, set -e after capture.
+
+  - decision: "tools-bin/ not scripts/"
+    rationale: >
+      tools-bin/ is already on PATH. scripts/ is relative to agent-config and doesn't
+      resolve from other project directories (confirmed: MintWolf tried scripts/gate.sh
+      from hsbc → "not found"). tools-bin/ makes the script callable as a bare command
+      from anywhere.
+
+artifacts_produced:
+  - specs/022-codex-review-timeout-resistance/spec.md
+  - specs/022-codex-review-timeout-resistance/plan.md
+  - specs/022-codex-review-timeout-resistance/tasks.md
+  - specs/022-codex-review-timeout-resistance/planning-transcript.md
+  - specs/022-codex-review-timeout-resistance/log.md
+  - tools-bin/codex-review-exec
+  - commands/codex-review.md
+
+collaborators:
+  - name: RedViper
+    role: adversarial reviewer (planning)
+    contributions: >
+      7 findings across 2 review rounds: no session ID parsing in script, script handles
+      full validation (eliminating Steps 3C/5C), no model default, single global anti-pattern,
+      session ID sourcing clarification, set -e would kill script before diagnostics,
+      --model warning in resume mode.
+
+  - name: MintWolf
+    role: evidence source
+    contributions: >
+      MintWolf's /codex-review session in hsbc (d7013d18) provided the primary evidence:
+      bash tool timeout: 300 → killed, timeout: 600 → killed, nohup workaround → succeeded
+      at ~8 minutes. Confirmed the root cause and validated that codex reviews work fine
+      when not killed by timeouts.
+
+related_beads:
+  - ".agent-config-ybl"  # spec 017 — original codex-review invocation fix
+
+commits:
+  - aeeb087d  # feat(022): add codex-review-exec wrapper script in tools-bin
+  - d95875c9  # feat(022): add bash tool timeout anti-pattern to codex-review
+  - 4c097a43  # feat(022): replace raw codex exec with codex-review-exec wrapper calls
+  - d891cf34  # chore(022): spec artifacts — all tasks complete
+  - 80c3e1e3  # chore(022): update log and workflow state after implementation
