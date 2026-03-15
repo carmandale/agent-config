@@ -143,8 +143,8 @@ if [[ -n "$PRIMARY_BEAD" ]]; then
     exit 1
   fi
 
-  br show "$PRIMARY_BEAD" >/dev/null 2>&1
-  br_exit=$?
+  br_exit=0
+  br show "$PRIMARY_BEAD" >/dev/null 2>&1 || br_exit=$?
   if [[ "$br_exit" -eq 3 ]]; then
     echo "Error: bead not found: $PRIMARY_BEAD" >&2
     echo "Run: br list --status in_progress --json" >&2
