@@ -22,6 +22,7 @@
 | 2026-03-12 | User | Used `find` for file discovery in grounding script — `find` is slow | Use `fd` (Homebrew) instead of `find` for all file discovery. Agents default to `find` but `fd` is faster and preferred. |
 | 2026-03-12 | Self | pi-messenger extension conflict kept recurring — fixed symlink/copy but conflict returned | Root cause: extension registered in TWO discovery paths (packages[] in settings.json AND ~/.pi/agent/extensions/). Fix: remove extensions/ entry, keep packages[] as canonical source. |
 | 2026-03-12 | Self | .git/hooks/post-commit was stale copy of hooks/post-commit — edits to hooks/ didn't take effect | Set `git config core.hooksPath hooks` so git reads hooks directly from repo. No copy = no drift. |
+| 2026-03-14 | Self | `git checkout -b feat/020-...` appeared to succeed but commits went to feat/021 branch. Didn't notice until after merge. | After `git checkout -b`, verify with `git branch --show-current` before committing. Check the branch name in commit output — `[branch-name hash]` tells you where the commit actually landed. |
 
 ## Agent Collaboration (Critical)
 1. **[2026-03-07] Agents will try subagent, interactive_shell, or bash to spawn collaborators — they MUST be told to use pi_messenger**
@@ -88,6 +89,7 @@
 - **Shared helper for multi-consumer logic**: When two scripts need the same check (bootstrap.sh detective + install.sh preventive), extract to `scripts/lib/*.sh` and source from both. Callers set dynamic paths before sourcing (e.g., `AGENT_CONFIG_SKILLS="$REPO_ROOT/skills"`). Eliminates drift — one file, zero duplicated logic. Proven in spec 012.
 - **Automated diff tests beat "keep in sync" comments**: When 4 sources (install.sh, bootstrap.sh, README, parity tool) must list the same paths, a test that extracts from each and diffs them is the only reliable coupling. Comments get ignored. Codex review independently identified this as the R1 top finding. See `tests/test-symlink-parity.sh` section 7 and rule `structural-coupling.md`. Proven in spec 014.
 - **Codex review catches structural plan weaknesses**: In spec 014, Codex R1 found 5 issues the original plan missed — most importantly that "comment-only coupling" is not structural enforcement. The two-round review loop (REVISE → APPROVED) produced a materially stronger plan. Worth the extra round.
+- **[2026-03-14] Self-validating scripts > consumer validation** — When a script produces output (files, paths), validate inside the script before returning success. Don't duplicate validation in every consumer. The duplication drifts (proven: finalize's `bead in path.name` checked the wrong thing for months). Exit code is the contract.
 
 ## Patterns That Don't Work
 - Individual per-skill symlinks - get stale when new skills are added to repo
