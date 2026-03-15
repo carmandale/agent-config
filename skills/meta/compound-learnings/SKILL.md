@@ -1,7 +1,6 @@
 ---
 name: compound-learnings
-description: Transform session learnings into permanent capabilities (skills, rules, agents). Use when asked to "improve setup", "learn from sessions", "compound learnings", or "what patterns should become skills".
-allowed-tools: [Read, Glob, Grep, Write, Edit, Bash, AskUserQuestion]
+description: Transform session learnings into permanent capabilities (skills, heuristics, agent updates). Use when asked to "improve setup", "learn from sessions", "compound learnings", or "what patterns should become skills".
 ---
 
 # Compound Learnings
@@ -12,7 +11,7 @@ Transform ephemeral session learnings into permanent, compounding capabilities.
 
 - "What should I learn from recent sessions?"
 - "Improve my setup based on recent work"
-- "Turn learnings into skills/rules"
+- "Turn learnings into skills"
 - "What patterns should become permanent?"
 - "Compound my learnings"
 
@@ -20,26 +19,59 @@ Transform ephemeral session learnings into permanent, compounding capabilities.
 
 ### Step 1: Gather Learnings
 
-```bash
-# List learnings (most recent first)
-ls -t $CLAUDE_PROJECT_DIR/.claude/cache/learnings/*.md | head -20
+Try sources in order. Use the first that yields results. If a source exists but returns empty or errors, report a specific message and try the next source.
 
-# Count total
-ls $CLAUDE_PROJECT_DIR/.claude/cache/learnings/*.md | wc -l
+**Source 1 — CASS (cross-agent session search):**
+
+```bash
+# Check if CASS is available
+which cass >/dev/null 2>&1 && echo "CASS available" || echo "CASS not installed — skipping"
+
+# Search recent sessions for patterns (use --robot for machine-readable output)
+cass search "patterns learnings takeaway" --robot --after 2026-01-01
 ```
 
-Read the most recent 5-10 files (or specify a date range).
+If CASS returns no results: "CASS returned no results for the given query/date range. Try broadening the search or check `cass status`." Fall through to next source.
+
+**Source 2 — Project learnings directory:**
+
+```bash
+# Check for .learnings/ in project root
+ls .learnings/*.md 2>/dev/null | head -20
+```
+
+If `.learnings/` exists but is empty: "`.learnings/` directory exists but contains no files." Fall through.
+
+**Source 3 — Claude Code learnings cache (legacy fallback):**
+
+```bash
+# Only if .claude/cache/learnings/ exists
+ls -t .claude/cache/learnings/*.md 2>/dev/null | head -20
+```
+
+**Source 4 — Napkin (curated patterns):**
+
+```bash
+# Check for napkin in common locations
+cat .claude/napkin.md 2>/dev/null || cat .napkin.md 2>/dev/null || echo "No napkin found"
+```
+
+**If ALL sources are unavailable or empty:** "No learnings sources found. Install CASS (`cass`) for cross-agent session analysis, or create `.learnings/` in your project root. See `self-improving-agent` skill for logging learnings during sessions." Stop gracefully.
+
+**Date filtering:** For any source, scope to recent sessions (e.g., last 30 days) unless the user specifies a broader range. This avoids re-analyzing old sessions on repeated runs.
+
+Read the most recent 5–10 results (or specify a date range).
 
 ### Step 2: Extract Patterns (Structured)
 
-For each learnings file, extract entries from these specific sections:
+For each learnings source, extract entries from these specific sections:
 
 | Section Header | What to Extract |
 |----------------|-----------------|
-| `## Patterns` or `Reusable techniques` | Direct candidates for rules |
+| `## Patterns` or `Reusable techniques` | Direct candidates for heuristics |
 | `**Takeaway:**` or `**Actionable takeaway:**` | Decision heuristics |
 | `## What Worked` | Success patterns |
-| `## What Failed` | Anti-patterns (invert to rules) |
+| `## What Failed` | Anti-patterns (invert to heuristics) |
 | `## Key Decisions` | Design principles |
 
 Build a frequency table as you go:
@@ -68,10 +100,10 @@ Use the most general formulation. Update the frequency table.
 **Critical step:** Look at what the learnings cluster around.
 
 If >50% of patterns relate to one topic (e.g., "hooks", "tracing", "async"):
-→ That topic may need a **dedicated skill** rather than multiple rules
-→ One skill compounds better than five rules
+→ That topic may need a **dedicated skill** rather than multiple heuristics
+→ One skill compounds better than five heuristics
 
-Ask yourself: *"Is there a skill that would make all these rules unnecessary?"*
+Ask yourself: *"Is there a skill that would make all these heuristics unnecessary?"*
 
 ### Step 4: Categorize (Decision Tree)
 
@@ -82,12 +114,12 @@ Is it a sequence of commands/steps?
   → YES → SKILL (executable > declarative)
   → NO ↓
 
-Should it run automatically on an event (SessionEnd, PostToolUse, etc.)?
-  → YES → HOOK (automatic > manual)
+Should it run automatically on an event?
+  → YES → CLAUDE CODE ENHANCEMENT (see appendix below)
   → NO ↓
 
 Is it "when X, do Y" or "never do X"?
-  → YES → RULE
+  → YES → HEURISTIC (append to AGENTS.md or napkin)
   → NO ↓
 
 Does it enhance an existing agent workflow?
@@ -99,10 +131,10 @@ Does it enhance an existing agent workflow?
 
 | Pattern | Type | Why |
 |---------|------|-----|
-| "Run linting before commit" | Hook (PreToolUse) | Automatic gate |
-| "Extract learnings on session end" | Hook (SessionEnd) | Automatic trigger |
+| "Run linting before commit" | Claude Code enhancement | Automatic gate (hook) |
+| "Extract learnings on session end" | Claude Code enhancement | Automatic trigger (hook) |
 | "Debug hooks step by step" | Skill | Manual sequence |
-| "Always pass IDs explicitly" | Rule | Heuristic |
+| "Always pass IDs explicitly" | Heuristic | Append to AGENTS.md |
 
 ### Step 5: Apply Signal Thresholds
 
@@ -126,7 +158,7 @@ Present each proposal in this format:
 
 **Category:** [debugging / reliability / workflow / etc.]
 
-**Artifact Type:** Rule / Skill / Agent Update
+**Artifact Type:** Skill / Heuristic / Agent Update
 
 **Rationale:** [Why this artifact type, why worth creating]
 
@@ -135,40 +167,18 @@ Present each proposal in this format:
 [Actual content that would be written to file]
 \`\`\`
 
-**File:** `.claude/rules/[name].md` or `.claude/skills/[name]/SKILL.md`
+**File:** `~/.agent-config/skills/<category>/<name>/SKILL.md` (for skills) or `Project AGENTS.md / napkin` (for heuristics)
 
 ---
 ```
 
-Use `AskUserQuestion` to get approval for each artifact (or batch approval).
+Ask the user for approval for each artifact (or batch approval).
 
 ### Step 7: Create Approved Artifacts
 
-#### For Rules:
-```bash
-# Write to rules directory
-cat > $CLAUDE_PROJECT_DIR/.claude/rules/<name>.md << 'EOF'
-# Rule Name
-
-[Context: why this rule exists, based on N sessions]
-
-## Pattern
-[The reusable principle]
-
-## DO
-- [Concrete action]
-
-## DON'T
-- [Anti-pattern]
-
-## Source Sessions
-- [session-id-1]: [what happened]
-- [session-id-2]: [what happened]
-EOF
-```
-
 #### For Skills:
-Create `.claude/skills/<category>/<name>/SKILL.md`. Choose category with the decision rule: wraps CLI/API → `tools/`, analyzes/reviews → `review/`, orchestrates dev process → `workflows/`, technology-specific → `domain/<sub>/`, agent behavior → `meta/`.
+
+Create `~/.agent-config/skills/<category>/<name>/SKILL.md`. Choose category with the decision rule: wraps CLI/API → `tools/`, analyzes/reviews → `review/`, orchestrates dev process → `workflows/`, technology-specific → `domain/<sub>/`, agent behavior → `meta/`.
 
 **The YAML frontmatter is mandatory.** Without `description`, the skill is invisible to all agents. Use this exact template:
 
@@ -196,39 +206,24 @@ description: <What it does. Use when [specific triggers]. Handles [patterns].>
 
 The `description` field is the primary discovery mechanism — include what the skill does, when to use it (trigger phrases), and what patterns/keywords should activate it.
 
-Skills placed in category directories are discovered automatically via recursive scan — no symlink needed.
+Skills placed in category directories are discovered automatically via recursive scan — no symlink needed. See the `create-skill` skill for full guidance on skill authoring, including init/validate/package scripts.
 
-#### For Hooks:
-Create shell wrapper + TypeScript handler:
+#### For Heuristics:
 
-```bash
-# Shell wrapper
-cat > $CLAUDE_PROJECT_DIR/.claude/hooks/<name>.sh << 'EOF'
-#!/bin/bash
-set -e
-cd "$CLAUDE_PROJECT_DIR/.claude/hooks"
-cat | node dist/<name>.mjs
-EOF
-chmod +x $CLAUDE_PROJECT_DIR/.claude/hooks/<name>.sh
+Append to the project's `AGENTS.md` or napkin. Add the heuristic to the most relevant section with context:
+
+```markdown
+## [Section Name]
+
+<!-- Heuristic from compound-learnings: [N] sessions, [category] -->
+- [The reusable principle] — [brief context of why]
 ```
 
-Then create `src/<name>.ts`, build with esbuild, and register in `settings.json`:
-
-```json
-{
-  "hooks": {
-    "EventName": [{
-      "hooks": [{
-        "type": "command",
-        "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/<name>.sh"
-      }]
-    }]
-  }
-}
-```
+If no relevant section exists, create one. Keep heuristics concise and actionable.
 
 #### For Agent Updates:
-Edit existing agent in `.claude/agents/<name>.md` to add the learned capability.
+
+Edit the relevant agent configuration to add the learned capability. The format depends on which agent you're running in — check the agent's documentation for its config format.
 
 ### Step 8: Summary Report
 
@@ -240,8 +235,8 @@ Edit existing agent in `.claude/agents/<name>.md` to add the learned capability.
 **Artifacts Created:** [K]
 
 ### Created:
-- Rule: `explicit-identity.md` - Pass IDs explicitly across boundaries
-- Skill: `debug-hooks` - Hook debugging workflow
+- Skill: `debug-hooks` — Hook debugging workflow → `~/.agent-config/skills/workflows/debug-hooks/SKILL.md`
+- Heuristic: "Pass IDs explicitly" — added to project AGENTS.md
 
 ### Skipped (insufficient signal):
 - "Pattern X" (1 occurrence)
@@ -255,15 +250,71 @@ Before creating any artifact:
 
 1. **Is it general enough?** Would it apply in other projects?
 2. **Is it specific enough?** Does it give concrete guidance?
-3. **Does it already exist?** Check `.claude/rules/` and `.claude/skills/` first
-4. **Is it the right type?** Sequences → skills, heuristics → rules
+3. **Does it already exist?** Check `~/.agent-config/skills/` and project AGENTS.md first
+4. **Is it the right type?** Sequences → skills, heuristics → AGENTS.md/napkin
+5. **Does it contain sensitive data?** API keys, credentials, PII must be redacted before creating an artifact.
 
 ## Files Reference
 
-- Learnings: `.claude/cache/learnings/*.md`
-- Skills: `.claude/skills/<name>/SKILL.md`
-- Rules: `.claude/rules/<name>.md`
-- Hooks: `.claude/hooks/<name>.sh` + `src/<name>.ts` + `dist/<name>.mjs`
-- Agents: `.claude/agents/<name>.md`
-- Skill triggers: `.claude/skills/skill-rules.json`
-- Hook registration: `.claude/settings.json` → `hooks` section
+- **Skills:** `~/.agent-config/skills/<category>/<name>/SKILL.md`
+- **Heuristics:** Project `AGENTS.md` or `.claude/napkin.md` / `.napkin.md`
+- **Claude Code-specific artifacts:** See appendix below
+
+---
+
+## Claude Code Enhancements
+
+> The following artifact types are available when running in Claude Code. They are not universal — other agents (Pi, Codex, Gemini) do not support these mechanisms. If a pattern should be an automatic gate or trigger, capture its *intent* as a heuristic in AGENTS.md for other agents, and create the hook/rule here for Claude Code.
+
+#### For Rules (Claude Code only):
+```bash
+cat > .claude/rules/<name>.md << 'EOF'
+# Rule Name
+
+[Context: why this rule exists, based on N sessions]
+
+## Pattern
+[The reusable principle]
+
+## DO
+- [Concrete action]
+
+## DON'T
+- [Anti-pattern]
+
+## Source Sessions
+- [session-id-1]: [what happened]
+- [session-id-2]: [what happened]
+EOF
+```
+
+#### For Hooks (Claude Code only):
+Create shell wrapper + TypeScript handler:
+
+```bash
+cat > .claude/hooks/<name>.sh << 'EOF'
+#!/bin/bash
+set -e
+cd "$(dirname "$0")"
+cat | node dist/<name>.mjs
+EOF
+chmod +x .claude/hooks/<name>.sh
+```
+
+Then create `src/<name>.ts`, build with esbuild, and register in `.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "EventName": [{
+      "hooks": [{
+        "type": "command",
+        "command": ".claude/hooks/<name>.sh"
+      }]
+    }]
+  }
+}
+```
+
+#### For Agent Definitions (Claude Code only):
+Edit existing agent in `.claude/agents/<name>.md` to add the learned capability.
