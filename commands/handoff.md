@@ -1,10 +1,10 @@
 ---
-description: Strict session transfer package (bead required). Uses ~/.claude/scripts/cc-artifact.
+description: Strict session transfer package (bead required). Uses agent-artifact (via tools-bin/).
 ---
 
 You are ending a session and handing off work to another session/agent.
 
-This command uses the unified artifact generator: `~/.claude/scripts/cc-artifact`.
+This command uses the unified artifact generator: `agent-artifact` (in `tools-bin/`, on PATH).
 
 ## Requirements
 - **Bead REQUIRED**
@@ -204,13 +204,26 @@ If the inferred bead is not in_progress, ask to mark it in_progress and continue
 python3 - <<'PY'
 import os
 import pathlib
+import shutil
 import subprocess
 
 bead = "<BEAD_ID>"  # required
 session_title = "<short title>"  # optional
 
+# Resolve agent-artifact with anti-shadow guard
+artifact_cmd = shutil.which("agent-artifact")
+if not artifact_cmd:
+    raise SystemExit("agent-artifact not found on PATH. Is ~/.agent-config/tools-bin/ on PATH?")
+expected_path = os.path.realpath(os.path.expanduser("~/.agent-config/tools-bin/agent-artifact"))
+actual_path = os.path.realpath(artifact_cmd)
+if actual_path != expected_path:
+    raise SystemExit(
+        f"agent-artifact resolved to {artifact_cmd} (real: {actual_path}) — "
+        f"expected {expected_path}. Check for shadowing binaries in earlier PATH entries."
+    )
+
 cmd = [
-    os.path.expanduser("~/.claude/scripts/cc-artifact"),
+    artifact_cmd,
     "--no-edit",
     "--mode",
     "handoff",
@@ -225,35 +238,13 @@ if result.returncode != 0:
     raise SystemExit(result.stderr.strip() or result.stdout.strip())
 
 artifact_path = result.stdout.strip().splitlines()[-1]
-path = pathlib.Path(artifact_path)
-if not path.exists():
-    raise SystemExit(f"Missing artifact path: {path}")
-if bead not in path.name or not path.name.endswith("_handoff.yaml"):
-    raise SystemExit(f"Unexpected artifact filename: {path.name}")
-
-text = path.read_text()
-parts = text.split("---", 2)
-if len(parts) < 3:
-    raise SystemExit("Missing frontmatter")
-front = parts[1]
-mode = None
-primary = None
-for line in front.splitlines():
-    if line.startswith("mode:"):
-        mode = line.split(":", 1)[1].strip().strip('"')
-    if line.startswith("primary_bead:"):
-        primary = line.split(":", 1)[1].strip().strip('"')
-if mode != "handoff":
-    raise SystemExit(f"Unexpected mode: {mode}")
-if primary != bead:
-    raise SystemExit(f"primary_bead mismatch: {primary} != {bead}")
-print(f"Verified artifact: {path}")
+print(f"Artifact created: {artifact_path}")
 PY
 ```
 Now use the Read tool to read the artifact file, then use the Edit tool to fill in `goal`, `now`, and `outcome` using SESSION_SUMMARY. Include concrete next steps and files to review.
 
-IMPORTANT: Only edit the file path returned by `cc-artifact`. Do not open or modify any existing handoff artifact.
-If the returned path does not include the BEAD_ID and `_handoff.yaml`, stop and re-run `cc-artifact` with the correct bead/title.
+IMPORTANT: Only edit the file path returned by `agent-artifact`. Do not open or modify any existing handoff artifact.
+If `agent-artifact` exits non-zero, show the error and stop. If it exits 0, the printed path is guaranteed correct — the script self-validates.
 
 ### 3) Propose outcome, allow override
 State your inferred outcome from SESSION_SUMMARY, then let the user confirm or change it:
