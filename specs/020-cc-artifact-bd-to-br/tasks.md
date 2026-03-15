@@ -75,6 +75,6 @@ bead: .agent-config-324
 
 ## Phase 8: Follow-up beads (not this spec)
 
-- [ ] 8.1 File bead for cc-synthesize migration (Claude hooks dependency — needs architecture decision)
-- [ ] 8.2 File bead for phantom scripts (aggregate-reasoning.sh, search-reasoning.sh — need creation or skill cleanup)
-- [ ] 8.3 File bead for Category 2 scripts (project-relative runtime harness dependencies)
+- [x] 8.1 Filed bead `.agent-config-3on` → `specs/023-cc-synthesize-migration/`
+- [x] 8.2 Filed bead `.agent-config-1gl` → `specs/024-missing-reasoning-scripts/`
+- [x] 8.3 Filed bead `.agent-config-chj` → `specs/025-project-relative-script-deps/`
