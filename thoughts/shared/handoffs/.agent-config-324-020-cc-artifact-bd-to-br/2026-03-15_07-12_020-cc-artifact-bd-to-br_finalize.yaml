@@ -1,0 +1,44 @@
+---
+schema_version: "1.0.0"
+mode: finalize
+date: 2026-03-15T07:12:30.806Z
+session: ".agent-config-324-020-cc-artifact-bd-to-br"
+outcome: "SUCCEEDED"
+primary_bead: ".agent-config-324"
+---
+
+goal: "Fix cc-artifact bd-to-br migration gap — move scripts to tools-bin, agent-agnostic names, self-validation, structural test"
+now: "Complete — all 9 commits on main via PR #6, all tests pass, KeenViper unblocked"
+
+done_this_session:
+  - "Created tools-bin/agent-artifact (cc-artifact renamed, bd→br, self-validating, hard errors)"
+  - "Moved generate-reasoning.sh to tools-bin/"
+  - "Updated 3 consumer commands (finalize, handoff, checkpoint) — agent-agnostic path, removed broken validation, added anti-shadow guard"
+  - "Updated 6 skill files to use bare names"
+  - "Created tests/test-no-agent-specific-paths.sh (10 checks, structural enforcement)"
+  - "Updated test-continuity-lifecycle.sh to use agent-artifact"
+  - "Fixed set -e exit code capture bug found during E2E testing"
+  - "Helped KeenViper resolve live cc-artifact breakage mid-session"
+
+decisions:
+  - "cc-synthesize DEFERRED — runtime dependency on Claude hooks (separate bead)"
+  - "Phantom scripts (aggregate/search-reasoning) — paths updated, creation deferred (separate bead)"
+  - "Category 2 scripts (project-relative) — separate bead"
+  - "Consumer validation removed entirely — agent-artifact self-validates (exit code is the contract)"
+  - "Anti-shadow guard: exact realpath comparison, not prefix match"
+
+next:
+  - "File follow-up beads: cc-synthesize migration, phantom scripts, Category 2 scripts"
+  - "Mini parity: git pull on mini-ts picks up tools-bin/ automatically"
+
+test:
+  - "test-no-agent-specific-paths.sh: 10/10 passed"
+  - "test-symlink-parity.sh: 29/29 passed"
+  - "test-continuity-lifecycle.sh: all passed"
+  - "E2E happy path (valid bead): exit 0, bead in dir name"
+  - "E2E invalid bead: exit 1, 'bead not found'"
+  - "E2E missing br: exit 1, 'br not found'"
+git:
+  branch: "main"
+  commit: "a169c160217977af6cb405a974bdd9cdb6594f45"
+  remote: "https://github.com/carmandale/agent-config.git"

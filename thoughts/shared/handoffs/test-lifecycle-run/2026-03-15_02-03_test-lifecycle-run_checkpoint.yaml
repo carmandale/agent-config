@@ -1,0 +1,17 @@
+---
+schema_version: "1.0.0"
+mode: checkpoint
+date: 2026-03-15T02:03:44.093Z
+session: "test-lifecycle-run"
+outcome: "SUCCEEDED"
+---
+
+goal: "Test spaces in path"
+now: "Validating path handling"
+
+# Optional fields (YAML)
+# done_this_session:, next:, blockers:, questions:, decisions:, findings:, worked:, failed:, files:, test:, git:
+git:
+  branch: "feat/021-cross-agent-compound-learnings"
+  commit: "9495b950e437ba5b27b1896e71154b0e61bfaa2d"
+  remote: "https://github.com/carmandale/agent-config.git"
