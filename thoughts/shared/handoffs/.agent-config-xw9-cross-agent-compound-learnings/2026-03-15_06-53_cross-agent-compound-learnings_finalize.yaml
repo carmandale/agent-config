@@ -1,0 +1,47 @@
+---
+schema_version: "1.0.0"
+mode: finalize
+date: 2026-03-15T06:53:48.712Z
+session: ".agent-config-xw9-cross-agent-compound-learnings"
+outcome: "SUCCEEDED"
+primary_bead: ".agent-config-xw9"
+---
+
+goal: "Generalize compound-learnings skill for cross-agent compatibility"
+now: "All 13 tasks complete, 5 commits on feat/021, bead closed, navigator validated"
+
+done_this_session:
+  - "Rewrote compound-learnings/SKILL.md: ordered source detection (CASS → .learnings/ → .claude/ fallback → napkin), Claude appendix for hooks/rules/agents, generic verbs, shared paths"
+  - "Created canonical create-skill in meta/ (182 lines): taxonomy, templates, init/validate/package scripts"
+  - "Added deprecation headers to skill-developer and skill-development"
+  - "Labeled create-agent-skills and skill-creator as Claude-specific with redirects"
+  - "Updated compound-docs and best-practices-researcher cross-references"
+  - "Fixed 5 Claude agent-name references in init_skill.py templates (caught by navigator)"
+
+decisions:
+  - "create-agent-skills (6215 lines) stays Claude-specific — labeled, not absorbed"
+  - "2 deprecated + 2 Claude-specific (not 4 deprecated) — preserves Claude Code functionality"
+  - "Scripts copied to canonical location, not moved — both locations stay functional"
+  - "compound-learnings rewritten first, create-skill built to match"
+  - "Steps 2-5 unchanged. Step 6 AskUserQuestion replaced with generic language only."
+
+findings:
+  - "skill-creator scripts (477 lines) have zero .claude/ refs — fully portable"
+  - "create-agent-skills has 72 .claude/ refs across 26 files — massive Claude lock-in"
+  - "CASS is installed but CM is not — CASS is viable primary source"
+
+files:
+  - "skills/meta/compound-learnings/SKILL.md — rewritten (primary deliverable)"
+  - "skills/meta/create-skill/SKILL.md — new canonical skill"
+  - "skills/meta/create-skill/scripts/ — init, package, validate scripts"
+  - "skills/meta/skill-developer/SKILL.md — deprecation header"
+  - "skills/meta/skill-development/SKILL.md — deprecation header"
+  - "skills/domain/compound/create-agent-skills/SKILL.md — Claude-specific header"
+  - "skills/domain/compound/skill-creator/SKILL.md — Claude-specific header"
+  - "skills/domain/compound/compound-docs/SKILL.md — script path updated"
+  - "skills/workflows/best-practices-researcher/SKILL.md — routing updated"
+
+git:
+  branch: "feat/021-cross-agent-compound-learnings"
+  commit: "02db8cdc8d2a2e8fb46bd4fd4497b269e1e79198"
+  remote: "https://github.com/carmandale/agent-config.git"

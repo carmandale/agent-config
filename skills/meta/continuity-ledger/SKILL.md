@@ -14,7 +14,7 @@ Create a unified artifact to preserve session state across `/clear` or session b
 Use the core generator:
 
 ```bash
-~/.claude/scripts/cc-artifact --mode <checkpoint|handoff|finalize> [--bead <BEAD_ID>] [--session-title "<short title>"]
+agent-artifact --mode <checkpoint|handoff|finalize> [--bead <BEAD_ID>] [--session-title "<short title>"]
 ```
 
 Artifacts are written to:

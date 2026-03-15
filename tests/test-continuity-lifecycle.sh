@@ -13,7 +13,7 @@
 set -euo pipefail
 
 # --- Config ---
-CC_ARTIFACT="$HOME/.claude/scripts/cc-artifact"
+CC_ARTIFACT="$(command -v agent-artifact)"
 PASS=0
 FAIL=0
 TOTAL=0

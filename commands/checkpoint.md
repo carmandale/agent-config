@@ -1,10 +1,10 @@
 ---
-description: Mid-session snapshot (bead optional). Uses ~/.claude/scripts/cc-artifact.
+description: Mid-session snapshot (bead optional). Uses agent-artifact (via tools-bin/).
 ---
 
 Create a **checkpoint** artifact to preserve mid-session progress.
 
-This command uses the unified artifact generator: `~/.claude/scripts/cc-artifact`.
+This command uses the unified artifact generator: `agent-artifact` (in `tools-bin/`, on PATH).
 
 ## Requirements
 - Bead is optional
@@ -188,13 +188,26 @@ If multiple plausible beads or none, ask **once** whether to include a bead or p
 python3 - <<'PY'
 import os
 import pathlib
+import shutil
 import subprocess
 
 bead = ""  # optional; set to BEAD_ID if known
 session_title = ""  # optional
 
+# Resolve agent-artifact with anti-shadow guard
+artifact_cmd = shutil.which("agent-artifact")
+if not artifact_cmd:
+    raise SystemExit("agent-artifact not found on PATH. Is ~/.agent-config/tools-bin/ on PATH?")
+expected_path = os.path.realpath(os.path.expanduser("~/.agent-config/tools-bin/agent-artifact"))
+actual_path = os.path.realpath(artifact_cmd)
+if actual_path != expected_path:
+    raise SystemExit(
+        f"agent-artifact resolved to {artifact_cmd} (real: {actual_path}) — "
+        f"expected {expected_path}. Check for shadowing binaries in earlier PATH entries."
+    )
+
 cmd = [
-    os.path.expanduser("~/.claude/scripts/cc-artifact"),
+    artifact_cmd,
     "--no-edit",
     "--mode",
     "checkpoint",
@@ -209,38 +222,13 @@ if result.returncode != 0:
     raise SystemExit(result.stderr.strip() or result.stdout.strip())
 
 artifact_path = result.stdout.strip().splitlines()[-1]
-path = pathlib.Path(artifact_path)
-if not path.exists():
-    raise SystemExit(f"Missing artifact path: {path}")
-if not path.name.endswith("_checkpoint.yaml"):
-    raise SystemExit(f"Unexpected artifact filename: {path.name}")
-
-text = path.read_text()
-parts = text.split("---", 2)
-if len(parts) < 3:
-    raise SystemExit("Missing frontmatter")
-front = parts[1]
-mode = None
-primary = None
-for line in front.splitlines():
-    if line.startswith("mode:"):
-        mode = line.split(":", 1)[1].strip().strip('"')
-    if line.startswith("primary_bead:"):
-        primary = line.split(":", 1)[1].strip().strip('"')
-if mode != "checkpoint":
-    raise SystemExit(f"Unexpected mode: {mode}")
-if bead:
-    if bead not in path.name:
-        raise SystemExit(f"Unexpected artifact filename: {path.name}")
-    if primary and primary != bead:
-        raise SystemExit(f"primary_bead mismatch: {primary} != {bead}")
-print(f"Verified artifact: {path}")
+print(f"Artifact created: {artifact_path}")
 PY
 ```
 Now use the Read tool to read the artifact file, then use the Edit tool to fill in `goal`, `now`, and `outcome` using SESSION_SUMMARY. Add optional fields (`done_this_session`, `next`, `worked`, `failed`, etc.) as needed.
 
-IMPORTANT: Only edit the file path returned by `cc-artifact`. Do not open or modify any existing checkpoint artifact.
-If the returned path does not end with `_checkpoint.yaml`, stop and re-run `cc-artifact`.
+IMPORTANT: Only edit the file path returned by `agent-artifact`. Do not open or modify any existing checkpoint artifact.
+If `agent-artifact` exits non-zero, show the error and stop. If it exits 0, the printed path is guaranteed correct — the script self-validates.
 
 ### 3) Propose outcome, allow override
 State your inferred outcome from SESSION_SUMMARY, then let the user confirm or change it:

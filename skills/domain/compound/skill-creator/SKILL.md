@@ -5,6 +5,8 @@ license: Complete terms in LICENSE.txt
 disable-model-invocation: true
 ---
 
+> ℹ️ **Claude Code-specific.** This skill covers the full Claude Code skill authoring process. For agent-agnostic skill creation, see [`create-skill`](../../../meta/create-skill/SKILL.md). Scripts are also available at `~/.agent-config/skills/meta/create-skill/scripts/`.
+
 # Skill Creator
 
 This skill provides guidance for creating effective skills.

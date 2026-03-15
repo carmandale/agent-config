@@ -4,6 +4,8 @@ description: Meta-skill for creating and managing Claude Code skills
 allowed-tools: [Bash, Read, Write, Edit]
 ---
 
+> ⚠️ **Deprecated.** This skill is Claude Code-specific. For agent-agnostic skill creation, use the [`create-skill`](../create-skill/SKILL.md) skill.
+
 # Skill Developer
 
 Meta-skill for creating new Claude Code skills, including skills that wrap MCP pipelines.

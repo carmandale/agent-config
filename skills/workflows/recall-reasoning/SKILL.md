@@ -31,7 +31,7 @@ This searches handoffs with post-mortems (what worked, what failed, key decision
 ### Secondary: Reasoning Files (build attempts)
 
 ```bash
-bash .claude/scripts/search-reasoning.sh "<query>"
+search-reasoning.sh "<query>"
 ```
 
 This searches `.git/claude/commits/*/reasoning.md` for build failures and fixes.
@@ -49,7 +49,7 @@ uv run python scripts/artifact_query.py "implement agent" --outcome SUCCEEDED
 uv run python scripts/artifact_query.py "hook implementation" --outcome FAILED
 
 # Search build/test reasoning
-bash .claude/scripts/search-reasoning.sh "TypeError"
+search-reasoning.sh "TypeError"
 ```
 
 ## What Gets Searched
