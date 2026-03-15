@@ -1,8 +1,8 @@
 ---
 name: codex-review
 description: Send the current plan to OpenAI Codex CLI for iterative review. Claude and Codex go back-and-forth until Codex approves the plan.
-revision: 3
-revision_date: 2026-03-12
+revision: 4
+revision_date: 2026-03-14
 user_invocable: true
 gate_requires: spec.md, plan.md
 gate_sentinels: plan:complete:v1
@@ -60,6 +60,7 @@ Revisions must be substantive. If Codex raised a specific technical concern, the
 - ❌ **Do NOT wrap `codex exec` in `timeout`.** Codex manages its own execution. Shell timeouts kill the process before `-o` can write the output file.
 - ❌ **Do NOT pipe codex output through `| tail -N`.** This discards the session ID and diagnostic information. Use `-o` to capture output to a file.
 - ❌ **Do NOT use heredocs (`<<PROMPT`).** Agents frequently mangle closing delimiters. Write the prompt to a file instead.
+- ❌ **Do NOT set a `timeout` parameter on the bash tool call.** Not 300 seconds, not 600, not any value. Codex reviews take 5-30 minutes depending on codebase size. This is normal — there is no hang to protect against.
 
 ---
 
@@ -144,36 +145,22 @@ Be specific and actionable. If the plan is solid and ready to implement, end you
 If changes are needed, end with exactly: VERDICT: REVISE
 ```
 
-**Step B — Run Codex.** Execute this one-liner:
+**Step B — Run the codex-review-exec wrapper script:**
 
 ```bash
-rm -f /tmp/codex-review-${REVIEW_ID}.md
-codex exec -m gpt-5.3-codex -s read-only -o /tmp/codex-review-${REVIEW_ID}.md - < /tmp/codex-prompt-${REVIEW_ID}.md
+codex-review-exec --prompt /tmp/codex-prompt-${REVIEW_ID}.md --output /tmp/codex-review-${REVIEW_ID}.md
 ```
 
-**Step C — Verify the invocation succeeded:**
+If the user specified a model override (e.g., `/codex-review o4-mini`), add `--model o4-mini`. If no model is specified, omit `--model` — codex uses its `~/.codex/config.toml` default.
 
-```bash
-CODEX_EXIT=$?
-if [ "$CODEX_EXIT" -ne 0 ] || [ ! -s /tmp/codex-review-${REVIEW_ID}.md ]; then
-  echo "ERROR: Codex invocation failed."
-  echo "Exit code: $CODEX_EXIT"
-  echo "Output file exists: $([ -f /tmp/codex-review-${REVIEW_ID}.md ] && echo yes || echo no)"
-  echo "Check: Is codex installed? Is OPENAI_API_KEY set? Did the prompt file get written to /tmp/codex-prompt-${REVIEW_ID}.md?"
-  echo "STOP: Do not proceed to Step 4. Diagnose the failure first."
-fi
-```
+**If the script exits non-zero, STOP.** The script prints diagnostics explaining what went wrong. Do not proceed to Step 4. Diagnose the failure and retry.
 
-**If the error check fires, STOP.** Do not proceed to Step 4 with missing or empty output. Diagnose the failure and retry the invocation.
-
-**Capture the Codex session ID** from the bash tool's stdout/stderr output — look for the line that says `session id: <uuid>`. Store this as `CODEX_SESSION_ID`. You MUST use this exact ID to resume in subsequent rounds (do NOT use `--last`, which would grab the wrong session if multiple reviews are running concurrently).
-
-**Note:** The session ID appears in the bash tool's stdout/stderr output. It is NOT in the `-o` output file — that file contains only Codex's review text.
+**If the script exits 0 (prints "SUCCESS: N bytes written to ...")**, capture the Codex session ID from the bash tool output — look for `session id: <uuid>` in the terminal output from the script call. Store this as `CODEX_SESSION_ID`. You MUST use this exact ID to resume in subsequent rounds (do NOT use `--last`, which would grab the wrong session if multiple reviews are running concurrently).
 
 **Notes:**
-- Use `-m gpt-5.3-codex` as the default model (configured in `~/.codex/config.toml`). If the user specifies a different model (e.g., `/codex-review o4-mini`), use that instead.
-- Use `-s read-only` so Codex can read the codebase for context but cannot modify anything.
-- Use `-o` to capture the output to a file for reliable reading.
+- The session ID appears in the bash tool's terminal output (stderr from codex, which the script passes through unchanged). It is NOT in the `-o` output file — that file contains only Codex's review text.
+- The script handles stale output cleanup, codex invocation, and output validation internally. You do not need to run separate error check commands.
+- Codex reviews can take 5-30 minutes depending on codebase size. This is normal. Do NOT set a timeout parameter on this bash tool call.
 
 Then go to **Step 4**.
 
@@ -233,29 +220,19 @@ Please re-review. If the plan is now solid and ready to implement, end with: VER
 If more changes are needed, end with: VERDICT: REVISE
 ```
 
-**Step B — Run Codex resume:**
+**Step B — Run the codex-review-exec wrapper script with session resume:**
 
 ```bash
-rm -f /tmp/codex-review-${REVIEW_ID}.md
-codex exec resume ${CODEX_SESSION_ID} -o /tmp/codex-review-${REVIEW_ID}.md - < /tmp/codex-prompt-${REVIEW_ID}.md
+codex-review-exec --prompt /tmp/codex-prompt-${REVIEW_ID}.md --output /tmp/codex-review-${REVIEW_ID}.md --session ${CODEX_SESSION_ID}
 ```
 
-**Step C — Verify the invocation succeeded** (same check as Step 3):
+**If the script exits non-zero, STOP.** The script prints diagnostics. Diagnose the failure and retry.
+
+**If `resume` fails** (e.g., session expired), fall back to a fresh exec — also via the wrapper script, without `--session`. Write the fallback prompt (including prior round context) to `/tmp/codex-prompt-${REVIEW_ID}.md`, then run:
 
 ```bash
-CODEX_EXIT=$?
-if [ "$CODEX_EXIT" -ne 0 ] || [ ! -s /tmp/codex-review-${REVIEW_ID}.md ]; then
-  echo "ERROR: Codex resume invocation failed."
-  echo "Exit code: $CODEX_EXIT"
-  echo "Output file exists: $([ -f /tmp/codex-review-${REVIEW_ID}.md ] && echo yes || echo no)"
-  echo "Check: Did the prompt file get written to /tmp/codex-prompt-${REVIEW_ID}.md? Is the session ID correct?"
-  echo "STOP: Do not proceed to Step 4. Diagnose the failure first."
-fi
+codex-review-exec --prompt /tmp/codex-prompt-${REVIEW_ID}.md --output /tmp/codex-review-${REVIEW_ID}.md
 ```
-
-**If the error check fires, STOP.** Do not proceed to Step 4 with missing or empty output. Diagnose the failure and retry.
-
-**If `resume ${CODEX_SESSION_ID}` fails** (e.g., session expired), fall back to a fresh `codex exec` call with context about the prior rounds included in the prompt. The fallback ALSO uses the prompt-file pattern: write the fallback prompt (including prior round context) to `/tmp/codex-prompt-${REVIEW_ID}.md`, then run the standard Step 3 one-liner with the same error check.
 
 After Codex responds, go back to **Step 4**.
 
